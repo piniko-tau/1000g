@@ -33,7 +33,7 @@ parser.add_argument("-dbpass",required=True,help='psql database user pass',metav
 
 #1000g actions
 parser.add_argument("-f",help='vcf file to load into psql database',metavar='VCF_FILE')
-parser.add_argument("-t",help='destination vcf table prefix on the psql database',metavar='PSQL_TABLE')
+parser.add_argument("-t",help='destination vcf table prefix on the psql database',metavar='PSQL_TABLE_PREFIX')
 parser.add_argument("-list",help='file containing a list of files to load into psql database',metavar='VCF_FILE_LIST')
 
 #UCSC's snp141CodingDbSnp annotated sr's actions: add amino acid annotation
