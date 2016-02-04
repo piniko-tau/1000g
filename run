@@ -1,0 +1,1 @@
+./g1.py -dbname pydb -dbuser pyuser -dbpass pyuser
