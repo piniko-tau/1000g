@@ -22,7 +22,7 @@ import logging
 from progressbar import AnimatedMarker, Bar, BouncingBar, Counter, ETA, FileTransferSpeed, FormatLabel, Percentage, ProgressBar, ReverseBar, RotatingMarker, SimpleProgress, Timer
 
 
-parser = argparse.ArgumentParser(prog='psql_1000g_loader',usage='psql_1000g_loader [-t table_name prefix -f file_input or -list file_input_list] [-ucsc_snpf file name -ucsc_snp table_name] (optional add a annotated ucsc_snp table from file ) [-dbname database_name -dbuser database_user -dbpass database_pass] [-a_ucsc chr table to be annotated by ucsc ] [-ensembl_variation_snpf file name -ensembl_variation_genename_snpf file name] (optional add a annotated ensembl tables from files) [-a_ensembl chr table to be annotated by ensemble ] [-sort_by_gene_and_pos ann_table] [-update_table_allel2peptide create all to peptide table] [-remove_dup_allele remove duplicate alleles from table] [-add_gene_peptide_string add gene_peptide_string fileds to table] [-create_uniq_pepstring_num create a table with unique number to each group of peptide strings ordered by descending] [-add_uniq_pepstring_num add unique pepstring number to specified table] [-export_sample_2file export 100 lines> of each table to file] [-export_fulldataset_2file export dataset in full to file name] [-s show all tables] [-add_meta add tables metadata]',description='Load annotated snp database & Create a 1000G sql table from all Chromosomes - using a connection to a postgresql DB.')
+parser = argparse.ArgumentParser(prog='psql_1000g_loader',usage='psql_1000g_loader [-t table_name prefix -f file_input or -list file_input_list] [-ucsc_snpf file name -ucsc_snp table_name] (optional add a annotated ucsc_snp table from file ) [-dbname database_name -dbuser database_user -dbpass database_pass] [-a_ucsc chr table to be annotated by ucsc ] [-ensembl_variation_snpf file name -ensembl_variation_genename_snpf file name] (optional add a annotated ensembl tables from files) [-a_ensembl chr table to be annotated by ensemble ] [-sort_by_gene_and_pos ann_table] [-update_table_allel2peptide create all to peptide table] [-remove_dup_allele remove duplicate alleles from table] [-add_gene_peptide_string add gene_peptide_string fileds to table] [-create_uniq_pepstring_num create a table with unique number to each group of peptide strings ordered by descending] [-add_uniq_pepstring_num add unique pepstring number to specified table] [-export_sample_2file export 100 lines> of each table to file] [-export_fulldataset_2file export dataset in full to file name] [-create_ml_dataset_table create dataset for machine learning by patients table] [-export_ml_full_dataset export dataset for machine learning by patients ] [-export_ml_sample_dataset export sample dataset for machine learning by patients ] [-s show all tables] [-add_meta add tables metadata]',description='Load annotated snp database & Create a 1000G sql table from all Chromosomes - using a connection to a postgresql DB.')
 
 # dbname=pydb user=pyuser password=pyuser
 # postgresql credentials
@@ -79,6 +79,12 @@ parser.add_argument("-multi_core_num",help='use multiple cores number or \"max\"
 parser.add_argument("-export_sample_2file",help='export sample to file name',metavar='export_sample_2file')
 
 parser.add_argument("-export_fulldataset_2file",help='export dataset in full to file name',metavar='export_datasetfull_2file')
+
+parser.add_argument("-create_ml_dataset_table", help="create dataset for machine learning by patients table",metavar='create_ml_dataset_table')
+
+parser.add_argument("-export_ml_full_dataset", help="export dataset for machine learning by patients ",metavar='export_ml_full_dataset')
+
+parser.add_argument("-export_ml_sample_dataset", help="export sample dataset for machine learning by patients ",metavar='export_ml_sample_dataset')
 
 parser.add_argument("-o", "--overwrite_tables", help="overwrites any existing tables",action="store_true")
 parser.add_argument("-v", "--verbose", help="increase output verbosity",action="store_true")
@@ -500,8 +506,29 @@ def query2list():
             # print querylist
     return querylist
 
+def gethg():
 
+    # varhgstr = "%peptide_string"
+    varhgstr = "hg_____"
+    varg22tblpepstr = "%g1000chr22%pepstr"
 
+    print(cur.mogrify("select column_name from information_schema.columns where table_name like \'%s\' and column_name like \'%s\';",(AsIs(varg22tblpepstr),AsIs(varhgstr),)))
+    cur.execute("select column_name from information_schema.columns where table_name like \'%s\' and column_name like \'%s\';",(AsIs(varg22tblpepstr),AsIs(varhgstr),))
+    
+    global hglist
+    hglist = []
+    va2all_query = cur.fetchall()
+    for i3 in va2all_query:
+        for index,i2 in enumerate(i3):
+
+            if index == len(i3) - 1:
+                word12 = ''.join(i2)
+                # print(word12)
+            hglist.extend([word12])
+            # print hglist
+    return hglist
+
+    
 
 # initialise variables
 table_exists = ""
@@ -995,12 +1022,38 @@ try:
             conn.commit()
 
 
-        #update g1000chr1annsorted2sorted_by_gene_posal2pnoduppepstrnum set hg96_num = str_rank from allchpepstrcountsum where g1000chr1annsorted2sorted_by_gene_posal2pnoduppepstrnum.hg00096peptide_string = allchpepstrcountsum.pepstr;
+
+    if args.create_ml_dataset_table:
+
+      #add hg patient fields with all values = hg name
+
+        varml_table = args.create_ml_dataset_table
+
+        for hg in gethg():
+
+            print(cur.mogrify("alter table %s add column %s_name text",(AsIs(args.create_ml_dataset_table),AsIs(hg),)))
+            cur.execute("alter table %s add column %s_name text",(AsIs(args.create_ml_dataset_table),AsIs(hg),))
+
+            conn.commit()
+
+            # update test2 set testcol1='testcol1';
+            print(cur.mogrify("update %s set %s_name=\'%s\'",(AsIs(args.create_ml_dataset_table),AsIs(hg),AsIs(hg),)))
+            cur.execute("update %s set %s_name=\'%s\'",(AsIs(args.create_ml_dataset_table),AsIs(hg),AsIs(hg),))
+            conn.commit()
+      #create string agg with comma del all pepstr numbs with row id as patient
 
 
-#         print(cur.mogrify("create table allchpepstrcount as select %s as pepstr,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom ;",(AsIs(querylist[0]),AsIs(querylist[0]),AsIs(querylist[0]), AsIs(querylist[1]),AsIs(querylist[1]),AsIs(querylist[1]), AsIs(querylist[2]),AsIs(querylist[2]),AsIs(querylist[2]), AsIs(querylist[3]),AsIs(querylist[3]),AsIs(querylist[3]), AsIs(querylist[4]),AsIs(querylist[4]),AsIs(querylist[4]), AsIs(querylist[5]),AsIs(querylist[5]),AsIs(querylist[5]), AsIs(querylist[6]),AsIs(querylist[6]),AsIs(querylist[6]), AsIs(querylist[7]),AsIs(querylist[7]),AsIs(querylist[7]), AsIs(querylist[8]),AsIs(querylist[8]),AsIs(querylist[8]), AsIs(querylist[9]),AsIs(querylist[9]),AsIs(querylist[9]), AsIs(querylist[10]),AsIs(querylist[10]),AsIs(querylist[10]),)))
 
 
+
+
+
+
+
+        #  print(cur.mogrify("create table %s as select gene_name as gene,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string from %s group by gene_name;",(AsIs(varpepstr_temp_table),AsIs(querylist[0]),AsIs(querylist[0]),AsIs(querylist[0]),AsIs(querylist[1]),AsIs(querylist[1]),AsIs(querylist[1]),AsIs(querylist[2]),AsIs(querylist[2]),AsIs(querylist[2]),AsIs(querylist[3]),AsIs(querylist[3]),AsIs(querylist[3]),AsIs(querylist[4]),AsIs(querylist[4]),AsIs(querylist[4]),AsIs(querylist[5]),AsIs(querylist[5]),AsIs(querylist[5]),AsIs(querylist[6]),AsIs(querylist[6]),AsIs(querylist[6]),AsIs(querylist[7]),AsIs(querylist[7]),AsIs(querylist[7]),AsIs(querylist[8]),AsIs(querylist[8]),AsIs(querylist[8]),AsIs(querylist[9]),AsIs(querylist[9]),AsIs(querylist[9]),AsIs(querylist[10]),AsIs(querylist[10]),AsIs(querylist[10]),AsIs(args.add_gene_peptide_string),)))
+        #     cur.execute("create table %s as select gene_name as gene,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string from %s group by gene_name;",(AsIs(varpepstr_temp_table),AsIs(querylist[0]),AsIs(querylist[0]),AsIs(querylist[0]),AsIs(querylist[1]),AsIs(querylist[1]),AsIs(querylist[1]),AsIs(querylist[2]),AsIs(querylist[2]),AsIs(querylist[2]),AsIs(querylist[3]),AsIs(querylist[3]),AsIs(querylist[3]),AsIs(querylist[4]),AsIs(querylist[4]),AsIs(querylist[4]),AsIs(querylist[5]),AsIs(querylist[5]),AsIs(querylist[5]),AsIs(querylist[6]),AsIs(querylist[6]),AsIs(querylist[6]),AsIs(querylist[7]),AsIs(querylist[7]),AsIs(querylist[7]),AsIs(querylist[8]),AsIs(querylist[8]),AsIs(querylist[8]),AsIs(querylist[9]),AsIs(querylist[9]),AsIs(querylist[9]),AsIs(querylist[10]),AsIs(querylist[10]),AsIs(querylist[10]),AsIs(args.add_gene_peptide_string),))
+        #
+        # conn.commit()
 
 
 
