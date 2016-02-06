@@ -1027,33 +1027,52 @@ try:
 
       #add hg patient fields with all values = hg name
 
-        varml_table = args.create_ml_dataset_table
+        varml_table = args.create_ml_dataset_table+"ml"
+        varml_agg_table = args.create_ml_dataset_table+"mlagg"
+
+        check_overwrite_table(varml_table)
+
+        print(cur.mogrify("create table %s as select * from %s",(AsIs(varml_table),AsIs(args.create_ml_dataset_table),)))
+        cur.execute("create table %s as select * from %s",(AsIs(varml_table),AsIs(args.create_ml_dataset_table),))
+        conn.commit()
+
 
         for hg in gethg():
 
-            print(cur.mogrify("alter table %s add column %s_name text",(AsIs(args.create_ml_dataset_table),AsIs(hg),)))
-            cur.execute("alter table %s add column %s_name text",(AsIs(args.create_ml_dataset_table),AsIs(hg),))
-
+            print(cur.mogrify("alter table %s add column %s_name text",(AsIs(varml_table),AsIs(hg),)))
+            cur.execute("alter table %s add column %s_name text",(AsIs(varml_table),AsIs(hg),))
             conn.commit()
 
             # update test2 set testcol1='testcol1';
-            print(cur.mogrify("update %s set %s_name=\'%s\'",(AsIs(args.create_ml_dataset_table),AsIs(hg),AsIs(hg),)))
-            cur.execute("update %s set %s_name=\'%s\'",(AsIs(args.create_ml_dataset_table),AsIs(hg),AsIs(hg),))
+            print(cur.mogrify("update %s set %s_name=\'%s\'",(AsIs(varml_table),AsIs(hg),AsIs(hg),)))
+            cur.execute("update %s set %s_name=\'%s\'",(AsIs(varml_table),AsIs(hg),AsIs(hg),))
             conn.commit()
-      #create string agg with comma del all pepstr numbs with row id as patient
 
 
+        #creat mlagg table , this table will hold the aggregated string for all of the chr hg's
+        check_overwrite_table(varml_agg_table)
+
+        print(cur.mogrify("create table %s (hg_patient text,peptide_string_num text,gene text)",(AsIs(varml_agg_table),)))
+        cur.execute("create table %s (hg_patient text,peptide_string_num text,gene text)",(AsIs(varml_agg_table),))
+        conn.commit()
 
 
+        for hg in gethg():
 
+            #create distinct hg ml table
 
+            print(cur.mogrify("create table %s_mldistinct as select distinct %s_name,%speptide_string_num,gene from %s;",(AsIs(hg),AsIs(hg),AsIs(hg),AsIs(varml_table),)))
+            cur.execute("create table %s_mldistinct as select distinct %s_name,%speptide_string_num,gene from %s;",(AsIs(hg),AsIs(hg),AsIs(hg),AsIs(varml_table),))
+            conn.commit()
 
+            #create string agg with comma del all pepstr numbs with row id as patient and insert into mlchr table
+            print(cur.mogrify("with ml as (select %s_name,string_agg(%speptide_string_num,',' order by %speptide_string_num) as peptide_string_num ,string_agg(gene,',' order by gene) as gene from %s_mldistinct group by %s_name) insert into %s select * from ml;",(AsIs(hg),AsIs(hg),AsIs(hg),AsIs(hg),AsIs(hg),AsIs(varml_agg_table),)))
+            cur.execute("with ml as (select %s_name,string_agg(%speptide_string_num,',' order by %speptide_string_num) as peptide_string_num ,string_agg(gene,',' order by gene) as gene from %s_mldistinct group by %s_name) insert into %s select * from ml;",(AsIs(hg),AsIs(hg),AsIs(hg),AsIs(hg),AsIs(hg),AsIs(varml_agg_table),))
+            conn.commit()
 
-
-        #  print(cur.mogrify("create table %s as select gene_name as gene,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string from %s group by gene_name;",(AsIs(varpepstr_temp_table),AsIs(querylist[0]),AsIs(querylist[0]),AsIs(querylist[0]),AsIs(querylist[1]),AsIs(querylist[1]),AsIs(querylist[1]),AsIs(querylist[2]),AsIs(querylist[2]),AsIs(querylist[2]),AsIs(querylist[3]),AsIs(querylist[3]),AsIs(querylist[3]),AsIs(querylist[4]),AsIs(querylist[4]),AsIs(querylist[4]),AsIs(querylist[5]),AsIs(querylist[5]),AsIs(querylist[5]),AsIs(querylist[6]),AsIs(querylist[6]),AsIs(querylist[6]),AsIs(querylist[7]),AsIs(querylist[7]),AsIs(querylist[7]),AsIs(querylist[8]),AsIs(querylist[8]),AsIs(querylist[8]),AsIs(querylist[9]),AsIs(querylist[9]),AsIs(querylist[9]),AsIs(querylist[10]),AsIs(querylist[10]),AsIs(querylist[10]),AsIs(args.add_gene_peptide_string),)))
-        #     cur.execute("create table %s as select gene_name as gene,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string from %s group by gene_name;",(AsIs(varpepstr_temp_table),AsIs(querylist[0]),AsIs(querylist[0]),AsIs(querylist[0]),AsIs(querylist[1]),AsIs(querylist[1]),AsIs(querylist[1]),AsIs(querylist[2]),AsIs(querylist[2]),AsIs(querylist[2]),AsIs(querylist[3]),AsIs(querylist[3]),AsIs(querylist[3]),AsIs(querylist[4]),AsIs(querylist[4]),AsIs(querylist[4]),AsIs(querylist[5]),AsIs(querylist[5]),AsIs(querylist[5]),AsIs(querylist[6]),AsIs(querylist[6]),AsIs(querylist[6]),AsIs(querylist[7]),AsIs(querylist[7]),AsIs(querylist[7]),AsIs(querylist[8]),AsIs(querylist[8]),AsIs(querylist[8]),AsIs(querylist[9]),AsIs(querylist[9]),AsIs(querylist[9]),AsIs(querylist[10]),AsIs(querylist[10]),AsIs(querylist[10]),AsIs(args.add_gene_peptide_string),))
-        #
-        # conn.commit()
+            print(cur.mogrify("drop table %s_mldistinct ",(AsIs(hg),)))
+            cur.execute("drop table %s_mldistinct ",(AsIs(hg),))
+            conn.commit()
 
 
 
