@@ -1076,6 +1076,121 @@ try:
 
 
 
+ #export SAMPLE ML dataset to file sample of 100 from each table
+    if args.export_ml_sample_dataset:
+       firstline = True
+       with open(args.export_sample_2file,"a") as export_file:
+
+           cur.execute("select tablename from pg_tables where tableowner='pyuser';")
+           for i in cur.fetchall():
+               sample_table = ''.join(i)
+               if sample_table.endswith("mlagg"):
+
+                    if firstline == True:
+
+                        cur.execute("select column_name from information_schema.columns where table_name = '%s';",(AsIs(sample_table),))
+                        row12 = cur.fetchall()
+                        for index,i2 in enumerate(row12):
+                            if index == len(row12) - 1 :
+                                word12 = ''.join(i2)
+                                export_file.write(word12)
+                            else:
+                                word12 = ''.join(i2) + ","
+                                export_file.write(word12)
+                        export_file.write("\n")
+
+                        firstline = False
+
+                    cur.execute("select * from %s limit 100;",(AsIs(sample_table),))
+                    row12 = cur.fetchall()
+                    for i3 in row12:
+                        for index,i2 in enumerate(i3):
+
+                            if index == len(i3) - 1:
+                                word12 = ''.join(i2)
+                                export_file.write(word12)
+                            else:
+                                if str(i2).isspace():
+                                    i2 = re.sub('\s+','',str(i2))
+                                    word12 = str(i2) + ","
+                                    export_file.write(word12)
+                                elif str(i2).isdigit():
+                                    i2 = str(i2).strip()
+                                    word12 = "\""+str(i2)+"\""
+                                    word12 = str(i2) + ","
+                                    export_file.write(word12)
+                                elif not str(i2).isdigit():
+                                    if str(i2) == "None":
+                                        i2 = " "
+                                    i2 = str(i2).strip()
+                                    i2 = re.sub(',$','',i2)
+                                    i2= re.sub(',',';',i2)
+                                    word12 = str(i2) + "\',"
+                                    export_file.write("\'"+word12)
+                        export_file.write("\n")
+
+
+
+##new full export
+
+    #export to file sample of 100 from each table
+    if args.export_ml_full_dataset:
+       firstline = True
+       with open(args.export_fulldataset_2file,"a") as export_file:
+
+           cur.execute("select tablename from pg_tables where tableowner='pyuser';")
+           for i in cur.fetchall():
+               sample_table = ''.join(i)
+               if sample_table.endswith("mlagg"):
+
+                    print "now exporting :   "+sample_table
+
+                    if firstline == True:
+
+                        cur.execute("select column_name from information_schema.columns where table_name = '%s';",(AsIs(sample_table),))
+                        row12 = cur.fetchall()
+                        for index,i2 in enumerate(row12):
+                            if index == len(row12) - 1 :
+                                word12 = ''.join(i2)
+                                export_file.write(word12)
+                            else:
+                                word12 = ''.join(i2) + ","
+                                export_file.write(word12)
+                        export_file.write("\n")
+
+                        firstline = False
+
+                    cur.execute("select * from %s;",(AsIs(sample_table),))
+                    row12 = cur.fetchall()
+                    for i3 in row12:
+                        for index,i2 in enumerate(i3):
+
+                            if index == len(i3) - 1:
+                                word12 = ''.join(i2)
+                                export_file.write(word12)
+                            else:
+                                if str(i2).isspace():
+                                    i2 = re.sub('\s+','',str(i2))
+                                    word12 = str(i2) + ","
+                                    export_file.write(word12)
+                                elif str(i2).isdigit():
+                                    i2 = str(i2).strip()
+                                    word12 = "\""+str(i2)+"\""
+                                    word12 = str(i2) + ","
+                                    export_file.write(word12)
+                                elif not str(i2).isdigit():
+                                    if str(i2) == "None":
+                                        i2 = " "
+                                    i2 = str(i2).strip()
+                                    i2 = re.sub(',$','',i2)
+                                    i2= re.sub(',',';',i2)
+                                    word12 = str(i2) + "\',"
+                                    export_file.write("\'"+word12)
+                        export_file.write("\n")
+
+
+
+
 
 
 
