@@ -1079,7 +1079,7 @@ try:
  #export SAMPLE ML dataset to file sample of 100 from each table
     if args.export_ml_sample_dataset:
        firstline = True
-       with open(args.export_sample_2file,"a") as export_file:
+       with open(args.export_ml_sample_dataset,"a") as export_file:
 
            cur.execute("select tablename from pg_tables where tableowner='pyuser';")
            for i in cur.fetchall():
@@ -1124,7 +1124,8 @@ try:
                                         i2 = " "
                                     i2 = str(i2).strip()
                                     i2 = re.sub(',$','',i2)
-                                    i2= re.sub(',',';',i2)
+                                   # i2= re.sub(',',';',i2)
+                                    i2= re.sub(',',',',i2)
                                     word12 = str(i2) + "\',"
                                     export_file.write("\'"+word12)
                         export_file.write("\n")
@@ -1136,7 +1137,7 @@ try:
     #export to file sample of 100 from each table
     if args.export_ml_full_dataset:
        firstline = True
-       with open(args.export_fulldataset_2file,"a") as export_file:
+       with open(args.export_ml_full_dataset,"a") as export_file:
 
            cur.execute("select tablename from pg_tables where tableowner='pyuser';")
            for i in cur.fetchall():
