@@ -1075,6 +1075,9 @@ try:
             conn.commit()
 
 
+#add thisbefore exporting : with ml as (select * from test9 union all select * from test8) select hg_patient,string_agg(peptide_string_num,','),string_agg(gene,',') from ml group by hg_patient;
+
+
 
  #export SAMPLE ML dataset to file sample of 100 from each table
     if args.export_ml_sample_dataset:
