@@ -22,7 +22,7 @@ import logging
 from progressbar import AnimatedMarker, Bar, BouncingBar, Counter, ETA, FileTransferSpeed, FormatLabel, Percentage, ProgressBar, ReverseBar, RotatingMarker, SimpleProgress, Timer
 
 
-parser = argparse.ArgumentParser(prog='psql_1000g_loader',usage='psql_1000g_loader [-t table_name prefix -f file_input or -list file_input_list] [-ucsc_snpf file name -ucsc_snp table_name] (optional add a annotated ucsc_snp table from file ) [-dbname database_name -dbuser database_user -dbpass database_pass] [-a_ucsc chr table to be annotated by ucsc ] [-ensembl_variation_snpf file name -ensembl_variation_genename_snpf file name] (optional add a annotated ensembl tables from files) [-a_ensembl chr table to be annotated by ensemble ] [-sort_by_gene_and_pos ann_table] [-update_table_allel2peptide create all to peptide table] [-remove_dup_allele remove duplicate alleles from table] [-add_gene_peptide_string add gene_peptide_string fileds to table] [-create_uniq_pepstring_num create a table with unique number to each group of peptide strings ordered by descending] [-add_uniq_pepstring_num add unique pepstring number to specified table] [-export_sample_2file export 100 lines> of each table to file] [-export_fulldataset_2file export dataset in full to file name] [-create_ml_dataset_table create dataset for machine learning by patients table] [-export_ml_full_dataset export dataset for machine learning by patients ] [-export_ml_sample_dataset export sample dataset for machine learning by patients ] [-s show all tables] [-add_meta add tables metadata]',description='Load annotated snp database & Create a 1000G sql table from all Chromosomes - using a connection to a postgresql DB.')
+parser = argparse.ArgumentParser(prog='psql_1000g_loader',usage='psql_1000g_loader [-t table_name prefix -f file_input or -list file_input_list] [-ucsc_snpf file name -ucsc_snp table_name] (optional add a annotated ucsc_snp table from file ) [-dbname database_name -dbuser database_user -dbpass database_pass] [-a_ucsc chr table to be annotated by ucsc ] [-ensembl_variation_snpf file name -ensembl_variation_genename_snpf file name] (optional add a annotated ensembl tables from files) [-a_ensembl chr table to be annotated by ensemble ] [-sort_by_gene_and_pos ann_table] [-update_table_allel2peptide create all to peptide table] [-remove_dup_allele remove duplicate alleles from table] [-add_gene_peptide_string add gene_peptide_string fileds to table] [-create_uniq_pepstring_num create a table with unique number to each group of peptide strings ordered by descending] [-add_uniq_pepstring_num add unique pepstring number to specified table] [-export_sample_2file export 100 lines> of each table to file] [-export_fulldataset_2file export dataset in full to file name] [-create_ml_dataset_table create dataset for machine learning by patients table] [-export_ml_full_dataset export dataset for machine learning by patients ] [-s show all tables] [-add_meta add tables metadata]',description='Load annotated snp database & Create a 1000G sql table from all Chromosomes - using a connection to a postgresql DB.')
 
 # dbname=pydb user=pyuser password=pyuser
 # postgresql credentials
@@ -83,8 +83,6 @@ parser.add_argument("-export_fulldataset_2file",help='export dataset in full to 
 parser.add_argument("-create_ml_dataset_table", help="create dataset for machine learning by patients table",metavar='create_ml_dataset_table')
 
 parser.add_argument("-export_ml_full_dataset", help="export dataset for machine learning by patients ",metavar='export_ml_full_dataset')
-
-parser.add_argument("-export_ml_sample_dataset", help="export sample dataset for machine learning by patients ",metavar='export_ml_sample_dataset')
 
 parser.add_argument("-o", "--overwrite_tables", help="overwrites any existing tables",action="store_true")
 parser.add_argument("-v", "--verbose", help="increase output verbosity",action="store_true")
@@ -493,28 +491,6 @@ def isInt(s):
         return False
 
 def query2list():
-    global querylist
-    querylist = []
-    va2all_query = cur.fetchall()
-    for i3 in va2all_query:
-        for index,i2 in enumerate(i3):
-
-            if index == len(i3) - 1:
-                word12 = ''.join(i2)
-                # print(word12)
-            querylist.extend([word12])
-            # print querylist
-    return querylist
-
-def gethg():
-
-    # varhgstr = "%peptide_string"
-    varhgstr = "hg_____"
-    varg22tblpepstr = "%g1000chr22%pepstr"
-
-    print(cur.mogrify("select column_name from information_schema.columns where table_name like \'%s\' and column_name like \'%s\';",(AsIs(varg22tblpepstr),AsIs(varhgstr),)))
-    cur.execute("select column_name from information_schema.columns where table_name like \'%s\' and column_name like \'%s\';",(AsIs(varg22tblpepstr),AsIs(varhgstr),))
-    
     global hglist
     hglist = []
     va2all_query = cur.fetchall()
@@ -528,7 +504,29 @@ def gethg():
             # print hglist
     return hglist
 
-    
+def gethg():
+
+    # varhgstr = "%peptide_string"
+    varhgstr = "hg_____"
+    varg22tblpepstr = "%g1000chr1%pepstr"
+
+    print(cur.mogrify("select column_name from information_schema.columns where table_name like \'%s\' and column_name like \'%s\';",(AsIs(varg22tblpepstr),AsIs(varhgstr),)))
+    cur.execute("select column_name from information_schema.columns where table_name like \'%s\' and column_name like \'%s\';",(AsIs(varg22tblpepstr),AsIs(varhgstr),))
+
+    global hglist
+    hglist = []
+    va2all_query = cur.fetchall()
+    for i3 in va2all_query:
+        for index,i2 in enumerate(i3):
+
+            if index == len(i3) - 1:
+                word12 = ''.join(i2)
+                # print(word12)
+            hglist.extend([word12])
+            # print hglist
+    return hglist
+
+
 
 # initialise variables
 table_exists = ""
@@ -914,8 +912,8 @@ try:
 
         if not check_table_exists(varpepstr_temp_table):
 
-            print(cur.mogrify("create table %s as select gene_name as gene,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string from %s group by gene_name;",(AsIs(varpepstr_temp_table),AsIs(querylist[0]),AsIs(querylist[0]),AsIs(querylist[0]),AsIs(querylist[1]),AsIs(querylist[1]),AsIs(querylist[1]),AsIs(querylist[2]),AsIs(querylist[2]),AsIs(querylist[2]),AsIs(querylist[3]),AsIs(querylist[3]),AsIs(querylist[3]),AsIs(querylist[4]),AsIs(querylist[4]),AsIs(querylist[4]),AsIs(querylist[5]),AsIs(querylist[5]),AsIs(querylist[5]),AsIs(querylist[6]),AsIs(querylist[6]),AsIs(querylist[6]),AsIs(querylist[7]),AsIs(querylist[7]),AsIs(querylist[7]),AsIs(querylist[8]),AsIs(querylist[8]),AsIs(querylist[8]),AsIs(querylist[9]),AsIs(querylist[9]),AsIs(querylist[9]),AsIs(querylist[10]),AsIs(querylist[10]),AsIs(querylist[10]),AsIs(args.add_gene_peptide_string),)))
-            cur.execute("create table %s as select gene_name as gene,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string from %s group by gene_name;",(AsIs(varpepstr_temp_table),AsIs(querylist[0]),AsIs(querylist[0]),AsIs(querylist[0]),AsIs(querylist[1]),AsIs(querylist[1]),AsIs(querylist[1]),AsIs(querylist[2]),AsIs(querylist[2]),AsIs(querylist[2]),AsIs(querylist[3]),AsIs(querylist[3]),AsIs(querylist[3]),AsIs(querylist[4]),AsIs(querylist[4]),AsIs(querylist[4]),AsIs(querylist[5]),AsIs(querylist[5]),AsIs(querylist[5]),AsIs(querylist[6]),AsIs(querylist[6]),AsIs(querylist[6]),AsIs(querylist[7]),AsIs(querylist[7]),AsIs(querylist[7]),AsIs(querylist[8]),AsIs(querylist[8]),AsIs(querylist[8]),AsIs(querylist[9]),AsIs(querylist[9]),AsIs(querylist[9]),AsIs(querylist[10]),AsIs(querylist[10]),AsIs(querylist[10]),AsIs(args.add_gene_peptide_string),))
+            print(cur.mogrify("create table %s as select gene_name as gene,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string from %s group by gene_name;",(AsIs(varpepstr_temp_table),AsIs(hglist[0]),AsIs(hglist[0]),AsIs(hglist[0]),AsIs(hglist[1]),AsIs(hglist[1]),AsIs(hglist[1]),AsIs(hglist[2]),AsIs(hglist[2]),AsIs(hglist[2]),AsIs(hglist[3]),AsIs(hglist[3]),AsIs(hglist[3]),AsIs(hglist[4]),AsIs(hglist[4]),AsIs(hglist[4]),AsIs(hglist[5]),AsIs(hglist[5]),AsIs(hglist[5]),AsIs(hglist[6]),AsIs(hglist[6]),AsIs(hglist[6]),AsIs(hglist[7]),AsIs(hglist[7]),AsIs(hglist[7]),AsIs(hglist[8]),AsIs(hglist[8]),AsIs(hglist[8]),AsIs(hglist[9]),AsIs(hglist[9]),AsIs(hglist[9]),AsIs(hglist[10]),AsIs(hglist[10]),AsIs(hglist[10]),AsIs(args.add_gene_peptide_string),)))
+            cur.execute("create table %s as select gene_name as gene,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string,string_agg(%s,'' order by %s) as %speptide_string from %s group by gene_name;",(AsIs(varpepstr_temp_table),AsIs(hglist[0]),AsIs(hglist[0]),AsIs(hglist[0]),AsIs(hglist[1]),AsIs(hglist[1]),AsIs(hglist[1]),AsIs(hglist[2]),AsIs(hglist[2]),AsIs(hglist[2]),AsIs(hglist[3]),AsIs(hglist[3]),AsIs(hglist[3]),AsIs(hglist[4]),AsIs(hglist[4]),AsIs(hglist[4]),AsIs(hglist[5]),AsIs(hglist[5]),AsIs(hglist[5]),AsIs(hglist[6]),AsIs(hglist[6]),AsIs(hglist[6]),AsIs(hglist[7]),AsIs(hglist[7]),AsIs(hglist[7]),AsIs(hglist[8]),AsIs(hglist[8]),AsIs(hglist[8]),AsIs(hglist[9]),AsIs(hglist[9]),AsIs(hglist[9]),AsIs(hglist[10]),AsIs(hglist[10]),AsIs(hglist[10]),AsIs(args.add_gene_peptide_string),))
 
         conn.commit()
 
@@ -955,10 +953,10 @@ try:
         query2list()
 
 
-        print(cur.mogrify("create table allchpepstr as select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s",(AsIs(querylist[0]), AsIs(querylist[1]), AsIs(querylist[2]), AsIs(querylist[3]), AsIs(querylist[4]), AsIs(querylist[5]), AsIs(querylist[6]), AsIs(querylist[7]), AsIs(querylist[8]), AsIs(querylist[9]), AsIs(querylist[10]), AsIs(querylist[11]), AsIs(querylist[12]), AsIs(querylist[13]), AsIs(querylist[14]), AsIs(querylist[15]), AsIs(querylist[16]), AsIs(querylist[17]), AsIs(querylist[18]), AsIs(querylist[19]), AsIs(querylist[20]), AsIs(querylist[21]), AsIs(querylist[22]), AsIs(querylist[23]),)))
+        print(cur.mogrify("create table allchpepstr as select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s",(AsIs(hglist[0]), AsIs(hglist[1]), AsIs(hglist[2]), AsIs(hglist[3]), AsIs(hglist[4]), AsIs(hglist[5]), AsIs(hglist[6]), AsIs(hglist[7]), AsIs(hglist[8]), AsIs(hglist[9]), AsIs(hglist[10]), AsIs(hglist[11]), AsIs(hglist[12]), AsIs(hglist[13]), AsIs(hglist[14]), AsIs(hglist[15]), AsIs(hglist[16]), AsIs(hglist[17]), AsIs(hglist[18]), AsIs(hglist[19]), AsIs(hglist[20]), AsIs(hglist[21]), AsIs(hglist[22]), AsIs(hglist[23]),)))
 
 
-        cur.execute("create table allchpepstr as select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s",(AsIs(querylist[0]), AsIs(querylist[1]), AsIs(querylist[2]), AsIs(querylist[3]), AsIs(querylist[4]), AsIs(querylist[5]), AsIs(querylist[6]), AsIs(querylist[7]), AsIs(querylist[8]), AsIs(querylist[9]), AsIs(querylist[10]), AsIs(querylist[11]), AsIs(querylist[12]), AsIs(querylist[13]), AsIs(querylist[14]), AsIs(querylist[15]), AsIs(querylist[16]), AsIs(querylist[17]), AsIs(querylist[18]), AsIs(querylist[19]), AsIs(querylist[20]), AsIs(querylist[21]), AsIs(querylist[22]), AsIs(querylist[23]),))
+        cur.execute("create table allchpepstr as select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s",(AsIs(hglist[0]), AsIs(hglist[1]), AsIs(hglist[2]), AsIs(hglist[3]), AsIs(hglist[4]), AsIs(hglist[5]), AsIs(hglist[6]), AsIs(hglist[7]), AsIs(hglist[8]), AsIs(hglist[9]), AsIs(hglist[10]), AsIs(hglist[11]), AsIs(hglist[12]), AsIs(hglist[13]), AsIs(hglist[14]), AsIs(hglist[15]), AsIs(hglist[16]), AsIs(hglist[17]), AsIs(hglist[18]), AsIs(hglist[19]), AsIs(hglist[20]), AsIs(hglist[21]), AsIs(hglist[22]), AsIs(hglist[23]),))
         conn.commit()
 
 
@@ -976,9 +974,9 @@ try:
         query2list()
 
 
-        print(cur.mogrify("create table allchpepstrcount as select %s as pepstr,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom ;",(AsIs(querylist[0]),AsIs(querylist[0]),AsIs(querylist[0]), AsIs(querylist[1]),AsIs(querylist[1]),AsIs(querylist[1]), AsIs(querylist[2]),AsIs(querylist[2]),AsIs(querylist[2]), AsIs(querylist[3]),AsIs(querylist[3]),AsIs(querylist[3]), AsIs(querylist[4]),AsIs(querylist[4]),AsIs(querylist[4]), AsIs(querylist[5]),AsIs(querylist[5]),AsIs(querylist[5]), AsIs(querylist[6]),AsIs(querylist[6]),AsIs(querylist[6]), AsIs(querylist[7]),AsIs(querylist[7]),AsIs(querylist[7]), AsIs(querylist[8]),AsIs(querylist[8]),AsIs(querylist[8]), AsIs(querylist[9]),AsIs(querylist[9]),AsIs(querylist[9]), AsIs(querylist[10]),AsIs(querylist[10]),AsIs(querylist[10]),)))
+        print(cur.mogrify("create table allchpepstrcount as select %s as pepstr,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom ;",(AsIs(hglist[0]),AsIs(hglist[0]),AsIs(hglist[0]), AsIs(hglist[1]),AsIs(hglist[1]),AsIs(hglist[1]), AsIs(hglist[2]),AsIs(hglist[2]),AsIs(hglist[2]), AsIs(hglist[3]),AsIs(hglist[3]),AsIs(hglist[3]), AsIs(hglist[4]),AsIs(hglist[4]),AsIs(hglist[4]), AsIs(hglist[5]),AsIs(hglist[5]),AsIs(hglist[5]), AsIs(hglist[6]),AsIs(hglist[6]),AsIs(hglist[6]), AsIs(hglist[7]),AsIs(hglist[7]),AsIs(hglist[7]), AsIs(hglist[8]),AsIs(hglist[8]),AsIs(hglist[8]), AsIs(hglist[9]),AsIs(hglist[9]),AsIs(hglist[9]), AsIs(hglist[10]),AsIs(hglist[10]),AsIs(hglist[10]),)))
 
-        cur.execute("create table allchpepstrcount as select %s as pepstr,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom ;",(AsIs(querylist[0]),AsIs(querylist[0]),AsIs(querylist[0]), AsIs(querylist[1]),AsIs(querylist[1]),AsIs(querylist[1]), AsIs(querylist[2]),AsIs(querylist[2]),AsIs(querylist[2]), AsIs(querylist[3]),AsIs(querylist[3]),AsIs(querylist[3]), AsIs(querylist[4]),AsIs(querylist[4]),AsIs(querylist[4]), AsIs(querylist[5]),AsIs(querylist[5]),AsIs(querylist[5]), AsIs(querylist[6]),AsIs(querylist[6]),AsIs(querylist[6]), AsIs(querylist[7]),AsIs(querylist[7]),AsIs(querylist[7]), AsIs(querylist[8]),AsIs(querylist[8]),AsIs(querylist[8]), AsIs(querylist[9]),AsIs(querylist[9]),AsIs(querylist[9]), AsIs(querylist[10]),AsIs(querylist[10]),AsIs(querylist[10]),))
+        cur.execute("create table allchpepstrcount as select %s as pepstr,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom union all select %s,count(%s),chrom from allchpepstr group by %s,chrom ;",(AsIs(hglist[0]),AsIs(hglist[0]),AsIs(hglist[0]), AsIs(hglist[1]),AsIs(hglist[1]),AsIs(hglist[1]), AsIs(hglist[2]),AsIs(hglist[2]),AsIs(hglist[2]), AsIs(hglist[3]),AsIs(hglist[3]),AsIs(hglist[3]), AsIs(hglist[4]),AsIs(hglist[4]),AsIs(hglist[4]), AsIs(hglist[5]),AsIs(hglist[5]),AsIs(hglist[5]), AsIs(hglist[6]),AsIs(hglist[6]),AsIs(hglist[6]), AsIs(hglist[7]),AsIs(hglist[7]),AsIs(hglist[7]), AsIs(hglist[8]),AsIs(hglist[8]),AsIs(hglist[8]), AsIs(hglist[9]),AsIs(hglist[9]),AsIs(hglist[9]), AsIs(hglist[10]),AsIs(hglist[10]),AsIs(hglist[10]),))
         conn.commit()
 
 
@@ -1074,78 +1072,42 @@ try:
             cur.execute("drop table %s_mldistinct ",(AsIs(hg),))
             conn.commit()
 
+#agg all mlagg tables into one
+
+        varmlagg = "%mlagg"
+        #create one big table from latets
+        cur.execute("select table_name from information_schema.tables where table_name like \'%s\'",(AsIs(varmlagg),))
+
+        query2list()
+
+        print(cur.mogrify("create table mlout as select * from (with ml as (select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all) select hg_patient,string_agg(peptide_string_num,',') as peptide_string_num,string_agg(gene,',') as gene from ml group by hg_patient)as ml1;",(AsIs(hglist[0]), AsIs(hglist[1]), AsIs(hglist[2]), AsIs(hglist[3]), AsIs(hglist[4]), AsIs(hglist[5]), AsIs(hglist[6]), AsIs(hglist[7]), AsIs(hglist[8]), AsIs(hglist[9]), AsIs(hglist[10]), AsIs(hglist[11]), AsIs(hglist[12]), AsIs(hglist[13]), AsIs(hglist[14]), AsIs(hglist[15]), AsIs(hglist[16]), AsIs(hglist[17]), AsIs(hglist[18]), AsIs(hglist[19]), AsIs(hglist[20]), AsIs(hglist[21]), AsIs(hglist[22]), AsIs(hglist[23]),)))
+
 
 #add thisbefore exporting : with ml as (select * from test9 union all select * from test8) select hg_patient,string_agg(peptide_string_num,','),string_agg(gene,',') from ml group by hg_patient;
 
 
 
- #export SAMPLE ML dataset to file sample of 100 from each table
-    if args.export_ml_sample_dataset:
-       firstline = True
-       with open(args.export_ml_sample_dataset,"a") as export_file:
-
-           cur.execute("select tablename from pg_tables where tableowner='pyuser';")
-           for i in cur.fetchall():
-               sample_table = ''.join(i)
-               if sample_table.endswith("mlagg"):
-
-                    if firstline == True:
-
-                        cur.execute("select column_name from information_schema.columns where table_name = '%s';",(AsIs(sample_table),))
-                        row12 = cur.fetchall()
-                        for index,i2 in enumerate(row12):
-                            if index == len(row12) - 1 :
-                                word12 = ''.join(i2)
-                                export_file.write(word12)
-                            else:
-                                word12 = ''.join(i2) + ","
-                                export_file.write(word12)
-                        export_file.write("\n")
-
-                        firstline = False
-
-                    cur.execute("select * from %s limit 100;",(AsIs(sample_table),))
-                    row12 = cur.fetchall()
-                    for i3 in row12:
-                        for index,i2 in enumerate(i3):
-
-                            if index == len(i3) - 1:
-                                word12 = ''.join(i2)
-                                export_file.write(word12)
-                            else:
-                                if str(i2).isspace():
-                                    i2 = re.sub('\s+','',str(i2))
-                                    word12 = str(i2) + ","
-                                    export_file.write(word12)
-                                elif str(i2).isdigit():
-                                    i2 = str(i2).strip()
-                                    word12 = "\""+str(i2)+"\""
-                                    word12 = str(i2) + ","
-                                    export_file.write(word12)
-                                elif not str(i2).isdigit():
-                                    if str(i2) == "None":
-                                        i2 = " "
-                                    i2 = str(i2).strip()
-                                    i2 = re.sub(',$','',i2)
-                                   # i2= re.sub(',',';',i2)
-                                    i2= re.sub(',',',',i2)
-                                    word12 = str(i2) + "\',"
-                                    export_file.write("\'"+word12)
-                        export_file.write("\n")
-
-
-
-##new full export
-
     #export to file sample of 100 from each table
     if args.export_ml_full_dataset:
+       varmlagg = "%mlagg"
+        #create one big table from latets
+       cur.execute("select table_name from information_schema.tables where table_name like \'%s\'",(AsIs(varmlagg),))
+
+       query2list()
+
+       print(cur.mogrify("create table mlout as select * from (with ml as (select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all) select hg_patient,string_agg(peptide_string_num,',') as peptide_string_num,string_agg(gene,',') as gene from ml group by hg_patient)as ml1;",(AsIs(hglist[0]), AsIs(hglist[1]), AsIs(hglist[2]), AsIs(hglist[3]), AsIs(hglist[4]), AsIs(hglist[5]), AsIs(hglist[6]), AsIs(hglist[7]), AsIs(hglist[8]), AsIs(hglist[9]), AsIs(hglist[10]), AsIs(hglist[11]), AsIs(hglist[12]), AsIs(hglist[13]), AsIs(hglist[14]), AsIs(hglist[15]), AsIs(hglist[16]), AsIs(hglist[17]), AsIs(hglist[18]), AsIs(hglist[19]), AsIs(hglist[20]), AsIs(hglist[21]), AsIs(hglist[22]), AsIs(hglist[23]),)))
+
+       cur.execute("create table mlout as select * from (with ml as (select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all) select hg_patient,string_agg(peptide_string_num,',') as peptide_string_num,string_agg(gene,',') as gene from ml group by hg_patient)as ml1;",(AsIs(hglist[0]), AsIs(hglist[1]), AsIs(hglist[2]), AsIs(hglist[3]), AsIs(hglist[4]), AsIs(hglist[5]), AsIs(hglist[6]), AsIs(hglist[7]), AsIs(hglist[8]), AsIs(hglist[9]), AsIs(hglist[10]), AsIs(hglist[11]), AsIs(hglist[12]), AsIs(hglist[13]), AsIs(hglist[14]), AsIs(hglist[15]), AsIs(hglist[16]), AsIs(hglist[17]), AsIs(hglist[18]), AsIs(hglist[19]), AsIs(hglist[20]), AsIs(hglist[21]), AsIs(hglist[22]), AsIs(hglist[23]),))
+       conn.commit()
+
        firstline = True
+
        with open(args.export_ml_full_dataset,"a") as export_file:
 
            cur.execute("select tablename from pg_tables where tableowner='pyuser';")
            for i in cur.fetchall():
                sample_table = ''.join(i)
-               if sample_table.endswith("mlagg"):
+               if sample_table.endswith("mlout"):
 
                     print "now exporting :   "+sample_table
 
