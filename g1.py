@@ -1072,16 +1072,6 @@ try:
             cur.execute("drop table %s_mldistinct ",(AsIs(hg),))
             conn.commit()
 
-#agg all mlagg tables into one
-
-        varmlagg = "%mlagg"
-        #create one big table from latets
-        cur.execute("select table_name from information_schema.tables where table_name like \'%s\'",(AsIs(varmlagg),))
-
-        query2list()
-
-        print(cur.mogrify("create table mlout as select * from (with ml as (select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all) select hg_patient,string_agg(peptide_string_num,',') as peptide_string_num,string_agg(gene,',') as gene from ml group by hg_patient)as ml1;",(AsIs(hglist[0]), AsIs(hglist[1]), AsIs(hglist[2]), AsIs(hglist[3]), AsIs(hglist[4]), AsIs(hglist[5]), AsIs(hglist[6]), AsIs(hglist[7]), AsIs(hglist[8]), AsIs(hglist[9]), AsIs(hglist[10]), AsIs(hglist[11]), AsIs(hglist[12]), AsIs(hglist[13]), AsIs(hglist[14]), AsIs(hglist[15]), AsIs(hglist[16]), AsIs(hglist[17]), AsIs(hglist[18]), AsIs(hglist[19]), AsIs(hglist[20]), AsIs(hglist[21]), AsIs(hglist[22]), AsIs(hglist[23]),)))
-
 
 #add thisbefore exporting : with ml as (select * from test9 union all select * from test8) select hg_patient,string_agg(peptide_string_num,','),string_agg(gene,',') from ml group by hg_patient;
 
@@ -1089,15 +1079,20 @@ try:
 
     #export to file sample of 100 from each table
     if args.export_ml_full_dataset:
+
+#agg all mlagg tables into one
+
+       varmlout = "mlout"
+       check_overwrite_table(varmlout)
        varmlagg = "%mlagg"
         #create one big table from latets
        cur.execute("select table_name from information_schema.tables where table_name like \'%s\'",(AsIs(varmlagg),))
 
        query2list()
 
-       print(cur.mogrify("create table mlout as select * from (with ml as (select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all) select hg_patient,string_agg(peptide_string_num,',') as peptide_string_num,string_agg(gene,',') as gene from ml group by hg_patient)as ml1;",(AsIs(hglist[0]), AsIs(hglist[1]), AsIs(hglist[2]), AsIs(hglist[3]), AsIs(hglist[4]), AsIs(hglist[5]), AsIs(hglist[6]), AsIs(hglist[7]), AsIs(hglist[8]), AsIs(hglist[9]), AsIs(hglist[10]), AsIs(hglist[11]), AsIs(hglist[12]), AsIs(hglist[13]), AsIs(hglist[14]), AsIs(hglist[15]), AsIs(hglist[16]), AsIs(hglist[17]), AsIs(hglist[18]), AsIs(hglist[19]), AsIs(hglist[20]), AsIs(hglist[21]), AsIs(hglist[22]), AsIs(hglist[23]),)))
+       print(cur.mogrify("create table mlout as select * from (with ml as (select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s) select hg_patient,string_agg(peptide_string_num,',') as peptide_string_num,string_agg(gene,',') as gene from ml group by hg_patient)as ml1;",(AsIs(hglist[0]), AsIs(hglist[1]), AsIs(hglist[2]), AsIs(hglist[3]), AsIs(hglist[4]), AsIs(hglist[5]), AsIs(hglist[6]), AsIs(hglist[7]), AsIs(hglist[8]), AsIs(hglist[9]), AsIs(hglist[10]), AsIs(hglist[11]), AsIs(hglist[12]), AsIs(hglist[13]), AsIs(hglist[14]), AsIs(hglist[15]), AsIs(hglist[16]), AsIs(hglist[17]), AsIs(hglist[18]), AsIs(hglist[19]), AsIs(hglist[20]), AsIs(hglist[21]), AsIs(hglist[22]), AsIs(hglist[23]),)))
 
-       cur.execute("create table mlout as select * from (with ml as (select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all) select hg_patient,string_agg(peptide_string_num,',') as peptide_string_num,string_agg(gene,',') as gene from ml group by hg_patient)as ml1;",(AsIs(hglist[0]), AsIs(hglist[1]), AsIs(hglist[2]), AsIs(hglist[3]), AsIs(hglist[4]), AsIs(hglist[5]), AsIs(hglist[6]), AsIs(hglist[7]), AsIs(hglist[8]), AsIs(hglist[9]), AsIs(hglist[10]), AsIs(hglist[11]), AsIs(hglist[12]), AsIs(hglist[13]), AsIs(hglist[14]), AsIs(hglist[15]), AsIs(hglist[16]), AsIs(hglist[17]), AsIs(hglist[18]), AsIs(hglist[19]), AsIs(hglist[20]), AsIs(hglist[21]), AsIs(hglist[22]), AsIs(hglist[23]),))
+       cur.execute("create table mlout as select * from (with ml as (select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s) select hg_patient,string_agg(peptide_string_num,',') as peptide_string_num,string_agg(gene,',') as gene from ml group by hg_patient)as ml1;",(AsIs(hglist[0]), AsIs(hglist[1]), AsIs(hglist[2]), AsIs(hglist[3]), AsIs(hglist[4]), AsIs(hglist[5]), AsIs(hglist[6]), AsIs(hglist[7]), AsIs(hglist[8]), AsIs(hglist[9]), AsIs(hglist[10]), AsIs(hglist[11]), AsIs(hglist[12]), AsIs(hglist[13]), AsIs(hglist[14]), AsIs(hglist[15]), AsIs(hglist[16]), AsIs(hglist[17]), AsIs(hglist[18]), AsIs(hglist[19]), AsIs(hglist[20]), AsIs(hglist[21]), AsIs(hglist[22]), AsIs(hglist[23]),))
        conn.commit()
 
        firstline = True
@@ -1149,7 +1144,7 @@ try:
                                         i2 = " "
                                     i2 = str(i2).strip()
                                     i2 = re.sub(',$','',i2)
-                                    i2= re.sub(',',';',i2)
+                                    i2= re.sub(',',',',i2)
                                     word12 = str(i2) + "\',"
                                     export_file.write("\'"+word12)
                         export_file.write("\n")
