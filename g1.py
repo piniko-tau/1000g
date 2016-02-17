@@ -1308,7 +1308,7 @@ def load_mind_rsids2sql():
     global column_variable_counter
     global column_limit_counter
     #define progress bar object
-    widgets = ['database upload -> mind_rsids ' :', Percentage(), ' ', Bar(marker=RotatingMarker()),' ', ETA(), ' ', FileTransferSpeed()]
+    widgets = ['database upload -> mind_rsids  :', Percentage(), ' ', Bar(marker=RotatingMarker()),' ', ETA(), ' ', FileTransferSpeed()]
 
     pbar = ProgressBar(widgets=widgets, maxval=10000000).start()
 
