@@ -200,8 +200,8 @@ def create_table(table4):
     conn.commit()
 
 def addcol_2table (column_name,table_name):
-   logging.debug(cur.mogrify("alter table %s add column %s text;", (AsIs(column_name),(AsIs(table_name),))))
-   cur.execute("alter table %s add column %s text;", (AsIs(column_name),)(AsIs(table_name),))
+   logging.debug(cur.mogrify("alter table %s add column %s text;", (AsIs(table_name),AsIs(column_name),)))
+   cur.execute("alter table %s add column %s text;", (AsIs(table_name),AsIs(column_name),))
    conn.commit()
 
 def addcol (column_name):
@@ -290,10 +290,82 @@ def load_1000g():
 
 
 
+def load_mind_rsids2sql():
+
+    mind_firstline = True
+
+    global column_variable_counter
+    global column_limit_counter
+    #define progress bar object
+    widgets = ['database upload -> mind_rsids  :', Percentage(), ' ', Bar(marker=RotatingMarker()),' ', ETA(), ' ', FileTransferSpeed()]
+
+    pbar = ProgressBar(widgets=widgets, maxval=10000000).start()
+
+    with open(args.load_mind_rsids) as f:
+
+
+       for line in pbar(f):
+            logging.debug("whole line :"+line)
+            # find columns row and set it as column names
+
+            # if first line with column names create table with column lines:
+            if mind_firstline:
+                logging.debug("mind rs first line!")
+                col_words = line.split()
+                col_counter = len(col_words)
+                logging.debug("column list length")
+                logging.debug(col_counter)
+
+                create_table(varmindrsids_table)
+
+                for word in line.split():
+
+                    logging.debug(word+" word"+str(col_counter))
+
+                    addcol_2table(word,varmindrsids_table)
+
+            mind_firstline = False
+
+            # first check the line length and compare to columns number
+            #find and load variable lines
+            if not line.startswith('numid'):
+                col_words2 = line.split()
+                word_counter = len(col_words2)
+                if word_counter == col_counter:
+                    logging.debug("variables list length :")
+                    logging.debug(word_counter)
+                    logging.debug("column list length :")
+                    logging.debug(col_counter)
+                    linequoted = ""
+
+                    for word in line.split():
+
+                        #skip after 20 column
+                        # if column_variable_counter >= column_limit:
+                        #     column_variable_counter=0
+                        #     break
+                        #
+                        # column_variable_counter+=1
+
+
+                        wordquoted='\''+word+'\''','
+                        logging.debug(wordquoted)
+                        linequoted += wordquoted
+
+                    logging.debug(linequoted)
+                    insertline=linequoted[:-1]
+
+                    insert_values_2table(insertline,varmindrsids_table)
+
 
 def insert_values(line):
     logging.debug(cur.mogrify("insert into "+table1000g+" values (%s);", (AsIs(line),)))
     cur.execute("insert into "+table1000g+" values (%s);", (AsIs(line),))
+    conn.commit()
+
+def insert_values_2table(line,table_name):
+    logging.debug(cur.mogrify("insert into %s values (%s);", (AsIs(table_name),AsIs(line),)))
+    cur.execute("insert into %s values (%s);", (AsIs(table_name),AsIs(line),))
     conn.commit()
 
 def check_1000g_table():
@@ -1306,73 +1378,6 @@ try:
 # #         print "command :", config
 # #         settings_list.append(config)
 
-
-def load_mind_rsids2sql():
-
-    mind_firstline = True
-
-    global column_variable_counter
-    global column_limit_counter
-    #define progress bar object
-    widgets = ['database upload -> mind_rsids  :', Percentage(), ' ', Bar(marker=RotatingMarker()),' ', ETA(), ' ', FileTransferSpeed()]
-
-    pbar = ProgressBar(widgets=widgets, maxval=10000000).start()
-
-    with open(args.load_mind_rsids) as f:
-
-       # print "loading : "+table1000g+"...."
-       ##latest change to file and remove readlines
-       for line in pbar(f):
-            logging.debug("whole line :"+line)
-            # find columns row and set it as column names
-
-            # if first line with column names create table with column lines:
-            if mind_firstline:
-                logging.debug("mind rs first line!")
-                col_words = line.split()
-                col_counter = len(col_words)
-                logging.debug("column list length")
-                logging.debug(col_counter)
-
-                create_table(varmindrsids_table)
-
-                for word in line.split():
-
-                    logging.debug(word+" word"+str(col_counter))
-                    addcol_2table(word,varmindrsids_table)
-
-            mind_firstline = False
-
-            # first check the line length and compare to columns number
-            #find and load variable lines
-            if (not line.startswith('#')) and ("CNV" not in line):
-                col_words2 = line.split()
-                word_counter = len(col_words2)
-                if word_counter == col_counter:
-                    logging.debug("variables list length :")
-                    logging.debug(word_counter)
-                    logging.debug("column list length :")
-                    logging.debug(col_counter)
-                    linequoted = ""
-
-                    for word in line.split():
-
-                        #skip after 20 column
-                        if column_variable_counter >= column_limit:
-                            column_variable_counter=0
-                            break
-
-                        column_variable_counter+=1
-
-
-                        wordquoted='\''+word+'\''','
-                        logging.debug(wordquoted)
-                        linequoted += wordquoted
-
-                    logging.debug(linequoted)
-                    insertline=linequoted[:-1]
-
-                    insert_values(insertline)
 
 
 
