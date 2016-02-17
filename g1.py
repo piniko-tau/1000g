@@ -22,7 +22,7 @@ import logging
 from progressbar import AnimatedMarker, Bar, BouncingBar, Counter, ETA, FileTransferSpeed, FormatLabel, Percentage, ProgressBar, ReverseBar, RotatingMarker, SimpleProgress, Timer
 
 
-parser = argparse.ArgumentParser(prog='psql_1000g_loader',usage='psql_1000g_loader [-t table_name prefix -f file_input or -list file_input_list] [-ucsc_snpf file name -ucsc_snp table_name] (optional add a annotated ucsc_snp table from file ) [-dbname database_name -dbuser database_user -dbpass database_pass] [-a_ucsc chr table to be annotated by ucsc ] [-ensembl_variation_snpf file name -ensembl_variation_genename_snpf file name] (optional add a annotated ensembl tables from files) [-a_ensembl chr table to be annotated by ensemble ] [-sort_by_gene_and_pos ann_table] [-update_table_allel2peptide create all to peptide table] [-remove_dup_allele remove duplicate alleles from table] [-add_gene_peptide_string add gene_peptide_string fileds to table] [-create_uniq_pepstring_num create a table with unique number to each group of peptide strings ordered by descending] [-add_uniq_pepstring_num add unique pepstring number to specified table] [-export_sample_2file export 100 lines> of each table to file] [-export_fulldataset_2file export dataset in full to file name] [-create_ml_dataset_table create dataset for machine learning by patients table] [-export_ml_full_dataset export dataset for machine learning by patients ] [-load_mind_data_f load mind dataset file] [-load_mind_data_t load mind dataset table prefix] [-s show all tables] [-add_meta add tables metadata]',description='Load annotated snp database & Create a 1000G sql table from all Chromosomes - using a connection to a postgresql DB.')
+parser = argparse.ArgumentParser(prog='psql_1000g_loader',usage='psql_1000g_loader [-t table_name prefix -f file_input or -list file_input_list] [-ucsc_snpf file name -ucsc_snp table_name] (optional add a annotated ucsc_snp table from file ) [-dbname database_name -dbuser database_user -dbpass database_pass] [-a_ucsc chr table to be annotated by ucsc ] [-ensembl_variation_snpf file name -ensembl_variation_genename_snpf file name] (optional add a annotated ensembl tables from files) [-a_ensembl chr table to be annotated by ensemble ] [-sort_by_gene_and_pos ann_table] [-update_table_allel2peptide create all to peptide table] [-remove_dup_allele remove duplicate alleles from table] [-add_gene_peptide_string add gene_peptide_string fileds to table] [-create_uniq_pepstring_num create a table with unique number to each group of peptide strings ordered by descending] [-add_uniq_pepstring_num add unique pepstring number to specified table] [-export_sample_2file export 100 lines> of each table to file] [-export_fulldataset_2file export dataset in full to file name] [-create_ml_dataset_table create dataset for machine learning by patients table] [-export_ml_full_dataset export dataset for machine learning by patients ] [-load_mind_data_f load mind dataset file] [-load_mind_data_t load mind dataset table prefix] [-load_mind_rsids load the mind rsids file to mind_rsids table] [-s show all tables] [-add_meta add tables metadata]',description='Load annotated snp database & Create a 1000G sql table from all Chromosomes - using a connection to a postgresql DB.')
 
 # dbname=pydb user=pyuser password=pyuser
 # postgresql credentials
@@ -89,6 +89,8 @@ parser.add_argument("-load_mind_data", help="load mind dataset file" , metavar='
 parser.add_argument("-load_mind_data_f", help="load mind dataset file" , metavar='load_mind_data_f')
 
 parser.add_argument("-load_mind_data_t",help=" load mind dataset table prefix",metavar='load_mind_data_t')
+# [-load_mind_rsids load the mind rsids file ]
+parser.add_argument("-load_mind_rsids",help=" load the mind rsids file to mind_rsids table",metavar='load_mind_rsids')
 
 parser.add_argument("-o", "--overwrite_tables", help="overwrites any existing tables",action="store_true")
 parser.add_argument("-v", "--verbose", help="increase output verbosity",action="store_true")
@@ -1157,16 +1159,160 @@ try:
                                     export_file.write("\'"+word12)
                         export_file.write("\n")
 
- def load_md2sql():
+#  def load_md2sql():
+#
+#     global column_variable_counter
+#     global column_limit_counter
+#     #define progress bar object
+#     widgets = ['database upload -> '+table1000g+' :', Percentage(), ' ', Bar(marker=RotatingMarker()),' ', ETA(), ' ', FileTransferSpeed()]
+#
+#     pbar = ProgressBar(widgets=widgets, maxval=10000000).start()
+#
+#     with open(myfile) as f:
+#
+#        # print "loading : "+table1000g+"...."
+#        ##latest change to file and remove readlines
+#        for line in pbar(f):
+#             logging.debug("whole line :"+line)
+#             # find columns row and set it as column names
+#
+#             #skip if table is initialized with colums
+#     #       option to have all files in single table
+#     #         if not check_empty_table(table1000g):
+#             ##add tab
+#
+#             if re.match("^#(?!#)",line):
+#                 logging.debug("found1#!")
+#                 col_words = line.split()
+#                 col_counter = len(col_words)
+#                 logging.debug("column list length")
+#                 logging.debug(col_counter)
+#
+#                 for word in line.split():
+#
+#                   #skip after 20 column
+#
+#                   if column_limit_counter >= column_limit:
+#                     column_limit_counter=0
+#                     break
+#                   column_limit_counter+=1
+#
+#
+#                   if word.startswith('#'):
+#                     logging.debug(word.replace("#","")+"word"+str(col_counter))
+#                     wo = word.replace("#","")
+#                     addcol(wo)
+#                   else :
+#                     logging.debug(word+" word"+str(col_counter))
+#                     addcol(word)
+#
+#             # first check the line length and compare to columns number
+#             #find and load variable lines
+#             if (not line.startswith('#')) and ("CNV" not in line):
+#                 col_words2 = line.split()
+#                 word_counter = len(col_words2)
+#                 if word_counter == col_counter:
+#                     logging.debug("variables list length :")
+#                     logging.debug(word_counter)
+#                     logging.debug("column list length :")
+#                     logging.debug(col_counter)
+#                     linequoted = ""
+#
+#                     for word in line.split():
+#
+#                         #skip after 20 column
+#                         if column_variable_counter >= column_limit:
+#                             column_variable_counter=0
+#                             break
+#
+#                         column_variable_counter+=1
+#
+#
+#                         wordquoted='\''+word+'\''','
+#                         logging.debug(wordquoted)
+#                         linequoted += wordquoted
+#
+#                     logging.debug(linequoted)
+#                     insertline=linequoted[:-1]
+#
+#                     insert_values(insertline)
+#
+#
+#
+#
+#
+#     if args.load_mind_data_f and args.load_mind_data_t:
+#
+#
+#             Fileinput = args.load_mind_data_f
+#             table_mind = args.t
+#             #set the 1000gfile
+#             myfile = str(Fileinput)
+#             #check if exists
+#             #if overwrite is set delete and recreate table
+#             check_overwrite_table(table_mind)
+#             load_md2sql()
+#
+#         elif (not args.load_mind_data_t and args.load_mind_data_f) or (not args.load_mind_data_f and args.load_mind_data_t):
+#             print "argument missing !"
+#             parser.print_help()
+#             sys.exit()
+#
+#
+#
+#
+#
+#
+#
+# # *************************************************************8
+# #multi core section
+# #select core num and execute function in pool
+# #function should be in top level so disable cache exeption
+#
+#     # if args.multi_core_num:
+#     #
+#     #     if __name__ == '__main__':
+#     #         logger = mp.log_to_stderr()
+#     #         logger.setLevel(logging.DEBUG)
+#     #
+#     #         if args.multi_core_num == "max":
+#     #
+#     #             max_cpu = mp.cpu_count()
+#     #             pool = mp.Pool(processes=max_cpu)
+#     #             print "cpu count", int(max_cpu)
+#     #             # results = [pool.apply_async(multiquery, (setting,)) for setting in range(2)]
+#     #             for setting in range(2):
+#     #                 pool.apply_async(multiquery,(setting,))
+#     #             # pool.apply_async(multiquery(1))
+#     #
+#     #         if isInt(args.multi_core_num):
+#     #             pool = mp.Pool(processes=int(args.multi_core_num))
+#     #             print "int ok", args.multi_core_num
+#     #             results = [pool.apply_async(multifunc, (setting,)) for setting in range(2)]
+#
+#         # print 'Ordered results using pool.apply_async():'
+#
+#     # for result in results:
+#     #     # print '\t', result.get()
+#     #     # print '\t', result.ready()
+#     #     print '\t', result.successful()
+#             # with open(settings_file) as f:
+#                 for line in f:
+# #         config = script2p+" "+line
+# #         print "command :", config
+# #         settings_list.append(config)
+
+
+def load_mind_rsids2sql():
 
     global column_variable_counter
     global column_limit_counter
     #define progress bar object
-    widgets = ['database upload -> '+table1000g+' :', Percentage(), ' ', Bar(marker=RotatingMarker()),' ', ETA(), ' ', FileTransferSpeed()]
+    widgets = ['database upload -> mind_rsids ' :', Percentage(), ' ', Bar(marker=RotatingMarker()),' ', ETA(), ' ', FileTransferSpeed()]
 
     pbar = ProgressBar(widgets=widgets, maxval=10000000).start()
 
-    with open(myfile) as f:
+    with open(args.load_mind_rsids) as f:
 
        # print "loading : "+table1000g+"...."
        ##latest change to file and remove readlines
@@ -1237,68 +1383,17 @@ try:
 
 
 
-    
-
-    if args.load_mind_data_f and args.load_mind_data_t:
-
-
-            Fileinput = args.load_mind_data_f
-            table_mind = args.t
-            #set the 1000gfile
-            myfile = str(Fileinput)
-            #check if exists
-            #if overwrite is set delete and recreate table
-            check_overwrite_table(table_mind)
-            load_md2sql()
-
-        elif (not args.load_mind_data_t and args.load_mind_data_f) or (not args.load_mind_data_f and args.load_mind_data_t):
-            print "argument missing !"
-            parser.print_help()
-            sys.exit()
 
 
 
 
+    if args.load_mind_rsids:
+
+        varmindrsids_table="mind_rsids"
+        check_overwrite_table(varmindrsids_table)
+        load_mind_rsids2sql()
 
 
-
-# *************************************************************8
-#multi core section
-#select core num and execute function in pool
-#function should be in top level so disable cache exeption
-
-    # if args.multi_core_num:
-    #
-    #     if __name__ == '__main__':
-    #         logger = mp.log_to_stderr()
-    #         logger.setLevel(logging.DEBUG)
-    #
-    #         if args.multi_core_num == "max":
-    #
-    #             max_cpu = mp.cpu_count()
-    #             pool = mp.Pool(processes=max_cpu)
-    #             print "cpu count", int(max_cpu)
-    #             # results = [pool.apply_async(multiquery, (setting,)) for setting in range(2)]
-    #             for setting in range(2):
-    #                 pool.apply_async(multiquery,(setting,))
-    #             # pool.apply_async(multiquery(1))
-    #
-    #         if isInt(args.multi_core_num):
-    #             pool = mp.Pool(processes=int(args.multi_core_num))
-    #             print "int ok", args.multi_core_num
-    #             results = [pool.apply_async(multifunc, (setting,)) for setting in range(2)]
-
-        # print 'Ordered results using pool.apply_async():'
-
-    # for result in results:
-    #     # print '\t', result.get()
-    #     # print '\t', result.ready()
-    #     print '\t', result.successful()
-            # with open(settings_file) as f:
-#                 for line in f:
-# #         config = script2p+" "+line
-# #         print "command :", config
-# #         settings_list.append(config)
 
 
 #end of program execution
