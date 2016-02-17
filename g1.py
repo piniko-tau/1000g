@@ -199,6 +199,10 @@ def create_table(table4):
     cur.execute("create table "+table4+"();")
     conn.commit()
 
+def addcol_2table (column_name,table_name):
+   logging.debug(cur.mogrify("alter table %s add column %s text;", (AsIs(column_name),(AsIs(table_name),))))
+   cur.execute("alter table %s add column %s text;", (AsIs(column_name),)(AsIs(table_name),))
+   conn.commit()
 
 def addcol (column_name):
    logging.debug(cur.mogrify("alter table "+table1000g+" add column %s text;", (AsIs(column_name),)))
@@ -1305,6 +1309,8 @@ try:
 
 def load_mind_rsids2sql():
 
+    mind_firstline = True
+
     global column_variable_counter
     global column_limit_counter
     #define progress bar object
@@ -1320,35 +1326,22 @@ def load_mind_rsids2sql():
             logging.debug("whole line :"+line)
             # find columns row and set it as column names
 
-            #skip if table is initialized with colums
-    #       option to have all files in single table
-    #         if not check_empty_table(table1000g):
-            ##add tab
-
-            if re.match("^#(?!#)",line):
-                logging.debug("found1#!")
+            # if first line with column names create table with column lines:
+            if mind_firstline:
+                logging.debug("mind rs first line!")
                 col_words = line.split()
                 col_counter = len(col_words)
                 logging.debug("column list length")
                 logging.debug(col_counter)
 
+                create_table(varmindrsids_table)
+
                 for word in line.split():
 
-                  #skip after 20 column
-
-                  if column_limit_counter >= column_limit:
-                    column_limit_counter=0
-                    break
-                  column_limit_counter+=1
-
-
-                  if word.startswith('#'):
-                    logging.debug(word.replace("#","")+"word"+str(col_counter))
-                    wo = word.replace("#","")
-                    addcol(wo)
-                  else :
                     logging.debug(word+" word"+str(col_counter))
-                    addcol(word)
+                    addcol_2table(word,varmindrsids_table)
+
+            mind_firstline = False
 
             # first check the line length and compare to columns number
             #find and load variable lines
@@ -1389,6 +1382,7 @@ def load_mind_rsids2sql():
 
     if args.load_mind_rsids:
 
+        global varmindrsids_table
         varmindrsids_table="mind_rsids"
         check_overwrite_table(varmindrsids_table)
         load_mind_rsids2sql()
