@@ -289,6 +289,83 @@ def load_1000g():
                     insert_values(insertline)
 
 
+def load_md2sql():
+
+    mind_firstline = True
+
+    global column_variable_counter
+    global column_limit_counter
+    #define progress bar object
+    widgets = ['database upload -> mind_rsids  :', Percentage(), ' ', Bar(marker=RotatingMarker()),' ', ETA(), ' ', FileTransferSpeed()]
+
+    pbar = ProgressBar(widgets=widgets, maxval=10000000).start()
+
+    with open(args.load_mind_data_f) as f:
+
+
+       for line in pbar(f):
+            logging.debug("whole line :"+line)
+            # find columns row and set it as column names
+
+            # if first line with column names create table with column lines:
+            if mind_firstline:
+                logging.debug("mind phenotypes first line!")
+                col_words = line.split()
+                col_counter = len(col_words)
+                logging.debug("column list length")
+                logging.debug(col_counter)
+
+                create_table(args.load_mind_data_t)
+
+                for word in line.split():
+
+                  #skip after 20 column
+
+                  if column_limit_counter >= mind_column_limit:
+                    column_limit_counter=0
+                    break
+                  column_limit_counter+=1
+
+                    logging.debug(word+" word"+str(col_counter))
+
+                    addcol_2table(word,varmindrsids_table)
+
+            mind_firstline = False
+
+            # first check the line length and compare to columns number
+            #find and load variable lines
+            if not line.startswith('PID'):
+                col_words2 = line.split()
+                word_counter = len(col_words2)
+                if word_counter == col_counter:
+                    logging.debug("variables list length :")
+                    logging.debug(word_counter)
+                    logging.debug("column list length :")
+                    logging.debug(col_counter)
+                    linequoted = ""
+
+                    for word in line.split():
+
+                        #skip after 20 column
+                        # if column_variable_counter >= column_limit:
+                        #     column_variable_counter=0
+                        #     break
+                        #
+                        # column_variable_counter+=1
+
+
+                        wordquoted='\''+word+'\''','
+                        logging.debug(wordquoted)
+                        linequoted += wordquoted
+
+                    logging.debug(linequoted)
+                    insertline=linequoted[:-1]
+
+                    insert_values_2table(insertline,varmindrsids_table)
+
+
+
+
 
 def load_mind_rsids2sql():
 
@@ -1235,111 +1312,30 @@ try:
                                     export_file.write("\'"+word12)
                         export_file.write("\n")
 
-#  def load_md2sql():
-#
-#     global column_variable_counter
-#     global column_limit_counter
-#     #define progress bar object
-#     widgets = ['database upload -> '+table1000g+' :', Percentage(), ' ', Bar(marker=RotatingMarker()),' ', ETA(), ' ', FileTransferSpeed()]
-#
-#     pbar = ProgressBar(widgets=widgets, maxval=10000000).start()
-#
-#     with open(myfile) as f:
-#
-#        # print "loading : "+table1000g+"...."
-#        ##latest change to file and remove readlines
-#        for line in pbar(f):
-#             logging.debug("whole line :"+line)
-#             # find columns row and set it as column names
-#
-#             #skip if table is initialized with colums
-#     #       option to have all files in single table
-#     #         if not check_empty_table(table1000g):
-#             ##add tab
-#
-#             if re.match("^#(?!#)",line):
-#                 logging.debug("found1#!")
-#                 col_words = line.split()
-#                 col_counter = len(col_words)
-#                 logging.debug("column list length")
-#                 logging.debug(col_counter)
-#
-#                 for word in line.split():
-#
-#                   #skip after 20 column
-#
-#                   if column_limit_counter >= column_limit:
-#                     column_limit_counter=0
-#                     break
-#                   column_limit_counter+=1
-#
-#
-#                   if word.startswith('#'):
-#                     logging.debug(word.replace("#","")+"word"+str(col_counter))
-#                     wo = word.replace("#","")
-#                     addcol(wo)
-#                   else :
-#                     logging.debug(word+" word"+str(col_counter))
-#                     addcol(word)
-#
-#             # first check the line length and compare to columns number
-#             #find and load variable lines
-#             if (not line.startswith('#')) and ("CNV" not in line):
-#                 col_words2 = line.split()
-#                 word_counter = len(col_words2)
-#                 if word_counter == col_counter:
-#                     logging.debug("variables list length :")
-#                     logging.debug(word_counter)
-#                     logging.debug("column list length :")
-#                     logging.debug(col_counter)
-#                     linequoted = ""
-#
-#                     for word in line.split():
-#
-#                         #skip after 20 column
-#                         if column_variable_counter >= column_limit:
-#                             column_variable_counter=0
-#                             break
-#
-#                         column_variable_counter+=1
-#
-#
-#                         wordquoted='\''+word+'\''','
-#                         logging.debug(wordquoted)
-#                         linequoted += wordquoted
-#
-#                     logging.debug(linequoted)
-#                     insertline=linequoted[:-1]
-#
-#                     insert_values(insertline)
-#
-#
-#
-#
-#
-#     if args.load_mind_data_f and args.load_mind_data_t:
-#
-#
-#             Fileinput = args.load_mind_data_f
-#             table_mind = args.t
-#             #set the 1000gfile
-#             myfile = str(Fileinput)
-#             #check if exists
-#             #if overwrite is set delete and recreate table
-#             check_overwrite_table(table_mind)
-#             load_md2sql()
-#
-#         elif (not args.load_mind_data_t and args.load_mind_data_f) or (not args.load_mind_data_f and args.load_mind_data_t):
-#             print "argument missing !"
-#             parser.print_help()
-#             sys.exit()
-#
-#
-#
-#
-#
-#
-#
+
+
+
+
+    if args.load_mind_data_f and args.load_mind_data_t:
+
+
+        Fileinput = args.load_mind_data_f
+        table_mind = args.t
+        myfile = str(Fileinput)
+        mind_column_limit = 1000
+        #check if exists
+        #if overwrite is set delete and recreate table
+        check_overwrite_table(table_mind)
+        load_md2sql()
+
+    elif (not args.load_mind_data_t and args.load_mind_data_f) or (not args.load_mind_data_f and args.load_mind_data_t):
+        print "argument missing !"
+        parser.print_help()
+        sys.exit()
+
+
+
+
 # # *************************************************************8
 # #multi core section
 # #select core num and execute function in pool
