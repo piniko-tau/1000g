@@ -1,8 +1,11 @@
 #!/usr/bin/python
 
+import sys
+filename=sys.argv[1]
+
 def bla():
 
-	filename="/home/pini/Downloads/mind_gene/mind_hw22"
+#	filename="/home/pini/Downloads/mind_gene/mind_hw22"
 	with open (filename) as f:
 	
 #		for i in 10 
@@ -15,7 +18,7 @@ def bla():
 length=bla()
 print "length is : ",length,"\n"
 
-filename="/home/pini/Downloads/mind_gene/mind_hw22"
+#filename="/home/pini/Downloads/mind_gene/mind_hw22"
 
 for i in range(length):
 		 
@@ -24,10 +27,8 @@ for i in range(length):
 	         list1 = ""
                  for line in f:
 			
-#			 print "line ",line 
- #                       print "line iter I ",i
-			 print "\n","row ",i,"",line.split()[i]
+#			 print "\n","row ",i,"",line.split()[i]
 			 list1 += '\''+line.split()[i]+'\''','
-                 print list1 		
+         print list1 		
 
  
