@@ -296,6 +296,27 @@ def file_first_row_length(file_2length):
             return len(line.split())
             break
 
+
+  #file transpose plan:
+
+        #   go over the file (row lentgh times):
+        #       for i in 1000 (patients):
+        #           insert into list : line.split()[i]
+                    #load first list into table colums
+                    #load the rest as values
+
+    # for i in range(length): (file_first_row_length)
+    #
+    #          with open (filename) as f:
+    #                  list1 = ""
+    #                  for line in f:
+    #
+    # #                        print "\n","row ",i,"",line.split()[i]
+    #                          list1 += '\''+line.split()[i]+'\''','
+    #          inser values
+    #
+
+
 def load_md2sql():
 
     mind_firstline = True
@@ -307,86 +328,83 @@ def load_md2sql():
 
     pbar = ProgressBar(widgets=widgets, maxval=10000000).start()
 
-    with open(args.load_mind_data_f) as f:
 
-    #file transpose plan:
+    length = file_first_row_length(args.load_mind_data_t)
 
-    #   go over the file (row lentgh times):
-    #       for i in 1000 (patients):
-    #           insert into list : line.split()[0]
-                #load first list into table colums
-                #load the rest as values
+#   go over the file (row lentgh times):
 
-# for i in range(length): (file_first_row_length)
-#
-#          with open (filename) as f:
-#                  list1 = ""
-#                  for line in f:
-#
-# #                        print "\n","row ",i,"",line.split()[i]
-#                          list1 += '\''+line.split()[i]+'\''','
-#          print list1
-#
+    for i in pbar(range(length)):
 
-       for line in pbar(f):
-            logging.debug("whole line :"+line)
-            # find columns row and set it as column names
 
-            # if first line with column names create table with column lines:
-            if mind_firstline:
-                logging.debug("mind phenotypes first line!")
-                col_words = line.split()
-                col_counter = len(col_words)
-                logging.debug("column list length")
-                logging.debug(col_counter)
+        with open(args.load_mind_data_f) as f:
 
-                create_table(args.load_mind_data_t)
 
-                for word in line.split():
+           linequoted = ""
 
-                      #skip after 20 column
+           for line in f:
 
-                      if column_limit_counter >= mind_column_limit:
-                        column_limit_counter=0
-                        break
-                      column_limit_counter+=1
+                linequoted += '\''+line.split()[i]+'\''','
 
-                      logging.debug(word+" word"+str(col_counter))
+        #whole line here
 
-                      addcol_2table(word,varmindrsids_table)
+                logging.debug("whole line :"+line)
+                # find columns row and set it as column names
 
-            mind_firstline = False
-
-            # first check the line length and compare to columns number
-            #find and load variable lines
-            if not line.startswith('PID'):
-                col_words2 = line.split()
-                word_counter = len(col_words2)
-                if word_counter == col_counter:
-                    logging.debug("variables list length :")
-                    logging.debug(word_counter)
-                    logging.debug("column list length :")
+                # if first line with column names create table with column lines:
+                if mind_firstline:
+                    logging.debug("mind phenotypes first line!")
+                    col_words = line.split()
+                    col_counter = len(col_words)
+                    logging.debug("column list length")
                     logging.debug(col_counter)
-                    linequoted = ""
+
+                    create_table(args.load_mind_data_t)
 
                     for word in line.split():
 
-                        #skip after 20 column
-                        # if column_variable_counter >= column_limit:
-                        #     column_variable_counter=0
-                        #     break
-                        #
-                        # column_variable_counter+=1
+                          #skip after 20 column
+
+                          if column_limit_counter >= mind_column_limit:
+                            column_limit_counter=0
+                            break
+                          column_limit_counter+=1
+
+                          logging.debug(word+" word"+str(col_counter))
+
+                          addcol_2table(word,varmindrsids_table)
+
+                mind_firstline = False
+
+                # first check the line length and compare to columns number
+                #find and load variable lines
+                if not line.startswith('PID'):
+                    col_words2 = line.split()
+                    word_counter = len(col_words2)
+                    if word_counter == col_counter:
+                        logging.debug("variables list length :")
+                        logging.debug(word_counter)
+                        logging.debug("column list length :")
+                        logging.debug(col_counter)
 
 
-                        wordquoted='\''+word+'\''','
-                        logging.debug(wordquoted)
-                        linequoted += wordquoted
+                        for word in line.split():
 
-                    logging.debug(linequoted)
-                    insertline=linequoted[:-1]
+                            #skip after 20 column
+                            # if column_variable_counter >= column_limit:
+                            #     column_variable_counter=0
+                            #     break
+                            #
+                            # column_variable_counter+=1
 
-                    insert_values_2table(insertline,varmindrsids_table)
+
+                            wordquoted='\''+word+'\''','
+                            logging.debug(wordquoted)
+                            linequoted += wordquoted
+
+                        logging.debug(linequoted)
+                        insertline=linequoted[:-1]
+
+                        insert_values_2table(insertline,varmindrsids_table)
 
 
 
