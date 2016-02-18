@@ -316,20 +316,18 @@ def load_md2sql():
     #           insert into list : line.split()[0]
                 #load first list into table colums
                 #load the rest as values
-# filename="/home/pini/Downloads/mind_gene/mind_hw22"
+
+# for i in range(length): (file_first_row_length)
 #
-# for i in range(length):
-#
-# #        print i
 #          with open (filename) as f:
 #                  list1 = ""
 #                  for line in f:
 #
-# #                        print "line ",line
-#  #                       print "line iter I ",i
-#                          print "\n","row ",i,"",line.split()[i]
+# #                        print "\n","row ",i,"",line.split()[i]
 #                          list1 += '\''+line.split()[i]+'\''','
-#                  print list1
+#          print list1
+#
+
        for line in pbar(f):
             logging.debug("whole line :"+line)
             # find columns row and set it as column names
