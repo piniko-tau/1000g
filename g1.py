@@ -288,6 +288,13 @@ def load_1000g():
 
                     insert_values(insertline)
 
+def file_first_row_length(file_2length):
+    with open (file_2length) as f:
+
+        for line in f:
+
+            return len(line.split())
+            break
 
 def load_md2sql():
 
@@ -302,7 +309,27 @@ def load_md2sql():
 
     with open(args.load_mind_data_f) as f:
 
+    #file transpose plan:
 
+    #   go over the file (row lentgh times):
+    #       for i in 1000 (patients):
+    #           insert into list : line.split()[0]
+                #load first list into table colums
+                #load the rest as values
+# filename="/home/pini/Downloads/mind_gene/mind_hw22"
+#
+# for i in range(length):
+#
+# #        print i
+#          with open (filename) as f:
+#                  list1 = ""
+#                  for line in f:
+#
+# #                        print "line ",line
+#  #                       print "line iter I ",i
+#                          print "\n","row ",i,"",line.split()[i]
+#                          list1 += '\''+line.split()[i]+'\''','
+#                  print list1
        for line in pbar(f):
             logging.debug("whole line :"+line)
             # find columns row and set it as column names
@@ -319,16 +346,16 @@ def load_md2sql():
 
                 for word in line.split():
 
-                  #skip after 20 column
+                      #skip after 20 column
 
-                  if column_limit_counter >= mind_column_limit:
-                    column_limit_counter=0
-                    break
-                  column_limit_counter+=1
+                      if column_limit_counter >= mind_column_limit:
+                        column_limit_counter=0
+                        break
+                      column_limit_counter+=1
 
-                    logging.debug(word+" word"+str(col_counter))
+                      logging.debug(word+" word"+str(col_counter))
 
-                    addcol_2table(word,varmindrsids_table)
+                      addcol_2table(word,varmindrsids_table)
 
             mind_firstline = False
 
