@@ -305,16 +305,25 @@ def file_first_row_length(file_2length):
                     #load first list into table colums
                     #load the rest as values
 
-    # for i in range(length): (file_first_row_length)
-    #
-    #          with open (filename) as f:
-    #                  list1 = ""
-    #                  for line in f:
-    #
-    # #                        print "\n","row ",i,"",line.split()[i]
-    #                          list1 += '\''+line.split()[i]+'\''','
-    #          inser values
-    #
+def transpose_file_2_file(file2_transpose, transposed_file):
+
+    widgets = ['database upload -> mind_rsids  :', Percentage(), ' ', Bar(marker=RotatingMarker()),' ', ETA(), ' ', FileTransferSpeed()]
+
+    pbar = ProgressBar(widgets=widgets, maxval=10000000).start()
+
+    with open (transposed_file, "a") as t2:
+
+        row_length = file_first_row_length(file2_transpose)
+        for i in range(row_length):
+            with open (file2_transpose) as f:
+                         list1 = ""
+                         for line in f:
+
+        #                        print "\n","row ",i,"",line.split()[i]
+                                 list1 += '\''+line.split()[i]+'\''','
+            t2.write(list1)
+            t2.write("\n")
+
 
 
 def load_md2sql():
