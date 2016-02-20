@@ -26,9 +26,9 @@ parser = argparse.ArgumentParser(prog='psql_1000g_loader',usage='psql_1000g_load
 
 # dbname=pydb user=pyuser password=pyuser
 # postgresql credentials
-parser.add_argument("-dbname",required=True,help='name of psql database',metavar='DBNAME')
-parser.add_argument("-dbuser",required=True,help='name of psql database user',metavar='DBUSER')
-parser.add_argument("-dbpass",required=True,help='psql database user pass',metavar='DBPASS')
+parser.add_argument("-dbname",help='name of psql database',metavar='DBNAME')
+parser.add_argument("-dbuser",help='name of psql database user',metavar='DBUSER')
+parser.add_argument("-dbpass",help='psql database user pass',metavar='DBPASS')
 
 
 #1000g actions
@@ -305,7 +305,9 @@ def file_first_row_length(file_2length):
                     #load first list into table colums
                     #load the rest as values
 
-def transpose_file_2_file(file2_transpose, transposed_file):
+def transpose_file_2_file():
+
+    args.
 
     widgets = ['database upload -> mind_rsids  :', Percentage(), ' ', Bar(marker=RotatingMarker()),' ', ETA(), ' ', FileTransferSpeed()]
 
