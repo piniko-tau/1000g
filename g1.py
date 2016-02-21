@@ -12,7 +12,7 @@ import multiprocessing as mp
 #on the psql shell
 #create role pyuser login password 'pyuser';
 #create database pydb owner pyuser;
-#l dg
+#\l \dg
 '''
 
 import psycopg2
@@ -74,7 +74,7 @@ parser.add_argument("-create_uniq_pepstring_num",help=' create a table with uniq
 parser.add_argument("-add_uniq_pepstring_num",help='add unique pepstring number to specified table',metavar='ADD_UNIQ_PEPSTRING_NUM')
 
 
-parser.add_argument("-multi_core_num",help='use multiple cores number or "max"',metavar='MULTI_CORE_NUM')
+parser.add_argument("-multi_core_num",help='use multiple cores number or \"max\"',metavar='MULTI_CORE_NUM')
 
 parser.add_argument("-export_sample_2file",help='export sample to file name',metavar='export_sample_2file')
 
@@ -137,12 +137,12 @@ column_variable_counter = 0
 def insert_snp_table():
 
 
-    print cur.mogrify("CREATE TABLE "%s" ("bin" smallint NOT NULL,"chrom" varchar(255) NOT NULL,"chromStart" int  NOT NULL,"chromEnd" int  NOT NULL, "name" text NOT NULL,"transcript" varchar(255) NOT NULL,"frame" varchar(255) NOT NULL,"alleleCount" int NOT NULL,"funcCodes" text NOT NULL,"alleles" text NOT NULL,"codons" text NOT NULL,"peptides" text NOT NULL)",(AsIs(snptable),))
-    cur.execute("CREATE TABLE "%s" ("bin" smallint NOT NULL,"chrom" varchar(255) NOT NULL,"chromStart" int  NOT NULL,"chromEnd" int  NOT NULL, "name" text NOT NULL,"transcript" varchar(255) NOT NULL,"frame" varchar(255) NOT NULL,"alleleCount" int NOT NULL,"funcCodes" text NOT NULL,"alleles" text NOT NULL,"codons" text NOT NULL,"peptides" text NOT NULL)",(AsIs(snptable),))
-    print cur.mogrify("COPY "%s" FROM '%s'",(AsIs(snptable),AsIs(snpfile),))
+    print cur.mogrify("CREATE TABLE \"%s\" (\"bin\" smallint NOT NULL,\"chrom\" varchar(255) NOT NULL,\"chromStart\" int  NOT NULL,\"chromEnd\" int  NOT NULL, \"name\" text NOT NULL,\"transcript\" varchar(255) NOT NULL,\"frame\" varchar(255) NOT NULL,\"alleleCount\" int NOT NULL,\"funcCodes\" text NOT NULL,\"alleles\" text NOT NULL,\"codons\" text NOT NULL,\"peptides\" text NOT NULL)",(AsIs(snptable),))
+    cur.execute("CREATE TABLE \"%s\" (\"bin\" smallint NOT NULL,\"chrom\" varchar(255) NOT NULL,\"chromStart\" int  NOT NULL,\"chromEnd\" int  NOT NULL, \"name\" text NOT NULL,\"transcript\" varchar(255) NOT NULL,\"frame\" varchar(255) NOT NULL,\"alleleCount\" int NOT NULL,\"funcCodes\" text NOT NULL,\"alleles\" text NOT NULL,\"codons\" text NOT NULL,\"peptides\" text NOT NULL)",(AsIs(snptable),))
+    print cur.mogrify("COPY \"%s\" FROM \'%s\'",(AsIs(snptable),AsIs(snpfile),))
     cur.copy_from(fsnpfile, snptable)
-    print cur.mogrify("CREATE TABLE %s AS SELECT * FROM "%s" WHERE frame NOT LIKE "n/a"",(AsIs(snptablena),AsIs(snptable),))
-    cur.execute("CREATE TABLE %s AS SELECT * FROM "%s" WHERE frame NOT LIKE 'n/a'",(AsIs(snptablena),AsIs(snptable),))
+    print cur.mogrify("CREATE TABLE %s AS SELECT * FROM \"%s\" WHERE frame NOT LIKE \"n/a\"",(AsIs(snptablena),AsIs(snptable),))
+    cur.execute("CREATE TABLE %s AS SELECT * FROM \"%s\" WHERE frame NOT LIKE \'n/a\'",(AsIs(snptablena),AsIs(snptable),))
     print  cur.mogrify("CREATE TABLE %s AS SELECT * FROM %s WITH NO DATA",(AsIs(snptablenasma),AsIs(snptablena),))
     cur.execute("CREATE TABLE %s AS SELECT * FROM %s WITH NO DATA",(AsIs(snptablenasma),AsIs(snptablena),))
     print  cur.mogrify("ALTER TABLE %s "
@@ -152,8 +152,8 @@ def insert_snp_table():
     cur.execute("INSERT INTO %s SELECT * FROM ( SELECT * , SUBSTR(peptides,1 , 1) AS peptide1 , SUBSTR(peptides,3 , 1) AS peptide2 , SUBSTR(peptides,5 , 1) AS peptide3 FROM %s ) AS ptt WHERE (peptide1!=peptide2) OR (peptide1!=peptide3) OR (peptide2!=peptide3)",(AsIs(snptablenasma),AsIs(snptablena),))
     print  cur.mogrify("CREATE TABLE %s AS SELECT * FROM %s ORDER BY codons",(AsIs(snptable_s_c),AsIs(snptablenasma),))
     cur.execute("CREATE TABLE %s AS SELECT * FROM %s ORDER BY codons",(AsIs(snptable_s_c),AsIs(snptablenasma),))
-    print  cur.mogrify("CREATE TABLE %s AS SELECT * FROM %s ORDER BY "chromStart"",(AsIs(snptable_s_ch_filtered_final),AsIs(snptable_s_c),))
-    cur.execute("CREATE TABLE %s AS SELECT * FROM %s ORDER BY "chromStart"",(AsIs(snptable_s_ch_filtered_final),AsIs(snptable_s_c),))
+    print  cur.mogrify("CREATE TABLE %s AS SELECT * FROM %s ORDER BY \"chromStart\"",(AsIs(snptable_s_ch_filtered_final),AsIs(snptable_s_c),))
+    cur.execute("CREATE TABLE %s AS SELECT * FROM %s ORDER BY \"chromStart\"",(AsIs(snptable_s_ch_filtered_final),AsIs(snptable_s_c),))
     conn.commit()
 
 
@@ -185,7 +185,7 @@ def cleanup_snp_tables():
 
 
 def check_table_exists(table1):
-    cur.execute("select * from information_schema.tables where table_name='%s'",(AsIs(table1),))
+    cur.execute("select * from information_schema.tables where table_name=\'%s\'",(AsIs(table1),))
     return bool(cur.fetchall())
 
 def delete_table(table3):
@@ -284,7 +284,7 @@ def load_1000g():
                         column_variable_counter+=1
 
 
-                        wordquoted='''+word+'''','
+                        wordquoted='\''+word+'\''','
                         logging.debug(wordquoted)
                         linequoted += wordquoted
 
@@ -320,7 +320,7 @@ def transpose_file_2_file(file2_transpose, transposed_file):
     with open (transposed_file, "a") as t2:
 
         row_length = file_first_row_length(file2_transpose)
-        for i in pbar(range(0,row_length,50)):
+        for i in pbar(range(0,row_length,2)):
             #load two lists at once
 
                 with open(file2_transpose) as f:
@@ -333,15 +333,17 @@ def transpose_file_2_file(file2_transpose, transposed_file):
 
                              for line in f:
 
-            #                        print "n","row ",i,"",line.split()[i]
+            #                        print "\n","row ",i,"",line.split()[i]
             #                         list1 += ' '+line.split()[i]+' '
                                     list2 += ' '+line.split()[i+1]+' '
                                     list1 +=  ' '+line.split()[i]+' ';	list2 +=  ' '+line.split()[i]+' ';	list3 +=  ' '+line.split()[i]+' ';	list4 +=  ' '+line.split()[i]+' ';	list5 +=  ' '+line.split()[i]+' ';	list6 +=  ' '+line.split()[i]+' ';	list7 +=  ' '+line.split()[i]+' ';	list8 +=  ' '+line.split()[i]+' ';	list9 +=  ' '+line.split()[i]+' ';list10 +=  ' '+line.split()[i]+' ';	list11 +=  ' '+line.split()[i]+' ';	list12 +=  ' '+line.split()[i]+' ';	list13 +=  ' '+line.split()[i]+' ';	list14 +=  ' '+line.split()[i]+' ';	list15 +=  ' '+line.split()[i]+' ';	list16 +=  ' '+line.split()[i]+' ';	list17 +=  ' '+line.split()[i]+' ';	list18 +=  ' '+line.split()[i]+' ';	list19 +=  ' '+line.split()[i]+' ';	list20 +=  ' '+line.split()[i]+' ';	list21 +=  ' '+line.split()[i]+' ';	list22 +=  ' '+line.split()[i]+' ';	list23 +=  ' '+line.split()[i]+' ';	list24 +=  ' '+line.split()[i]+' ';	list25 +=  ' '+line.split()[i]+' ';	list26 +=  ' '+line.split()[i]+' ';	list27 +=  ' '+line.split()[i]+' ';	list28 +=  ' '+line.split()[i]+' ';	list29 +=  ' '+line.split()[i]+' ';	list30 +=  ' '+line.split()[i]+' ';	list31 +=  ' '+line.split()[i]+' ';	list32 +=  ' '+line.split()[i]+' ';	list33 +=  ' '+line.split()[i]+' ';	list34 +=  ' '+line.split()[i]+' ';	list35 +=  ' '+line.split()[i]+' ';	list36 +=  ' '+line.split()[i]+' ';	list37 +=  ' '+line.split()[i]+' ';	list38 +=  ' '+line.split()[i]+' ';	list39 +=  ' '+line.split()[i]+' ';	list40 +=  ' '+line.split()[i]+' ';	list41 +=  ' '+line.split()[i]+' ';	list42 +=  ' '+line.split()[i]+' ';	list43 +=  ' '+line.split()[i]+' ';	list44 +=  ' '+line.split()[i]+' ';	list45 +=  ' '+line.split()[i]+' ';	list46 +=  ' '+line.split()[i]+' ';	list47 +=  ' '+line.split()[i]+' ';	list48 +=  ' '+line.split()[i]+' ';	list49 +=  ' '+line.split()[i]+' ';	list50 +=  ' '+line.split()[i]+' ';
+
                 # t2.write(list1)
-                # t2.write("n")
+                # t2.write("\n")
                 # t2.write(list2)
-                # t2.write("n")
-                t2.write(list1);t2.write("n");t2.write(list2);t2.write("n");t2.write(list3);t2.write("n");t2.write(list4);t2.write("n");t2.write(list5);t2.write("n");t2.write(list6);t2.write("n");t2.write(list7);t2.write("n");t2.write(list8);t2.write("n");t2.write(list9);t2.write("n");t2.write(list10);t2.write("n");t2.write(list11);t2.write("n");t2.write(list12);t2.write("n");t2.write(list13);t2.write("n");t2.write(list14);t2.write("n");t2.write(list15);t2.write("n");t2.write(list16);t2.write("n");t2.write(list17);t2.write("n");t2.write(list18);t2.write("n");t2.write(list19);t2.write("n");t2.write(list20);t2.write("n");t2.write(list21);t2.write("n");t2.write(list22);t2.write("n");t2.write(list23);t2.write("n");t2.write(list24);t2.write("n");t2.write(list25);t2.write("n");t2.write(list26);t2.write("n");t2.write(list27);t2.write("n");t2.write(list28);t2.write("n");t2.write(list29);t2.write("n");t2.write(list30);t2.write("n");t2.write(list31);t2.write("n");t2.write(list32);t2.write("n");t2.write(list33);t2.write("n");t2.write(list34);t2.write("n");t2.write(list35);t2.write("n");t2.write(list36);t2.write("n");t2.write(list37);t2.write("n");t2.write(list38);t2.write("n");t2.write(list39);t2.write("n");t2.write(list40);t2.write("n");t2.write(list41);t2.write("n");t2.write(list42);t2.write("n");t2.write(list43);t2.write("n");t2.write(list44);t2.write("n");t2.write(list45);t2.write("n");t2.write(list46);t2.write("n");t2.write(list47);t2.write("n");t2.write(list48);t2.write("n");t2.write(list49);t2.write("n");t2.write(list50);t2.write("n")
+                # t2.write("\n")
+                t2.write(list1);t2.write("\n");t2.write(list2);t2.write("\n");t2.write(list3);t2.write("\n");t2.write(list4);t2.write("\n");t2.write(list5);t2.write("\n");t2.write(list6);t2.write("\n");t2.write(list7);t2.write("\n");t2.write(list8);t2.write("\n");t2.write(list9);t2.write("\n");t2.write(list10);t2.write("\n");t2.write(list11);t2.write("\n");t2.write(list12);t2.write("\n");t2.write(list13);t2.write("\n");t2.write(list14);t2.write("\n");t2.write(list15);t2.write("\n");t2.write(list16);t2.write("\n");t2.write(list17);t2.write("\n");t2.write(list18);t2.write("\n");t2.write(list19);t2.write("\n");t2.write(list20);t2.write("\n");t2.write(list21);t2.write("\n");t2.write(list22);t2.write("\n");t2.write(list23);t2.write("\n");t2.write(list24);t2.write("\n");t2.write(list25);t2.write("\n");t2.write(list26);t2.write("\n");t2.write(list27);t2.write("\n");t2.write(list28);t2.write("\n");t2.write(list29);t2.write("\n");t2.write(list30);t2.write("\n");t2.write(list31);t2.write("\n");t2.write(list32);t2.write("\n");t2.write(list33);t2.write("\n");t2.write(list34);t2.write("\n");t2.write(list35);t2.write("\n");t2.write(list36);t2.write("\n");t2.write(list37);t2.write("\n");t2.write(list38);t2.write("\n");t2.write(list39);t2.write("\n");t2.write(list40);t2.write("\n");t2.write(list41);t2.write("\n");t2.write(list42);t2.write("\n");t2.write(list43);t2.write("\n");t2.write(list44);t2.write("\n");t2.write(list45);t2.write("\n");t2.write(list46);t2.write("\n");t2.write(list47);t2.write("\n");t2.write(list48);t2.write("\n");t2.write(list49);t2.write("\n");t2.write(list50);t2.write("\n")
+
 
 def load_md2sql():
 
@@ -369,7 +371,7 @@ def load_md2sql():
 
            for line in f:
 
-                linequoted += '''+line.split()[i]+'''','
+                linequoted += '\''+line.split()[i]+'\''','
 
         #whole line here
 
@@ -423,7 +425,7 @@ def load_md2sql():
                             # column_variable_counter+=1
 
 
-                            wordquoted='''+word+'''','
+                            wordquoted='\''+word+'\''','
                             logging.debug(wordquoted)
                             linequoted += wordquoted
 
@@ -494,7 +496,7 @@ def load_mind_rsids2sql():
                         # column_variable_counter+=1
 
 
-                        wordquoted='''+word+'''','
+                        wordquoted='\''+word+'\''','
                         logging.debug(wordquoted)
                         linequoted += wordquoted
 
@@ -555,15 +557,15 @@ def sort_annotated(anntable):
 
     sortedtable = args.sort+"sorted"
 
-    cur.mogrify("create table %s as select * from %s order by "chromStart";",(AsIs(sortedtable),AsIs(anntable),))
-    cur.execute("create table %s as select * from %s order by "chromStart";",(AsIs(sortedtable),AsIs(anntable),))
+    cur.mogrify("create table %s as select * from %s order by \"chromStart\";",(AsIs(sortedtable),AsIs(anntable),))
+    cur.execute("create table %s as select * from %s order by \"chromStart\";",(AsIs(sortedtable),AsIs(anntable),))
     conn.commit()
 
 def sort_by_gene_and_pos(anntable2):
 
     sortedtable2 = args.sort_by_gene_and_pos+"sorted_by_gene_pos"
-    cur.mogrify("create table %s as select * from %s order by "chromStart" , "gene_name" ;",(AsIs(sortedtable2),AsIs(anntable2),))
-    cur.execute("create table %s as select * from %s order by "chromStart" , "gene_name" ;",(AsIs(sortedtable2),AsIs(anntable2),))
+    cur.mogrify("create table %s as select * from %s order by \"chromStart\" , \"gene_name\" ;",(AsIs(sortedtable2),AsIs(anntable2),))
+    cur.execute("create table %s as select * from %s order by \"chromStart\" , \"gene_name\" ;",(AsIs(sortedtable2),AsIs(anntable2),))
     conn.commit()
 
 def check_snp_table():
@@ -633,14 +635,14 @@ def add_ann_ensembl():
     e2 = "ensembl_variation_genename"
 
     if not check_table_exists(e1):
-        print cur.mogrify("CREATE TABLE ensembl_variation ("variation_id" int ,"source_id" int ,"rs_name" text ,"validation_status" text ,"ancestral_allele" text ,"flipped" boolean ,"class_attrib_id" int ,"somatic" boolean ,"minor_allele" text ,"minor_allele_freq" real ,"minor_allele_count" int ,"clinical_significance" text , "evidence" text)")
-        cur.execute("CREATE TABLE ensembl_variation ("variation_id" int ,"source_id" int ,"rs_name" text ,"validation_status" text ,"ancestral_allele" text ,"flipped" boolean ,"class_attrib_id" int ,"somatic" boolean ,"minor_allele" text ,"minor_allele_freq" real ,"minor_allele_count" int ,"clinical_significance" text , "evidence" text)")
+        print cur.mogrify("CREATE TABLE ensembl_variation (\"variation_id\" int ,\"source_id\" int ,\"rs_name\" text ,\"validation_status\" text ,\"ancestral_allele\" text ,\"flipped\" boolean ,\"class_attrib_id\" int ,\"somatic\" boolean ,\"minor_allele\" text ,\"minor_allele_freq\" real ,\"minor_allele_count\" int ,\"clinical_significance\" text , \"evidence\" text)")
+        cur.execute("CREATE TABLE ensembl_variation (\"variation_id\" int ,\"source_id\" int ,\"rs_name\" text ,\"validation_status\" text ,\"ancestral_allele\" text ,\"flipped\" boolean ,\"class_attrib_id\" int ,\"somatic\" boolean ,\"minor_allele\" text ,\"minor_allele_freq\" real ,\"minor_allele_count\" int ,\"clinical_significance\" text , \"evidence\" text)")
         conn.commit()
 
 
     if not check_table_exists(e2):
-        print cur.mogrify("CREATE TABLE ensembl_variation_genename ("variation_id2" int ,  "gene_name" text)")
-        cur.execute("CREATE TABLE ensembl_variation_genename ("variation_id2" int ,  "gene_name" text)")
+        print cur.mogrify("CREATE TABLE ensembl_variation_genename (\"variation_id2\" int ,  \"gene_name\" text)")
+        cur.execute("CREATE TABLE ensembl_variation_genename (\"variation_id2\" int ,  \"gene_name\" text)")
         conn.commit()
 
     #copy data to the tables
@@ -665,17 +667,17 @@ def add_ann_ensembl():
 #add tables meta data , this is a static table
 def add_meta():
     if not check_table_exists("tables_meta"):
-        print (cur.mogrify("create table tables_meta ("source" text, "Genome" text, "Reference_Consortium_Human_Reference" text, "table_name" text, "schema_link" text, "table link" text, "documentation_link" text, "date_downloaded" text) "))
-        cur.execute("create table tables_meta ("source" text, "Genome" text, "Reference_Consortium_Human_Reference" text, "table_name" text, "schema_link" text, "table link" text, "documentation_link" text, "date_downloaded" text) ")
+        print (cur.mogrify("create table tables_meta (\"source\" text, \"Genome\" text, \"Reference_Consortium_Human_Reference\" text, \"table_name\" text, \"schema_link\" text, \"table link\" text, \"documentation_link\" text, \"date_downloaded\" text) "))
+        cur.execute("create table tables_meta (\"source\" text, \"Genome\" text, \"Reference_Consortium_Human_Reference\" text, \"table_name\" text, \"schema_link\" text, \"table link\" text, \"documentation_link\" text, \"date_downloaded\" text) ")
         conn.commit()
-        print ("insert into tables_meta values('ucsc', 'GRCh37', 'snp141CodingDbSnp', 'http://hgdownload.cse.ucsc.edu/goldenpath/hg19/database/snp141CodingDbSnp.sql', 'http://hgdownload.cse.ucsc.edu/goldenpath/hg19/database/snp141CodingDbSnp.txt.gz', 'http://hgdownload.cse.ucsc.edu/goldenpath/hg19/database/', '10.2015')")
-        cur.execute("insert into tables_meta values('ucsc', 'GRCh37', 'snp141CodingDbSnp', 'http://hgdownload.cse.ucsc.edu/goldenpath/hg19/database/snp141CodingDbSnp.sql', 'http://hgdownload.cse.ucsc.edu/goldenpath/hg19/database/snp141CodingDbSnp.txt.gz', 'http://hgdownload.cse.ucsc.edu/goldenpath/hg19/database/', '10.2015')")
+        print ("insert into tables_meta values(\'ucsc\', \'GRCh37\', \'snp141CodingDbSnp\', \'http://hgdownload.cse.ucsc.edu/goldenpath/hg19/database/snp141CodingDbSnp.sql\', \'http://hgdownload.cse.ucsc.edu/goldenpath/hg19/database/snp141CodingDbSnp.txt.gz\', \'http://hgdownload.cse.ucsc.edu/goldenpath/hg19/database/\', \'10.2015\')")
+        cur.execute("insert into tables_meta values(\'ucsc\', \'GRCh37\', \'snp141CodingDbSnp\', \'http://hgdownload.cse.ucsc.edu/goldenpath/hg19/database/snp141CodingDbSnp.sql\', \'http://hgdownload.cse.ucsc.edu/goldenpath/hg19/database/snp141CodingDbSnp.txt.gz\', \'http://hgdownload.cse.ucsc.edu/goldenpath/hg19/database/\', \'10.2015\')")
         conn.commit()
-        print("insert into tables_meta values('ensembl', 'GRCh37', 'variation,  variation_genename', 'ftp://ftp.ensembl.org/pub/release-75/mysql/homo_sapiens_variation_75_37/homo_sapiens_variation_75_37.sql.gz', 'ftp://ftp.ensembl.org/pub/release-75/mysql/homo_sapiens_variation_75_37/variation.txt.gz,  ftp://ftp.ensembl.org/pub/release-75/mysql/homo_sapiens_variation_75_37/variation_genename.txt.gz', 'http://grch37.ensembl.org/info/docs/api/variation/variation_schema.html#variation', '8.2015')")
-        cur.execute("insert into tables_meta values('ensembl', 'GRCh37', 'variation,  variation_genename', 'ftp://ftp.ensembl.org/pub/release-75/mysql/homo_sapiens_variation_75_37/homo_sapiens_variation_75_37.sql.gz', 'ftp://ftp.ensembl.org/pub/release-75/mysql/homo_sapiens_variation_75_37/variation.txt.gz,  ftp://ftp.ensembl.org/pub/release-75/mysql/homo_sapiens_variation_75_37/variation_genename.txt.gz', 'http://grch37.ensembl.org/info/docs/api/variation/variation_schema.html#variation', '8.2015')")
+        print("insert into tables_meta values(\'ensembl\', \'GRCh37\', \'variation,  variation_genename\', \'ftp://ftp.ensembl.org/pub/release-75/mysql/homo_sapiens_variation_75_37/homo_sapiens_variation_75_37.sql.gz\', \'ftp://ftp.ensembl.org/pub/release-75/mysql/homo_sapiens_variation_75_37/variation.txt.gz,  ftp://ftp.ensembl.org/pub/release-75/mysql/homo_sapiens_variation_75_37/variation_genename.txt.gz\', \'http://grch37.ensembl.org/info/docs/api/variation/variation_schema.html#variation\', \'8.2015\')")
+        cur.execute("insert into tables_meta values(\'ensembl\', \'GRCh37\', \'variation,  variation_genename\', \'ftp://ftp.ensembl.org/pub/release-75/mysql/homo_sapiens_variation_75_37/homo_sapiens_variation_75_37.sql.gz\', \'ftp://ftp.ensembl.org/pub/release-75/mysql/homo_sapiens_variation_75_37/variation.txt.gz,  ftp://ftp.ensembl.org/pub/release-75/mysql/homo_sapiens_variation_75_37/variation_genename.txt.gz\', \'http://grch37.ensembl.org/info/docs/api/variation/variation_schema.html#variation\', \'8.2015\')")
         conn.commit()
-        print("insert into tables_meta values('1000genomes', 'GRCh37', 'ALL.chrXX.phase3', 'ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/20130502/', 'ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/20130502/', 'http://www.1000genomes.org/faq', '7.2015')")
-        cur.execute("insert into tables_meta values('1000genomes', 'GRCh37', 'ALL.chrXX.phase3', 'ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/20130502/', 'ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/20130502/', 'http://www.1000genomes.org/faq', '7.2015')")
+        print("insert into tables_meta values(\'1000genomes\', \'GRCh37\', \'ALL.chrXX.phase3\', \'ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/20130502/\', \'ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/20130502/\', \'http://www.1000genomes.org/faq\', \'7.2015\')")
+        cur.execute("insert into tables_meta values(\'1000genomes\', \'GRCh37\', \'ALL.chrXX.phase3\', \'ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/20130502/\', \'ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/20130502/\', \'http://www.1000genomes.org/faq\', \'7.2015\')")
         conn.commit()
 
 
@@ -742,8 +744,8 @@ def gethg():
     varhgstr = "hg_____"
     varg22tblpepstr = "%g1000chr1%pepstr"
 
-    print(cur.mogrify("select column_name from information_schema.columns where table_name like '%s' and column_name like '%s';",(AsIs(varg22tblpepstr),AsIs(varhgstr),)))
-    cur.execute("select column_name from information_schema.columns where table_name like '%s' and column_name like '%s';",(AsIs(varg22tblpepstr),AsIs(varhgstr),))
+    print(cur.mogrify("select column_name from information_schema.columns where table_name like \'%s\' and column_name like \'%s\';",(AsIs(varg22tblpepstr),AsIs(varhgstr),)))
+    cur.execute("select column_name from information_schema.columns where table_name like \'%s\' and column_name like \'%s\';",(AsIs(varg22tblpepstr),AsIs(varhgstr),))
 
     global hglist
     hglist = []
@@ -835,7 +837,7 @@ try:
                     ch_name = re.search('chr.[0-9]|chr.', str(file_list_line))
 
                     if not ch_name:
-                        print "n ERROR : problem : wrong file name for 1000g file n please use original vcf file names (containing "chr" string)"
+                        print "\n ERROR : problem : wrong file name for 1000g file \n please use original vcf file names (containing \"chr\" string)"
                         print "error in file name :"+str(file_list_line)
                         sys.exit()
 
@@ -874,7 +876,7 @@ try:
             # 1000g vars
             ch_name = re.search('chr.[0-9]|chr.', args.f)
             if not ch_name:
-                print "n ERROR : problem : wrong file name for 1000g file n please use original vcf file names (containing "chr" string)"
+                print "\n ERROR : problem : wrong file name for 1000g file \n please use original vcf file names (containing \"chr\" string)"
                 print "error in file name :"+str(args.f)
                 sys.exit()
 
@@ -955,21 +957,21 @@ try:
     #        for i in cur.fetchall():
     #            sample_table = ''.join(i)
     #            if sample_table.endswith("sorted_by_gene_pos"):
-    #                print "n"
+    #                print "\n"
     #                print "table : ", sample_table
-    #                print "n"
+    #                print "\n"
     #                #  select * from g1000chr1ann2sorted_by_gene_pos where false
     #                cur.execute("select column_name from information_schema.columns where table_name = '%s';;",(AsIs(sample_table),))
     #                # print(cur.fetchall())
     #
-    #                print(re.sub('(,))|(()|([)|(])|())','',str(cur.fetchall())))
-    #                # print "n"
+    #                print(re.sub('(\,\))|(\()|(\[)|(\])|(\))','',str(cur.fetchall())))
+    #                # print "\n"
     #                # export_file.write(cur.fetchall())
     #                cur.execute("select * from %s limit 100;",(AsIs(sample_table),))
     #                # print(cur.fetchall())
     #                for i2 in cur.fetchall():
-    #                    print "n"
-    #                    print(re.sub('(,))|(()|([)|(])|())','',str(i2)))
+    #                    print "\n"
+    #                    print(re.sub('(\,\))|(\()|(\[)|(\])|(\))','',str(i2)))
     #                # export_file.write(cur.fetchall())
 
     #export to file sample of 100 from each table
@@ -993,7 +995,7 @@ try:
                             else:
                                 word12 = ''.join(i2) + ","
                                 export_file.write(word12)
-                        export_file.write("n")
+                        export_file.write("\n")
 
                         firstline = False
 
@@ -1007,12 +1009,12 @@ try:
                                 export_file.write(word12)
                             else:
                                 if str(i2).isspace():
-                                    i2 = re.sub('s+','',str(i2))
+                                    i2 = re.sub('\s+','',str(i2))
                                     word12 = str(i2) + ","
                                     export_file.write(word12)
                                 elif str(i2).isdigit():
                                     i2 = str(i2).strip()
-                                    word12 = """+str(i2)+"""
+                                    word12 = "\""+str(i2)+"\""
                                     word12 = str(i2) + ","
                                     export_file.write(word12)
                                 elif not str(i2).isdigit():
@@ -1021,9 +1023,9 @@ try:
                                     i2 = str(i2).strip()
                                     i2 = re.sub(',$','',i2)
                                     i2= re.sub(',',';',i2)
-                                    word12 = str(i2) + "',"
-                                    export_file.write("'"+word12)
-                        export_file.write("n")
+                                    word12 = str(i2) + "\',"
+                                    export_file.write("\'"+word12)
+                        export_file.write("\n")
 
 
 
@@ -1052,7 +1054,7 @@ try:
                             else:
                                 word12 = ''.join(i2) + ","
                                 export_file.write(word12)
-                        export_file.write("n")
+                        export_file.write("\n")
 
                         firstline = False
 
@@ -1066,12 +1068,12 @@ try:
                                 export_file.write(word12)
                             else:
                                 if str(i2).isspace():
-                                    i2 = re.sub('s+','',str(i2))
+                                    i2 = re.sub('\s+','',str(i2))
                                     word12 = str(i2) + ","
                                     export_file.write(word12)
                                 elif str(i2).isdigit():
                                     i2 = str(i2).strip()
-                                    word12 = """+str(i2)+"""
+                                    word12 = "\""+str(i2)+"\""
                                     word12 = str(i2) + ","
                                     export_file.write(word12)
                                 elif not str(i2).isdigit():
@@ -1080,9 +1082,9 @@ try:
                                     i2 = str(i2).strip()
                                     i2 = re.sub(',$','',i2)
                                     i2= re.sub(',',';',i2)
-                                    word12 = str(i2) + "',"
-                                    export_file.write("'"+word12)
-                        export_file.write("n")
+                                    word12 = str(i2) + "\',"
+                                    export_file.write("\'"+word12)
+                        export_file.write("\n")
 
 
 
@@ -1099,8 +1101,8 @@ try:
 
         hg = "hg%"
 
-        print(cur.mogrify("select column_name from information_schema.columns where table_name = '%s' and column_name like '%s';",(AsIs(var2all_table),AsIs(hg),)))
-        cur.execute("select column_name from information_schema.columns where table_name = '%s' and column_name like '%s';",(AsIs(var2all_table),AsIs(hg),))
+        print(cur.mogrify("select column_name from information_schema.columns where table_name = '%s' and column_name like \'%s\';",(AsIs(var2all_table),AsIs(hg),)))
+        cur.execute("select column_name from information_schema.columns where table_name = '%s' and column_name like \'%s\';",(AsIs(var2all_table),AsIs(hg),))
 
         for hg2 in query2list():
 
@@ -1134,8 +1136,8 @@ try:
 
         hg = "hg%"
 
-        print(cur.mogrify("select column_name from information_schema.columns where table_name = '%s' and column_name like '%s';",(AsIs(args.add_gene_peptide_string),AsIs(hg),)))
-        cur.execute("select column_name from information_schema.columns where table_name = '%s' and column_name like '%s';",(AsIs(args.add_gene_peptide_string),AsIs(hg),))
+        print(cur.mogrify("select column_name from information_schema.columns where table_name = '%s' and column_name like \'%s\';",(AsIs(args.add_gene_peptide_string),AsIs(hg),)))
+        cur.execute("select column_name from information_schema.columns where table_name = '%s' and column_name like \'%s\';",(AsIs(args.add_gene_peptide_string),AsIs(hg),))
 
 #load ersults into list :
 
@@ -1180,7 +1182,7 @@ try:
         check_overwrite_table(varallchpepstrcountsum)
 
  #create one big table from latets
-        cur.execute("select table_name from information_schema.tables where table_name like '%s'",(AsIs(pepvar),))
+        cur.execute("select table_name from information_schema.tables where table_name like \'%s\'",(AsIs(pepvar),))
 
         query2list()
 
@@ -1199,8 +1201,8 @@ try:
 
 # select column_name from information_schema.columns where table_name like '%g1000chr22%pepstr' and column_name like '%peptide_string';
 
-        print(cur.mogrify("select column_name from information_schema.columns where table_name like '%s' and column_name like '%s';",(AsIs(varg22tblpepstr),AsIs(varhgstr),)))
-        cur.execute("select column_name from information_schema.columns where table_name like '%s' and column_name like '%s';",(AsIs(varg22tblpepstr),AsIs(varhgstr),))
+        print(cur.mogrify("select column_name from information_schema.columns where table_name like \'%s\' and column_name like \'%s\';",(AsIs(varg22tblpepstr),AsIs(varhgstr),)))
+        cur.execute("select column_name from information_schema.columns where table_name like \'%s\' and column_name like \'%s\';",(AsIs(varg22tblpepstr),AsIs(varhgstr),))
 #load ersults into list :
 
         query2list()
@@ -1234,8 +1236,8 @@ try:
 
         varhgstr = "%peptide_string"
 
-        print(cur.mogrify("select column_name from information_schema.columns where table_name = '%s' and column_name like '%s';",(AsIs(args.add_uniq_pepstring_num),AsIs(varhgstr),)))
-        cur.execute("select column_name from information_schema.columns where table_name = '%s' and column_name like '%s';",(AsIs(args.add_uniq_pepstring_num),AsIs(varhgstr),))
+        print(cur.mogrify("select column_name from information_schema.columns where table_name = \'%s\' and column_name like \'%s\';",(AsIs(args.add_uniq_pepstring_num),AsIs(varhgstr),)))
+        cur.execute("select column_name from information_schema.columns where table_name = \'%s\' and column_name like \'%s\';",(AsIs(args.add_uniq_pepstring_num),AsIs(varhgstr),))
 #load ersults into list :
 
         for hg1 in query2list():
@@ -1274,8 +1276,8 @@ try:
             conn.commit()
 
             # update test2 set testcol1='testcol1';
-            print(cur.mogrify("update %s set %s_name='%s'",(AsIs(varml_table),AsIs(hg),AsIs(hg),)))
-            cur.execute("update %s set %s_name='%s'",(AsIs(varml_table),AsIs(hg),AsIs(hg),))
+            print(cur.mogrify("update %s set %s_name=\'%s\'",(AsIs(varml_table),AsIs(hg),AsIs(hg),)))
+            cur.execute("update %s set %s_name=\'%s\'",(AsIs(varml_table),AsIs(hg),AsIs(hg),))
             conn.commit()
 
 
@@ -1318,7 +1320,7 @@ try:
        check_overwrite_table(varmlout)
        varmlagg = "%mlagg"
         #create one big table from latets
-       cur.execute("select table_name from information_schema.tables where table_name like '%s'",(AsIs(varmlagg),))
+       cur.execute("select table_name from information_schema.tables where table_name like \'%s\'",(AsIs(varmlagg),))
 
        query2list()
 
@@ -1349,7 +1351,7 @@ try:
                             else:
                                 word12 = ''.join(i2) + ","
                                 export_file.write(word12)
-                        export_file.write("n")
+                        export_file.write("\n")
 
                         firstline = False
 
@@ -1363,12 +1365,12 @@ try:
                                 export_file.write(word12)
                             else:
                                 if str(i2).isspace():
-                                    i2 = re.sub('s+','',str(i2))
+                                    i2 = re.sub('\s+','',str(i2))
                                     word12 = str(i2) + ","
                                     export_file.write(word12)
                                 elif str(i2).isdigit():
                                     i2 = str(i2).strip()
-                                    word12 = """+str(i2)+"""
+                                    word12 = "\""+str(i2)+"\""
                                     word12 = str(i2) + ","
                                     export_file.write(word12)
                                 elif not str(i2).isdigit():
@@ -1377,9 +1379,9 @@ try:
                                     i2 = str(i2).strip()
                                     i2 = re.sub(',$','',i2)
                                     i2= re.sub(',',',',i2)
-                                    word12 = str(i2) + "',"
-                                    export_file.write("'"+word12)
-                        export_file.write("n")
+                                    word12 = str(i2) + "\',"
+                                    export_file.write("\'"+word12)
+                        export_file.write("\n")
 
 
     if args.file2_transpose and args.transposed_file:
@@ -1442,9 +1444,9 @@ try:
 #         # print 'Ordered results using pool.apply_async():'
 #
 #     # for result in results:
-#     #     # print 't', result.get()
-#     #     # print 't', result.ready()
-#     #     print 't', result.successful()
+#     #     # print '\t', result.get()
+#     #     # print '\t', result.ready()
+#     #     print '\t', result.successful()
 #             # with open(settings_file) as f:
 #                 for line in f:
 # #         config = script2p+" "+line
@@ -1470,7 +1472,7 @@ try:
 
 #end of program execution
 except (KeyboardInterrupt, SystemExit):
-    print "n Program interrupted  ! n Clean up in progress..."
+    print "\n Program interrupted  ! \n Clean up in progress..."
     interrans = raw_input("Are you sure you want to cleanup stuff ? (yes/no)")
     if interrans == "yes":
         print "ok doing cleanup stuff, clean up stuff disabled for now"
