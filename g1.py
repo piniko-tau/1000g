@@ -22,13 +22,13 @@ import logging
 from progressbar import AnimatedMarker, Bar, BouncingBar, Counter, ETA, FileTransferSpeed, FormatLabel, Percentage, ProgressBar, ReverseBar, RotatingMarker, SimpleProgress, Timer
 
 
-parser = argparse.ArgumentParser(prog='psql_1000g_loader',usage='psql_1000g_loader [-t table_name prefix -f file_input or -list file_input_list] [-ucsc_snpf file name -ucsc_snp table_name] (optional add a annotated ucsc_snp table from file ) [-dbname database_name -dbuser database_user -dbpass database_pass] [-a_ucsc chr table to be annotated by ucsc ] [-ensembl_variation_snpf file name -ensembl_variation_genename_snpf file name] (optional add a annotated ensembl tables from files) [-a_ensembl chr table to be annotated by ensemble ] [-sort_by_gene_and_pos ann_table] [-update_table_allel2peptide create all to peptide table] [-remove_dup_allele remove duplicate alleles from table] [-add_gene_peptide_string add gene_peptide_string fileds to table] [-create_uniq_pepstring_num create a table with unique number to each group of peptide strings ordered by descending] [-add_uniq_pepstring_num add unique pepstring number to specified table] [-export_sample_2file export 100 lines> of each table to file] [-export_fulldataset_2file export dataset in full to file name] [-create_ml_dataset_table create dataset for machine learning by patients table] [-export_ml_full_dataset export dataset for machine learning by patients ] [-load_mind_data_f load mind dataset file] [-load_mind_data_t load mind dataset table prefix] [-load_mind_rsids load the mind rsids file to mind_rsids table] [-s show all tables] [-add_meta add tables metadata]',description='Load annotated snp database & Create a 1000G sql table from all Chromosomes - using a connection to a postgresql DB.')
+parser = argparse.ArgumentParser(prog='psql_1000g_loader',usage='psql_1000g_loader [-t table_name prefix -f file_input or -list file_input_list] [-ucsc_snpf file name -ucsc_snp table_name] (optional add a annotated ucsc_snp table from file ) [-dbname database_name -dbuser database_user -dbpass database_pass] [-a_ucsc chr table to be annotated by ucsc ] [-ensembl_variation_snpf file name -ensembl_variation_genename_snpf file name] (optional add a annotated ensembl tables from files) [-a_ensembl chr table to be annotated by ensemble ] [-sort_by_gene_and_pos ann_table] [-update_table_allel2peptide create all to peptide table] [-remove_dup_allele remove duplicate alleles from table] [-add_gene_peptide_string add gene_peptide_string fileds to table] [-create_uniq_pepstring_num create a table with unique number to each group of peptide strings ordered by descending] [-add_uniq_pepstring_num add unique pepstring number to specified table] [-export_sample_2file export 100 lines> of each table to file] [-export_fulldataset_2file export dataset in full to file name] [-create_ml_dataset_table create dataset for machine learning by patients table] [-export_ml_full_dataset export dataset for machine learning by patients ] [-load_mind_data_f load mind dataset file] [-file2_transpose file to transpose ] [-transposed_file transposed file] [-load_mind_data_t load mind dataset table prefix] [-load_mind_rsids load the mind rsids file to mind_rsids table] [-s show all tables] [-add_meta add tables metadata]',description='Load annotated snp database & Create a 1000G sql table from all Chromosomes - using a connection to a postgresql DB.')
 
 # dbname=pydb user=pyuser password=pyuser
 # postgresql credentials
-parser.add_argument("-dbname",help='name of psql database',metavar='DBNAME')
-parser.add_argument("-dbuser",help='name of psql database user',metavar='DBUSER')
-parser.add_argument("-dbpass",help='psql database user pass',metavar='DBPASS')
+parser.add_argument("-dbname",required=True,help='name of psql database',metavar='DBNAME')
+parser.add_argument("-dbuser",required=True,help='name of psql database user',metavar='DBUSER')
+parser.add_argument("-dbpass",required=True,help='psql database user pass',metavar='DBPASS')
 
 
 #1000g actions
@@ -88,9 +88,14 @@ parser.add_argument("-load_mind_data", help="load mind dataset file" , metavar='
 
 parser.add_argument("-load_mind_data_f", help="load mind dataset file" , metavar='load_mind_data_f')
 
+parser.add_argument("-file2_transpose",help="file to transpose",metavar='file2_transpose')
+
+parser.add_argument("-transposed_file",help="transposed file",metavar='transposed_file')
+
 parser.add_argument("-load_mind_data_t",help=" load mind dataset table prefix",metavar='load_mind_data_t')
 # [-load_mind_rsids load the mind rsids file ]
 parser.add_argument("-load_mind_rsids",help=" load the mind rsids file to mind_rsids table",metavar='load_mind_rsids')
+
 
 parser.add_argument("-o", "--overwrite_tables", help="overwrites any existing tables",action="store_true")
 parser.add_argument("-v", "--verbose", help="increase output verbosity",action="store_true")
@@ -305,9 +310,8 @@ def file_first_row_length(file_2length):
                     #load first list into table colums
                     #load the rest as values
 
-def transpose_file_2_file():
+def transpose_file_2_file(file2_transpose, transposed_file):
 
-    args.
 
     widgets = ['database upload -> mind_rsids  :', Percentage(), ' ', Bar(marker=RotatingMarker()),' ', ETA(), ' ', FileTransferSpeed()]
 
@@ -316,8 +320,8 @@ def transpose_file_2_file():
     with open (transposed_file, "a") as t2:
 
         row_length = file_first_row_length(file2_transpose)
-        for i in range(row_length):
-            with open (file2_transpose) as f:
+        for i in pbar(range(row_length)):
+            with open(file2_transpose) as f:
                          list1 = ""
                          for line in f:
 
@@ -1367,7 +1371,15 @@ try:
                         export_file.write("\n")
 
 
+    if args.file2_transpose and args.transposed_file:
 
+        print "transposing...."
+        transpose_file_2_file(args.file2_transpose,args.transposed_file)
+
+    elif (not args.file2_transpose and args.transposed_file) or (not args.transposed_file and args.file2_transpose):
+        print "argument missing !"
+        parser.print_help()
+        sys.exit()
 
 
     if args.load_mind_data_f and args.load_mind_data_t:
