@@ -1265,17 +1265,6 @@ cat -A fint33|sed \'s/^     //g\'|sed \'s/\^M/ /g\'|sed \'s/\^I/ /g\'>fint333\
 cut - " "\
 echo "done"\                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     '
 
-    if args.file2_transpose and args.transposed_file:
-
-        print "transposing...."
-        transpose_file_2_file(args.file2_transpose,args.transposed_file)
-
-    elif (not args.file2_transpose and args.transposed_file) or (not args.transposed_file and args.file2_transpose):
-        print "argument missing !"
-        parser.print_help()
-        sys.exit()
-
-
     if args.load_mind_data_f and args.load_mind_data_t:
 
 
