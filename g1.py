@@ -1252,18 +1252,20 @@ try:
                         export_file.write("\n")
 
     if args.mind_data_preprocess:
-        print '#! /bin/bash\
-exit\
-echo "split -l 100 --verbose -d t1"\
-for i in `ls |grep x`;do  echo "cat -A $i|sed \'s/\^I/ /g\'|sed \'s/\$//g\'>$i.s";done\
-for i in `ls |grep x.*s`;do  echo "transposer -i $i -o $i.t -d \" \"";done\
-ech "paste `ls|grep \'\.t\'|sort`>>fint"\
-awk \'{if(NR>1)print}\' fint >fint2; cat -n fint2 > fint22\
-head -n 1 fint >fint3; cat -n fint3 |sed \'s/ 1 /numid/g\'> fint33\
-cat fint22 >>fint33\
-cat -A fint33|sed \'s/^     //g\'|sed \'s/\^M/ /g\'|sed \'s/\^I/ /g\'>fint333\
-cut - " "\
-echo "done"\                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     '
+        pass
+        print " see the folowing steps :" \
+        print '#! /bin/bash'
+        print 'echo "split -l 100 --verbose -d t1"'
+        print 'for i in `ls |grep x`;do  echo "cat -A $i|sed \'s/\^I/ /g\'|sed \'s/\$//g\'>$i.s";done'
+        print 'for i in `ls |grep x.*s`;do  echo "transposer -i $i -o $i.t -d \" \"";done'
+        print '"paste `ls|grep \'\.t\'|sort`>>fint"'
+        print 'awk \'{if(NR>1)print}\' fint >fint2; cat -n fint2 > fint22'
+        print 'head -n 1 fint >fint3; cat -n fint3 |sed \'s/ 1 /numid/g\'> fint33'
+        print 'cat fint22 >>fint33'
+        print 'cat -A fint33|sed \'s/^     //g\'|sed \'s/\^M/ /g\'|sed \'s/\^I/ /g\'>fint333'
+        print 'cut -d " " -f1-900 fint333>fint_1;cut -d " " -f1,901-1800 fint333>fint_1;cut -d " " -f1,1801-2700 fint333>fint_2;cut -d " " -f1,2701- fint333>fint_3;'
+        # cut - " "\
+        # echo "done"\                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     '
 
     if args.load_mind_data_f and args.load_mind_data_t:
 
