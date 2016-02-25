@@ -300,6 +300,51 @@ def file_first_row_length(file_2length):
             break
 
 
+<<<<<<< HEAD
+=======
+  #file transpose plan:
+
+        #   go over the file (row lentgh times):
+        #       for i in 1000 (patients):
+        #           insert into list : line.split()[i]
+                    #load first list into table colums
+                    #load the rest as values
+
+def transpose_file_2_file(file2_transpose, transposed_file):
+
+
+    widgets = ['database upload -> mind_rsids  :', Percentage(), ' ', Bar(marker=RotatingMarker()),' ', ETA(), ' ', FileTransferSpeed()]
+
+    pbar = ProgressBar(widgets=widgets, maxval=10000000).start()
+
+    with open (transposed_file, "a") as t2:
+
+        row_length = file_first_row_length(file2_transpose)
+        # for i in range(row_length,50):
+        for i in pbar(range(row_length/2)):
+
+            #load two lists at once
+
+                with open(file2_transpose) as f:
+                        list1 = "";list2 = ""
+
+                        # list1 = "";list2 = "";list3 = "";list4 = "";list5 = "";list6 = "";list7 = "";list8 = "";list9 = "";list10 = "";list11 = "";list12 = "";list13 = "";list14 = "";list15 = "";list16 = "";list17 = "";list18 = "";list19 = "";list20 = "";list21 = "";list22 = "";list23 = "";list24 = "";list25 = "";list26 = "";list27 = "";list28 = "";list29 = "";list30 = "";list31 = "";list32 = "";list33 = "";list34 = "";list35 = "";list36 = "";list37 = "";list38 = "";list39 = "";list40 = "";list41 = "";list42 = "";list43 = "";list44 = "";list45 = "";list46 = "";list47 = "";list48 = "";list49 = "";list50 = ""
+                        rowlist = [list1,list2]
+                        # rowlist = [list1,list2,list3,list4,list5,list6,list7,list8,list9,list10,list11,list12,list13,list14,list15,list16,list17,list18,list19,list20,list21,list22,list23,list24,list25,list26,list27,list28,list29,list30,list31,list32,list33,list34,list35,list36,list37,list38,list39,list40,list41,list42,list43,list44,list45,list46,list47,list48,list49,list50]
+                        # for n in rowlist:
+
+                        for line in f:
+            #                        print "\n","row ",i,"",line.split()[i]
+                                    list1 += ' '+line.split()[i]+' ';list2 += ' '+line.split()[i+1]+' '
+
+                                    # list1 +=  ' '+line.split()[i]+' ';list1 +=  ' '+line.split()[i+1]+' ';	list2 +=  ' '+line.split()[i+2]+' ';	list3 +=  ' '+line.split()[i+3]+' ';	list4 +=  ' '+line.split()[i+4]+' ';	list5 +=  ' '+line.split()[i+5]+' ';	list6 +=  ' '+line.split()[i+6]+' ';	list7 +=  ' '+line.split()[i+7]+' ';	list8 +=  ' '+line.split()[i+8]+' ';	list9 +=  ' '+line.split()[i+9]+' ';	list10 +=  ' '+line.split()[i+10]+' ';	list11 +=  ' '+line.split()[i+11]+' ';	list12 +=  ' '+line.split()[i+12]+' ';list13 +=  ' '+line.split()[i+13]+' ';	list14 +=  ' '+line.split()[i+14]+' ';	list15 +=  ' '+line.split()[i+15]+' ';	list16 +=  ' '+line.split()[i+16]+' ';	list17 +=  ' '+line.split()[i+17]+' ';	list18 +=  ' '+line.split()[i+18]+' ';	list19 +=  ' '+line.split()[i+19]+' ';	list20 +=  ' '+line.split()[i+20]+' ';	list21 +=  ' '+line.split()[i+21]+' ';	list22 +=  ' '+line.split()[i+22]+' ';	list23 +=  ' '+line.split()[i+23]+' ';	list24 +=  ' '+line.split()[i+24]+' ';list25 +=  ' '+line.split()[i+25]+' ';	list26 +=  ' '+line.split()[i+26]+' ';	list27 +=  ' '+line.split()[i+27]+' ';	list28 +=  ' '+line.split()[i+28]+' ';	list29 +=  ' '+line.split()[i+29]+' ';	list30 +=  ' '+line.split()[i+30]+' ';	list31 +=  ' '+line.split()[i+31]+' ';	list32 +=  ' '+line.split()[i+32]+' ';	list33 +=  ' '+line.split()[i+33]+' ';	list34 +=  ' '+line.split()[i+34]+' ';	list35 +=  ' '+line.split()[i+35]+' ';	list36 +=  ' '+line.split()[i+36]+' ';list37 +=  ' '+line.split()[i+37]+' ';	list38 +=  ' '+line.split()[i+38]+' ';	list39 +=  ' '+line.split()[i+39]+' ';	list40 +=  ' '+line.split()[i+40]+' ';	list41 +=  ' '+line.split()[i+41]+' ';	list42 +=  ' '+line.split()[i+42]+' ';	list43 +=  ' '+line.split()[i+43]+' ';	list44 +=  ' '+line.split()[i+44]+' ';	list45 +=  ' '+line.split()[i+45]+' ';	list46 +=  ' '+line.split()[i+46]+' ';	list47 +=  ' '+line.split()[i+47]+' ';	list48 +=  ' '+line.split()[i+48]+' ';list49 +=  ' '+line.split()[i+49]+' ';	list50 +=  ' '+line.split()[i+50]+' ';
+                                    # print "i is : ",i
+                                    # print list1;print list2
+                t2.write(list1);t2.write("\n");t2.write(list2);t2.write("\n")
+
+                # t2.write(list1);t2.write("\n");t2.write(list2);t2.write("\n");t2.write(list3);t2.write("\n");t2.write(list4);t2.write("\n");t2.write(list5);t2.write("\n");t2.write(list6);t2.write("\n");t2.write(list7);t2.write("\n");t2.write(list8);t2.write("\n");t2.write(list9);t2.write("\n");t2.write(list10);t2.write("\n");t2.write(list11);t2.write("\n");t2.write(list12);t2.write("\n");t2.write(list13);t2.write("\n");t2.write(list14);t2.write("\n");t2.write(list15);t2.write("\n");t2.write(list16);t2.write("\n");t2.write(list17);t2.write("\n");t2.write(list18);t2.write("\n");t2.write(list19);t2.write("\n");t2.write(list20);t2.write("\n");t2.write(list21);t2.write("\n");t2.write(list22);t2.write("\n");t2.write(list23);t2.write("\n");t2.write(list24);t2.write("\n");t2.write(list25);t2.write("\n");t2.write(list26);t2.write("\n");t2.write(list27);t2.write("\n");t2.write(list28);t2.write("\n");t2.write(list29);t2.write("\n");t2.write(list30);t2.write("\n");t2.write(list31);t2.write("\n");t2.write(list32);t2.write("\n");t2.write(list33);t2.write("\n");t2.write(list34);t2.write("\n");t2.write(list35);t2.write("\n");t2.write(list36);t2.write("\n");t2.write(list37);t2.write("\n");t2.write(list38);t2.write("\n");t2.write(list39);t2.write("\n");t2.write(list40);t2.write("\n");t2.write(list41);t2.write("\n");t2.write(list42);t2.write("\n");t2.write(list43);t2.write("\n");t2.write(list44);t2.write("\n");t2.write(list45);t2.write("\n");t2.write(list46);t2.write("\n");t2.write(list47);t2.write("\n");t2.write(list48);t2.write("\n");t2.write(list49);t2.write("\n");t2.write(list50);t2.write("\n")
+
+>>>>>>> c17f13718d1ad2ea3127c7c0db75d368a6930488
 
 def load_md2sql():
     pass
