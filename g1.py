@@ -22,7 +22,7 @@ import logging
 from progressbar import AnimatedMarker, Bar, BouncingBar, Counter, ETA, FileTransferSpeed, FormatLabel, Percentage, ProgressBar, ReverseBar, RotatingMarker, SimpleProgress, Timer
 
 
-parser = argparse.ArgumentParser(prog='psql_1000g_loader',usage='psql_1000g_loader [-t table_name prefix -f file_input or -list file_input_list] [-ucsc_snpf file name -ucsc_snp table_name] (optional add a annotated ucsc_snp table from file ) [-dbname database_name -dbuser database_user -dbpass database_pass] [-a_ucsc chr table to be annotated by ucsc ] [-ensembl_variation_snpf file name -ensembl_variation_genename_snpf file name] (optional add a annotated ensembl tables from files) [-a_ensembl chr table to be annotated by ensemble ] [-sort_by_gene_and_pos ann_table] [-update_table_allel2peptide create all to peptide table] [-remove_dup_allele remove duplicate alleles from table] [-add_gene_peptide_string add gene_peptide_string fileds to table] [-create_uniq_pepstring_num create a table with unique number to each group of peptide strings ordered by descending] [-add_uniq_pepstring_num add unique pepstring number to specified table] [-export_sample_2file export 100 lines> of each table to file] [-export_fulldataset_2file export dataset in full to file name] [-create_ml_dataset_table create dataset for machine learning by patients table] [-export_ml_full_dataset export dataset for machine learning by patients ] [-mind_data_preprocess] [-load_mind_data_f load mind dataset file] [-load_mind_data_t load mind dataset table prefix] [-load_mind_rsids load the mind rsids file to mind_rsids table] [-s show all tables] [-add_meta add tables metadata]',description='Load annotated snp database & Create a 1000G sql table from all Chromosomes - using a connection to a postgresql DB.')
+parser = argparse.ArgumentParser(prog='psql_1000g_loader',usage='psql_1000g_loader [-t table_name prefix -f file_input or -list file_input_list] [-ucsc_snpf file name -ucsc_snp table_name] (optional add a annotated ucsc_snp table from file ) [-dbname database_name -dbuser database_user -dbpass database_pass] [-a_ucsc chr table to be annotated by ucsc ] [-ensembl_variation_snpf file name -ensembl_variation_genename_snpf file name] (optional add a annotated ensembl tables from files) [-a_ensembl chr table to be annotated by ensemble ] [-sort_by_gene_and_pos ann_table] [-update_table_allel2peptide create all to peptide table] [-remove_dup_allele remove duplicate alleles from table] [-add_gene_peptide_string add gene_peptide_string fileds to table] [-create_uniq_pepstring_num create a table with unique number to each group of peptide strings ordered by descending] [-add_uniq_pepstring_num add unique pepstring number to specified table] [-export_sample_2file export 100 lines> of each table to file] [-export_fulldataset_2file export dataset in full to file name] [-create_ml_dataset_table create dataset for machine learning by patients table] [-export_ml_full_dataset export dataset for machine learning by patients ] [-mind_data_preprocess] [-load_mind_data_f load mind dataset file] [-load_mind_data_t load mind dataset table prefix] [-load_mind_rsids load the mind rsids file to mind_rsids table] [-join_mind_rsids table to join mind data with rsids] [-s show all tables] [-add_meta add tables metadata]',description='Load annotated snp database & Create a 1000G sql table from all Chromosomes - using a connection to a postgresql DB.')
 
 # dbname=pydb user=pyuser password=pyuser
 # postgresql credentials
@@ -93,6 +93,8 @@ parser.add_argument("-load_mind_data_f", help="load mind dataset file" , metavar
 parser.add_argument("-load_mind_data_t",help=" load mind dataset table prefix",metavar='load_mind_data_t')
 
 parser.add_argument("-load_mind_rsids",help=" load the mind rsids file to mind_rsids table",metavar='load_mind_rsids')
+
+parser.add_argument("-join_mind_rsids",help=" table to annotate join mind data with rsids",metavar='join_mind_rsids')
 
 
 parser.add_argument("-o", "--overwrite_tables", help="overwrites any existing tables",action="store_true")
@@ -627,6 +629,21 @@ def join_chr_with_anno_ensembl_snp():
     cur.execute("CREATE TABLE %s AS SELECT * FROM %s inner join variation_genename_4ann on (%s.name = variation_genename_4ann.rs_name)",(AsIs(chr2bann_ensembl),AsIs(args.a_ensembl),AsIs(args.a_ensembl),))
     conn.commit()
 
+def join_mind_data_with_rsids(mind_table):
+    if not check_table_exists("mind_rsids"):
+        print "no mind_rsids table present"
+        sys.exit()
+
+    # new annotation table to be created
+    varmind_table_rs = mind_table+"_rs"
+
+    check_overwrite_table(varmind_table_rs)
+
+    #  inner join the ensembl table with the chranntable
+    print(cur.mogrify("CREATE TABLE %s AS SELECT * FROM %s inner join mind_rsids on (%s.idnum = mind_rsids.numid)",(AsIs(varmind_table_rs),AsIs(mind_table),AsIs(mind_table),)))
+
+    cur.execute("CREATE TABLE %s AS SELECT * FROM %s inner join mind_rsids on (%s.idnum = mind_rsids.numid)",(AsIs(varmind_table_rs),AsIs(mind_table),AsIs(mind_table),))
+    conn.commit()
 
 def multifunc(arg):
     print arg, "print"
@@ -1356,6 +1373,8 @@ try:
         load_mind_rsids2sql()
 
 
+    if args.join_mind_rsids:
+        join_mind_data_with_rsids(args.join_mind_rsids)
 
 
 
