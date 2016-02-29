@@ -665,9 +665,9 @@ def join_mind_data_with_rsids(mind_table):
     check_overwrite_table(varmind_table_rs)
 
     #  inner join the ensembl table with the chranntable
-    print(cur.mogrify("CREATE TABLE %s AS SELECT * FROM %s inner join mind_rsids on (%s.idnum = mind_rsids.numid)",(AsIs(varmind_table_rs),AsIs(mind_table),AsIs(mind_table),)))
+    print(cur.mogrify("CREATE TABLE %s AS SELECT * FROM %s full outer join mind_rsids on (%s.idnum = mind_rsids.numid)",(AsIs(varmind_table_rs),AsIs(mind_table),AsIs(mind_table),)))
 
-    cur.execute("CREATE TABLE %s AS SELECT * FROM %s inner join mind_rsids on (%s.idnum = mind_rsids.numid)",(AsIs(varmind_table_rs),AsIs(mind_table),AsIs(mind_table),))
+    cur.execute("CREATE TABLE %s AS SELECT * FROM %s full outer join mind_rsids on (%s.idnum = mind_rsids.numid)",(AsIs(varmind_table_rs),AsIs(mind_table),AsIs(mind_table),))
     conn.commit()
 
 def multifunc(arg):
