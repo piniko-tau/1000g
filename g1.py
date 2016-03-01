@@ -44,6 +44,7 @@ parser = argparse.ArgumentParser(prog='psql_1000g_loader',usage='psql_1000g_load
  [-load_mind_data_t load mind dataset table prefix] \
  [-load_mind_rsids load the mind rsids file to mind_rsids table] \
  [-join_mind_rsids table to join mind data with rsids] \
+ [-mind_a_ensembl annotate mind table with ensemble] \
  [-s show all tables] \
  [-add_meta add tables metadata]',\
  description='Load annotated snp database & Create a 1000G sql table from all Chromosomes - using a connection to a postgresql DB.')
@@ -121,6 +122,7 @@ parser.add_argument("-load_mind_rsids",help=" load the mind rsids file to mind_r
 
 parser.add_argument("-join_mind_rsids",help=" table to annotate join mind data with rsids",metavar='join_mind_rsids')
 
+parser.add_argument("-mind_a_ensembl",help=" annotate mind table with ensemble ",metavar='mind_a_ensembl')
 
 parser.add_argument("-o", "--overwrite_tables", help="overwrites any existing tables",action="store_true")
 parser.add_argument("-v", "--verbose", help="increase output verbosity",action="store_true")
@@ -652,6 +654,22 @@ def join_chr_with_anno_ensembl_snp():
     print(cur.mogrify("CREATE TABLE %s AS SELECT * FROM %s inner join variation_genename_4ann on (%s.name = variation_genename_4ann.rs_name)",(AsIs(chr2bann_ensembl),AsIs(args.a_ensembl),AsIs(args.a_ensembl),)))
 
     cur.execute("CREATE TABLE %s AS SELECT * FROM %s inner join variation_genename_4ann on (%s.name = variation_genename_4ann.rs_name)",(AsIs(chr2bann_ensembl),AsIs(args.a_ensembl),AsIs(args.a_ensembl),))
+    conn.commit()
+
+def join_mind_table_with_anno_ensembl_snp():
+    if not check_table_exists("variation_genename_4ann"):
+        print "no snp annotated table present"
+        sys.exit()
+
+    #new annotation table to be created
+    mind2bann_ensembl = args.mind_a_ensembl+"_en"
+
+    check_overwrite_table(mind2bann_ensembl)
+
+    #  inner join the ensembl table with the chranntable
+    print(cur.mogrify("CREATE TABLE %s AS SELECT * FROM %s inner join variation_genename_4ann on (%s.rsid = variation_genename_4ann.rs_name)",(AsIs(mind2bann_ensembl),AsIs(args.mind_a_ensembl),AsIs(args.mind_a_ensembl),)))
+
+    cur.execute("CREATE TABLE %s AS SELECT * FROM %s inner join variation_genename_4ann on (%s.rsid = variation_genename_4ann.rs_name)",(AsIs(mind2bann_ensembl),AsIs(args.mind_a_ensembl),AsIs(args.mind_a_ensembl),))
     conn.commit()
 
 def join_mind_data_with_rsids(mind_table):
@@ -1400,6 +1418,9 @@ try:
 
     if args.join_mind_rsids:
         join_mind_data_with_rsids(args.join_mind_rsids)
+
+    if args.mind_a_ensembl:
+         join_mind_table_with_anno_ensembl_snp()
 
 
 
