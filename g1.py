@@ -533,6 +533,7 @@ def sort_by_gene_and_pos(anntable2):
 def mind_sort_by_gene_and_pos(anntable2):
 
     sortedtable2 = args.mind_sort_by_gene_and_pos+"sorted_by_gene_pos"
+    check_overwrite_table(sortedtable2)
     cur.mogrify("create table %s as select * from %s order by \"coordinate\" , \"gene_name\" ;",(AsIs(sortedtable2),AsIs(anntable2),))
     cur.execute("create table %s as select * from %s order by \"coordinate\" , \"gene_name\" ;",(AsIs(sortedtable2),AsIs(anntable2),))
     conn.commit()
@@ -1188,7 +1189,6 @@ try:
 
 
         print(cur.mogrify("create table allchpepstr as select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s",(AsIs(hglist[0]), AsIs(hglist[1]), AsIs(hglist[2]), AsIs(hglist[3]), AsIs(hglist[4]), AsIs(hglist[5]), AsIs(hglist[6]), AsIs(hglist[7]), AsIs(hglist[8]), AsIs(hglist[9]), AsIs(hglist[10]), AsIs(hglist[11]), AsIs(hglist[12]), AsIs(hglist[13]), AsIs(hglist[14]), AsIs(hglist[15]), AsIs(hglist[16]), AsIs(hglist[17]), AsIs(hglist[18]), AsIs(hglist[19]), AsIs(hglist[20]), AsIs(hglist[21]), AsIs(hglist[22]), AsIs(hglist[23]),)))
-
 
         cur.execute("create table allchpepstr as select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s union all select * from %s",(AsIs(hglist[0]), AsIs(hglist[1]), AsIs(hglist[2]), AsIs(hglist[3]), AsIs(hglist[4]), AsIs(hglist[5]), AsIs(hglist[6]), AsIs(hglist[7]), AsIs(hglist[8]), AsIs(hglist[9]), AsIs(hglist[10]), AsIs(hglist[11]), AsIs(hglist[12]), AsIs(hglist[13]), AsIs(hglist[14]), AsIs(hglist[15]), AsIs(hglist[16]), AsIs(hglist[17]), AsIs(hglist[18]), AsIs(hglist[19]), AsIs(hglist[20]), AsIs(hglist[21]), AsIs(hglist[22]), AsIs(hglist[23]),))
         conn.commit()
