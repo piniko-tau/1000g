@@ -45,6 +45,7 @@ parser = argparse.ArgumentParser(prog='psql_1000g_loader',usage='psql_1000g_load
  [-load_mind_rsids load the mind rsids file to mind_rsids table] \
  [-join_mind_rsids table to join mind data with rsids] \
  [-mind_a_ensembl annotate mind table with ensemble] \
+ [-mind_sort_by_gene_and_pos ann_table]\
  [-s show all tables] \
  [-add_meta add tables metadata]',\
  description='Load annotated snp database & Create a 1000G sql table from all Chromosomes - using a connection to a postgresql DB.')
@@ -123,6 +124,8 @@ parser.add_argument("-load_mind_rsids",help=" load the mind rsids file to mind_r
 parser.add_argument("-join_mind_rsids",help=" table to annotate join mind data with rsids",metavar='join_mind_rsids')
 
 parser.add_argument("-mind_a_ensembl",help=" annotate mind table with ensemble ",metavar='mind_a_ensembl')
+
+parser.add_argument("-mind_sort_by_gene_and_pos",help='annotated table to be sorted by gene name and position',metavar='SORT_TABLES')
 
 parser.add_argument("-o", "--overwrite_tables", help="overwrites any existing tables",action="store_true")
 parser.add_argument("-v", "--verbose", help="increase output verbosity",action="store_true")
@@ -525,6 +528,13 @@ def sort_by_gene_and_pos(anntable2):
     sortedtable2 = args.sort_by_gene_and_pos+"sorted_by_gene_pos"
     cur.mogrify("create table %s as select * from %s order by \"chromStart\" , \"gene_name\" ;",(AsIs(sortedtable2),AsIs(anntable2),))
     cur.execute("create table %s as select * from %s order by \"chromStart\" , \"gene_name\" ;",(AsIs(sortedtable2),AsIs(anntable2),))
+    conn.commit()
+
+def mind_sort_by_gene_and_pos(anntable2):
+
+    sortedtable2 = args.mind_sort_by_gene_and_pos+"sorted_by_gene_pos"
+    cur.mogrify("create table %s as select * from %s order by \"coordinate\" , \"gene_name\" ;",(AsIs(sortedtable2),AsIs(anntable2),))
+    cur.execute("create table %s as select * from %s order by \"coordinate\" , \"gene_name\" ;",(AsIs(sortedtable2),AsIs(anntable2),))
     conn.commit()
 
 def check_snp_table():
@@ -1422,6 +1432,8 @@ try:
     if args.mind_a_ensembl:
          join_mind_table_with_anno_ensembl_snp()
 
+    if args.mind_sort_by_gene_and_pos:
+        mind_sort_by_gene_and_pos(args.mind_sort_by_gene_and_pos)
 
 
 # # *************************************************************8
