@@ -43,6 +43,7 @@ parser = argparse.ArgumentParser(prog='psql_1000g_loader',usage='psql_1000g_load
  [-load_mind_data_f load mind dataset file] \
  [-load_mind_data_t load mind dataset table prefix] \
  [-load_mind_rsids load the mind rsids file to mind_rsids table] \
+ [-join_mind_with_with_anno_ucsc_snp annotate mind table with peptide data] \
  [-join_mind_rsids table to join mind data with rsids] \
  [-mind_a_ensembl annotate mind table with ensemble] \
  [-mind_sort_by_gene_and_pos ann_table]\
@@ -118,6 +119,8 @@ parser.add_argument("-mind_data_preprocess",help="preprocess mind how to",metava
 parser.add_argument("-load_mind_data_f", help="load mind dataset file" , metavar='load_mind_data_f')
 
 parser.add_argument("-load_mind_data_t",help=" load mind dataset table prefix",metavar='load_mind_data_t')
+
+parser.add_argument("-join_mind_with_with_anno_ucsc_snp",help=" annotate mind table with peptide data",metavar='join_mind_with_with_anno_ucsc_snp')
 
 parser.add_argument("-load_mind_rsids",help=" load the mind rsids file to mind_rsids table",metavar='load_mind_rsids')
 
@@ -597,6 +600,48 @@ def join_chr_with_anno_ucsc_snp():
 #    print(cur.mogrify("drop table if exists %s",(AsIs(annsnptemp),)))
  #   cur.execute("drop table if exists %s",(AsIs(annsnptemp),))
   #  conn.commit()
+
+def join_mind_with_with_anno_ucsc_snp():
+
+    cur.execute("SELECT tablename FROM pg_catalog.pg_tables where tableowner='pyuser' and tablename like '%filtered_final'")
+    snpname=str(cur.fetchall())
+    if not snpname:
+        print "no snp annotated table present"
+        sys.exit()
+    else:
+
+        annsnp = snpname[3:-4]
+        annsnptemp = annsnp+"temp"
+
+    mind2bann = args.join_mind_with_with_anno_ucsc_snp+"ann"
+
+    #check overwrite or errstop
+
+    check_overwrite_table(mind2bann)
+    # check_overwrite_table(annsnptemp)
+
+    if not check_table_exists(annsnptemp):
+
+        #first copy the snp table without the chrom column
+
+        print(cur.mogrify("create table %s as select * from %s ",(AsIs(annsnptemp),AsIs(annsnp))))
+        cur.execute("create table %s as select * from %s ",(AsIs(annsnptemp),AsIs(annsnp)))
+        conn.commit()
+
+        print(cur.mogrify("alter table %s drop column chrom", (AsIs(annsnptemp),)))
+        cur.execute("alter table %s drop column chrom", (AsIs(annsnptemp),))
+        conn.commit()
+
+    # then inner join the annsnp table with the chrtable
+    print(cur.mogrify("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.name = %s.rsid)",(AsIs(mind2bann),AsIs(annsnptemp),AsIs(args.join_mind_with_with_anno_ucsc_snp),AsIs(annsnptemp),AsIs(args.join_mind_with_with_anno_ucsc_snp),)))
+    cur.execute("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.name = %s.rsid)",(AsIs(mind2bann),AsIs(annsnptemp),AsIs(args.join_mind_with_with_anno_ucsc_snp),AsIs(annsnptemp),AsIs(args.join_mind_with_with_anno_ucsc_snp),))
+    conn.commit()
+
+    # #clean up temp table
+#    print(cur.mogrify("drop table if exists %s",(AsIs(annsnptemp),)))
+ #   cur.execute("drop table if exists %s",(AsIs(annsnptemp),))
+  #  conn.commit()
+
 
 #load 2 tables from ensembl , one with gana_name and the other with clinical segnificanse, add them together
 def add_ann_ensembl():
@@ -1425,7 +1470,9 @@ try:
         check_overwrite_table(varmindrsids_table)
         load_mind_rsids2sql()
 
-
+    if args.join_mind_with_with_anno_ucsc_snp:
+        join_mind_with_with_anno_ucsc_snp()
+    
     if args.join_mind_rsids:
         join_mind_data_with_rsids(args.join_mind_rsids)
 
