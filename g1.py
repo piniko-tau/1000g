@@ -47,6 +47,7 @@ parser = argparse.ArgumentParser(prog='psql_1000g_loader',usage='psql_1000g_load
  [-join_mind_rsids table to join mind data with rsids] \
  [-mind_a_ensembl annotate mind table with ensemble] \
  [-mind_sort_by_gene_and_pos ann_table]\
+ [-mind_update_table_allel2peptide create all to peptide table] \
  [-s show all tables] \
  [-add_meta add tables metadata]',\
  description='Load annotated snp database & Create a 1000G sql table from all Chromosomes - using a connection to a postgresql DB.')
@@ -129,6 +130,9 @@ parser.add_argument("-join_mind_rsids",help=" table to annotate join mind data w
 parser.add_argument("-mind_a_ensembl",help=" annotate mind table with ensemble ",metavar='mind_a_ensembl')
 
 parser.add_argument("-mind_sort_by_gene_and_pos",help='annotated table to be sorted by gene name and position',metavar='SORT_TABLES')
+
+parser.add_argument("-mind_update_table_allel2peptide",help=' create all to peptide table',metavar='mind_update_table_allel2peptide')
+
 
 parser.add_argument("-o", "--overwrite_tables", help="overwrites any existing tables",action="store_true")
 parser.add_argument("-v", "--verbose", help="increase output verbosity",action="store_true")
@@ -1156,6 +1160,33 @@ try:
             cur.execute("update %s set %s = (case when (%s='0') then  peptide1 when (%s='0|0') then  peptide1||peptide1 when (%s='0|1') then peptide1||peptide2 when (%s='0|2') then  peptide1||peptide3 when (%s='1') then  peptide2 when (%s='1|0') then  peptide2||peptide1 when (%s='1|1') then  peptide2||peptide2 when (%s='1|2') then  peptide2||peptide3 when (%s='2') then  peptide3 when (%s='2|0') then  peptide3||peptide1 when (%s='2|1') then  peptide3||peptide2 when (%s='2|2') then  peptide3||peptide3 end)",(AsIs(var2all_table),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),))
             conn.commit()
             print hg2
+
+
+# add variation peptide scetion :
+#
+    if args.mind_update_table_allel2peptide:
+        var2all_table = args.mind_update_table_allel2peptide + "al2p"
+        check_overwrite_table(var2all_table)
+        # if not check_table_exists(var2all_table):
+
+        print(cur.mogrify("create table %s as select * from %s ",(AsIs(var2all_table),AsIs(args.mind_update_table_allel2peptide),)))
+        cur.execute("create table %s as select * from %s ",(AsIs(var2all_table),AsIs(args.mind_update_table_allel2peptide),))
+        conn.commit()
+
+        hg = "hg%"
+
+        print(cur.mogrify("select column_name from information_schema.columns where table_name = '%s' and column_name like \'%s\';",(AsIs(var2all_table),AsIs(hg),)))
+        cur.execute("select column_name from information_schema.columns where table_name = '%s' and column_name like \'%s\';",(AsIs(var2all_table),AsIs(hg),))
+
+        for hg2 in query2list():
+
+            print(cur.mogrify("update %s set %s = (case when (%s='0') then  peptide1 when (%s='0|0') then  peptide1||peptide1 when (%s='0|1') then peptide1||peptide2 when (%s='0|2') then  peptide1||peptide3 when (%s='1') then  peptide2 when (%s='1|0') then  peptide2||peptide1 when (%s='1|1') then  peptide2||peptide2 when (%s='1|2') then  peptide2||peptide3 when (%s='2') then  peptide3 when (%s='2|0') then  peptide3||peptide1 when (%s='2|1') then  peptide3||peptide2 when (%s='2|2') then  peptide3||peptide3 end)",(AsIs(var2all_table),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),)))
+            cur.execute("update %s set %s = (case when (%s='0') then  peptide1 when (%s='0|0') then  peptide1||peptide1 when (%s='0|1') then peptide1||peptide2 when (%s='0|2') then  peptide1||peptide3 when (%s='1') then  peptide2 when (%s='1|0') then  peptide2||peptide1 when (%s='1|1') then  peptide2||peptide2 when (%s='1|2') then  peptide2||peptide3 when (%s='2') then  peptide3 when (%s='2|0') then  peptide3||peptide1 when (%s='2|1') then  peptide3||peptide2 when (%s='2|2') then  peptide3||peptide3 end)",(AsIs(var2all_table),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),))
+            conn.commit()
+            print hg2
+
+
+
 
 #create new tables without duplicate alleles
     if args.remove_dup_allele:
