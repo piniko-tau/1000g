@@ -1173,7 +1173,7 @@ try:
         cur.execute("create table %s as select * from %s ",(AsIs(var2all_table),AsIs(args.mind_update_table_allel2peptide),))
         conn.commit()
 
-        hg = "hg%"
+        hg = "sz%"
 
         print(cur.mogrify("select column_name from information_schema.columns where table_name = '%s' and column_name like \'%s\';",(AsIs(var2all_table),AsIs(hg),)))
         cur.execute("select column_name from information_schema.columns where table_name = '%s' and column_name like \'%s\';",(AsIs(var2all_table),AsIs(hg),))
@@ -1183,7 +1183,7 @@ try:
             print(cur.mogrify("update %s set %s = (case when (%s='0') then  peptide1 when (%s='0|0') then  peptide1||peptide1 when (%s='0|1') then peptide1||peptide2 when (%s='0|2') then  peptide1||peptide3 when (%s='1') then  peptide2 when (%s='1|0') then  peptide2||peptide1 when (%s='1|1') then  peptide2||peptide2 when (%s='1|2') then  peptide2||peptide3 when (%s='2') then  peptide3 when (%s='2|0') then  peptide3||peptide1 when (%s='2|1') then  peptide3||peptide2 when (%s='2|2') then  peptide3||peptide3 end)",(AsIs(var2all_table),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),)))
             cur.execute("update %s set %s = (case when (%s='0') then  peptide1 when (%s='0|0') then  peptide1||peptide1 when (%s='0|1') then peptide1||peptide2 when (%s='0|2') then  peptide1||peptide3 when (%s='1') then  peptide2 when (%s='1|0') then  peptide2||peptide1 when (%s='1|1') then  peptide2||peptide2 when (%s='1|2') then  peptide2||peptide3 when (%s='2') then  peptide3 when (%s='2|0') then  peptide3||peptide1 when (%s='2|1') then  peptide3||peptide2 when (%s='2|2') then  peptide3||peptide3 end)",(AsIs(var2all_table),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),))
             conn.commit()
-            print hg2
+            # print hg2
 
 
 
