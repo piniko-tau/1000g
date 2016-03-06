@@ -1173,10 +1173,10 @@ try:
         cur.execute("create table %s as select * from %s ",(AsIs(var2all_table),AsIs(args.mind_update_table_allel2peptide),))
         conn.commit()
 
-        hg = "sz%"
-
-        print(cur.mogrify("select column_name from information_schema.columns where table_name = '%s' and column_name like \'%s\';",(AsIs(var2all_table),AsIs(hg),)))
-        cur.execute("select column_name from information_schema.columns where table_name = '%s' and column_name like \'%s\';",(AsIs(var2all_table),AsIs(hg),))
+        hg = "[0-9]"
+        # select column_name from information_schema.columns where table_name = 'mind_data_2_rs' and column_name ~ '[0-9]';                                                                                                                   
+        print(cur.mogrify("select column_name from information_schema.columns where table_name = '%s' and column_name ~ \'%s\';",(AsIs(var2all_table),AsIs(hg),)))
+        cur.execute("select column_name from information_schema.columns where table_name = '%s' and column_name ~ \'%s\';",(AsIs(var2all_table),AsIs(hg),))
 
         for hg2 in query2list():
 
