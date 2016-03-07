@@ -1,0 +1,15 @@
+devide alleles
+add -/+ strand
+compare with patient
+replace patient with peptides
+
+add to pepstr
+
+
+pydb=> select * from test1;
+ alleles |    codons    | peptides | peptide1 | peptide2 | peptide3 | szptcr0001 | szptcr0002 | szptcr0003 |    rsid     
+---------+--------------+----------+----------+----------+----------+------------+------------+------------+-------------
+ T,G,    | TTT,TGT,     | F,C,     | F        | C        |          | A/A        | A/A        | A/A        | rs140739101
+ G,C,T,  | AAG,AAC,AAT, | K,N,N,   | K        | N        | N        | G/G        | G/G        | G/G        | rs2854682
+ T,C,    | ATG,ACG,     | M,T,     | M        | T        |          | G/G        | G/G        | G/G        | rs148502021
+
