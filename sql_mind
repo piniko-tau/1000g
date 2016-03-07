@@ -1,0 +1,1 @@
+select "alleleCount", alleles, codons, peptides, peptide1,peptide2, peptide3, idnum,gcobbn3803,gcobbn3804,gcobbn3805,gcobbn3807,gcobbn3808,rs_name,clinical_significance,evidence,gene_name from mind_data_4_rs_ensorted_by_gene_posann where rs_name='rs17234961' or rs_name='rs3810965';
