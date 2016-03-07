@@ -47,6 +47,7 @@ parser = argparse.ArgumentParser(prog='psql_1000g_loader',usage='psql_1000g_load
  [-join_mind_rsids table to join mind data with rsids] \
  [-mind_a_ensembl annotate mind table with ensemble] \
  [-mind_sort_by_gene_and_pos ann_table]\
+ [-mind_prepare_ucsc_4_mind_annotations table]\
  [-mind_update_table_allel2peptide create all to peptide table] \
  [-s show all tables] \
  [-add_meta add tables metadata]',\
@@ -131,6 +132,9 @@ parser.add_argument("-mind_a_ensembl",help=" annotate mind table with ensemble "
 
 parser.add_argument("-mind_sort_by_gene_and_pos",help='annotated table to be sorted by gene name and position',metavar='SORT_TABLES')
 
+# mind_prepare_ucsc_4_mind_annotations
+parser.add_argument("-mind_prepare_ucsc_4_mind_annotations",help='preprocess ucsc table for mind ann',metavar='mind_prepare_ucsc_4_mind_annotations')
+
 parser.add_argument("-mind_update_table_allel2peptide",help=' create all to peptide table',metavar='mind_update_table_allel2peptide')
 
 
@@ -193,6 +197,23 @@ def insert_snp_table():
     cur.execute("CREATE TABLE %s AS SELECT * FROM %s ORDER BY \"chromStart\"",(AsIs(snptable_s_ch_filtered_final),AsIs(snptable_s_c),))
     conn.commit()
 
+def uscs_split_allels(ucsc_table):
+
+    ucsc_table_split_alleles=ucsc_table+"_spltal"
+
+    print  cur.mogrify("create table %s as SELECT *  FROM ( SELECT * , SUBSTR(alleles,1 , 1) AS allele1 , SUBSTR(alleles,3 , 1) AS allele2 , SUBSTR(alleles,5 , 1) AS allele3 FROM test1) as t;",(AsIs(ucsc_table_split_alleles),AsIs(ucsc_table),))
+    cur.execute("create table %s as SELECT *  FROM ( SELECT * , SUBSTR(alleles,1 , 1) AS allele1 , SUBSTR(alleles,3 , 1) AS allele2 , SUBSTR(alleles,5 , 1) AS allele3 FROM test1) as t;",(AsIs(ucsc_table_split_alleles),AsIs(ucsc_table),))
+    conn.commit()
+
+def ucsc_add_op_allele_strand(ucsc_table2):
+
+    print cur.mogrify("ALTER TABLE %s ADD COLUMN opallele1 text, add column opallele2 text, add column opallele3 text",(AsIs(ucsc_table2),))
+    cur.execute("ALTER TABLE %s ADD COLUMN opallele1 text, add column opallele2 text, add column opallele3 text",(AsIs(ucsc_table2),))
+    conn.commit()
+
+    print cur.mogrify("update %s set opallele1 = (case when (allele1='G') then  'C' when (allele1='C') then  'G' when (allele1='A') then  'T' when (allele1='T') then  'A' ,opallele2 = (case when (allele2='G') then  'C' when (allele2='C') then  'G' when (allele2='A') then  'T' when (allele2='T') then  'A' ,opallele3 = (case when (allele3='G') then  'C' when (allele3='C') then  'G' when (allele3='A') then  'T' when (allele3='T') then  'A'  end)",(AsIs(ucsc_table2),))
+    cur.execute("update %s set opallele1 = (case when (allele1='G') then  'C' when (allele1='C') then  'G' when (allele1='A') then  'T' when (allele1='T') then  'A' ,opallele2 = (case when (allele2='G') then  'C' when (allele2='C') then  'G' when (allele2='A') then  'T' when (allele2='T') then  'A' ,opallele3 = (case when (allele3='G') then  'C' when (allele3='C') then  'G' when (allele3='A') then  'T' when (allele3='T') then  'A'  end)",(AsIs(ucsc_table2),))
+    conn.commit()
 
 def cleanup_err_tables():
 
@@ -1512,6 +1533,10 @@ try:
 
     if args.mind_sort_by_gene_and_pos:
         mind_sort_by_gene_and_pos(args.mind_sort_by_gene_and_pos)
+
+    if args.mind_prepare_ucsc_4_mind_annotations:
+        uscs_split_allels(args.mind_prepare_ucsc_4_mind_annotations)
+        ucsc_add_op_allele_strand(args.mind_prepare_ucsc_4_mind_annotations)
 
 
 # # *************************************************************8

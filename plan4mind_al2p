@@ -13,3 +13,10 @@ pydb=> select * from test1;
  G,C,T,  | AAG,AAC,AAT, | K,N,N,   | K        | N        | N        | G/G        | G/G        | G/G        | rs2854682
  T,C,    | ATG,ACG,     | M,T,     | M        | T        |          | G/G        | G/G        | G/G        | rs148502021
 
+
+
+strand op
+T	A
+G	C	
+A	T
+C	G
