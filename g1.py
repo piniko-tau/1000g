@@ -630,7 +630,7 @@ def join_chr_with_anno_ucsc_snp():
 
 def join_mind_with_with_anno_ucsc_snp():
 
-    cur.execute("SELECT tablename FROM pg_catalog.pg_tables where tableowner='pyuser' and tablename like '%filtered_final'")
+    cur.execute("SELECT tablename FROM pg_catalog.pg_tables where tableowner='pyuser' and tablename like '%filtered_final_spltal'")
     snpname=str(cur.fetchall())
     if not snpname:
         print "no snp annotated table present"
