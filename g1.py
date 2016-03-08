@@ -199,20 +199,22 @@ def insert_snp_table():
 
 def uscs_split_allels(ucsc_table):
 
+    global ucsc_table_split_alleles
     ucsc_table_split_alleles=ucsc_table+"_spltal"
+    check_overwrite_table(ucsc_table_split_alleles)
 
-    print  cur.mogrify("create table %s as SELECT *  FROM ( SELECT * , SUBSTR(alleles,1 , 1) AS allele1 , SUBSTR(alleles,3 , 1) AS allele2 , SUBSTR(alleles,5 , 1) AS allele3 FROM test1) as t;",(AsIs(ucsc_table_split_alleles),AsIs(ucsc_table),))
-    cur.execute("create table %s as SELECT *  FROM ( SELECT * , SUBSTR(alleles,1 , 1) AS allele1 , SUBSTR(alleles,3 , 1) AS allele2 , SUBSTR(alleles,5 , 1) AS allele3 FROM test1) as t;",(AsIs(ucsc_table_split_alleles),AsIs(ucsc_table),))
+    print (cur.mogrify("create table %s as SELECT *  FROM ( SELECT * , SUBSTR(alleles,1 , 1) AS allele1 , SUBSTR(alleles,3 , 1) AS allele2 , SUBSTR(alleles,5 , 1) AS allele3 FROM %s) as t;",(AsIs(ucsc_table_split_alleles),AsIs(ucsc_table),)))
+    cur.execute("create table %s as SELECT *  FROM ( SELECT * , SUBSTR(alleles,1 , 1) AS allele1 , SUBSTR(alleles,3 , 1) AS allele2 , SUBSTR(alleles,5 , 1) AS allele3 FROM %s) as t;",(AsIs(ucsc_table_split_alleles),AsIs(ucsc_table),))
     conn.commit()
 
 def ucsc_add_op_allele_strand(ucsc_table2):
 
-    print cur.mogrify("ALTER TABLE %s ADD COLUMN opallele1 text, add column opallele2 text, add column opallele3 text",(AsIs(ucsc_table2),))
+    print (cur.mogrify("ALTER TABLE %s ADD COLUMN opallele1 text, add column opallele2 text, add column opallele3 text",(AsIs(ucsc_table2),)))
     cur.execute("ALTER TABLE %s ADD COLUMN opallele1 text, add column opallele2 text, add column opallele3 text",(AsIs(ucsc_table2),))
     conn.commit()
 
-    print cur.mogrify("update %s set opallele1 = (case when (allele1='G') then  'C' when (allele1='C') then  'G' when (allele1='A') then  'T' when (allele1='T') then  'A' ,opallele2 = (case when (allele2='G') then  'C' when (allele2='C') then  'G' when (allele2='A') then  'T' when (allele2='T') then  'A' ,opallele3 = (case when (allele3='G') then  'C' when (allele3='C') then  'G' when (allele3='A') then  'T' when (allele3='T') then  'A'  end)",(AsIs(ucsc_table2),))
-    cur.execute("update %s set opallele1 = (case when (allele1='G') then  'C' when (allele1='C') then  'G' when (allele1='A') then  'T' when (allele1='T') then  'A' ,opallele2 = (case when (allele2='G') then  'C' when (allele2='C') then  'G' when (allele2='A') then  'T' when (allele2='T') then  'A' ,opallele3 = (case when (allele3='G') then  'C' when (allele3='C') then  'G' when (allele3='A') then  'T' when (allele3='T') then  'A'  end)",(AsIs(ucsc_table2),))
+    print (cur.mogrify("update %s set opallele1 = (case when (allele1='G') then  'C' when (allele1='C') then  'G' when (allele1='A') then  'T' when (allele1='T') then  'A' end),opallele2 = (case when (allele2='G') then  'C' when (allele2='C') then  'G' when (allele2='A') then  'T' when (allele2='T') then  'A' end),opallele3 = (case when (allele3='G') then  'C' when (allele3='C') then  'G' when (allele3='A') then  'T' when (allele3='T') then  'A'  end)",(AsIs(ucsc_table2),)))
+    cur.execute("update %s set opallele1 = (case when (allele1='G') then  'C' when (allele1='C') then  'G' when (allele1='A') then  'T' when (allele1='T') then  'A' end),opallele2 = (case when (allele2='G') then  'C' when (allele2='C') then  'G' when (allele2='A') then  'T' when (allele2='T') then  'A' end),opallele3 = (case when (allele3='G') then  'C' when (allele3='C') then  'G' when (allele3='A') then  'T' when (allele3='T') then  'A'  end)",(AsIs(ucsc_table2),))
     conn.commit()
 
 def cleanup_err_tables():
@@ -1536,7 +1538,7 @@ try:
 
     if args.mind_prepare_ucsc_4_mind_annotations:
         uscs_split_allels(args.mind_prepare_ucsc_4_mind_annotations)
-        ucsc_add_op_allele_strand(args.mind_prepare_ucsc_4_mind_annotations)
+        ucsc_add_op_allele_strand(ucsc_table_split_alleles)
 
 
 # # *************************************************************8
