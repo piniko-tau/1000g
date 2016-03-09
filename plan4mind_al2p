@@ -19,22 +19,29 @@ a1 a2 a3 o1 o2 o3 p1 p2 p3
 select szptcr0001, case (a1:p1+ if a2:p2+ if a3:p3+ if o1:p1- if o2:p2- if o3:p3-
 
 
+ select szptcr0001,t1||t2||t3 as t123 from (select szptcr0001,
 
- select szptcr0001,t1||t2 as t12 from (select szptcr0001, case when substr(szptcr0001,1,1) = allele1 then '+'||peptide1 when substr(szptcr0001,1,1) = allele2 then '+'||peptide2 when substr(szptcr0001,1,1) = allele3 then '+'||peptide3 when substr(szptcr0001,1,1) = opallele1 then '-'||peptide1 when substr(szptcr0001,1,1) = opallele2 then '-'||peptide2 when substr(szptcr0001,1,1) = opallele3 then '-'||peptide3
+case when substr(szptcr0001,1,1) = allele1 then '+'||peptide1 when substr(szptcr0001,1,1) = allele2 then '+'||peptide2 when substr(szptcr0001,1,1) = allele3 then '+'||peptide3 when substr(szptcr0001,1,1) = opallele1 then '-'||peptide1 when substr(szptcr0001,1,1) = opallele2 then '-'||peptide2 when substr(szptcr0001,1,1) = opallele3 then '-'||peptide3 end as t1 ,
 
-end as t1 , case when substr(szptcr0001,3,1) = opallele1 then peptide1 
+ case when substr(szptcr0001,3,1) = allele1 then '+'||peptide1 when substr(szptcr0001,3,1) = allele2 then '+'||peptide2 when substr(szptcr0001,3,1) = allele3 then '+'||peptide3 when substr(szptcr0001,3,1) = opallele1 then '-'||peptide1 when substr(szptcr0001,3,1) = opallele2 then '-'||peptide2 when substr(szptcr0001,3,1) = opallele3 then '-'||peptide3 end as t2 ,
 
-end as t2 ,case when substr(szptcr0001,5,1) = opallele1 then peptide1 
+case when substr(szptcr0001,5,1) = '' then '' when substr(szptcr0001,5,1) = allele1 then '+'||peptide1 when substr(szptcr0001,5,1) = allele2 then '+'||peptide2 when substr(szptcr0001,5,1) = allele3 then '+'||peptide3 when substr(szptcr0001,5,1) = opallele1 then '-'||peptide1 when substr(szptcr0001,5,1) = opallele2 then '-'||peptide2 when substr(szptcr0001,5,1) = opallele3 then '-'||peptide3 end as t3 from mind_data_1ann) as mytable;
 
-end as t3
+pydb=>  select szptcr0001,t1||t2||t3 as t12 from (select szptcr0001, case when substr(szptcr0001,1,1) = allele1 then '+'||peptide1 when substr(szptcr0001,1,1) = allele2 then '+'||peptide2 when substr(szptcr0001,1,1) = allele3 then '+'||peptide3 when substr(szptcr0001,1,1) = opallele1 then '-'||peptide1 when substr(szptcr0001,1,1) = opallele2 then '-'||peptide2 when substr(szptcr0001,1,1) = opallele3 then '-'||peptide3 end as t1 , case when substr(szptcr0001,3,1) = allele1 then '+'||peptide1 when substr(szptcr0001,3,1) = allele2 then '+'||peptide2 when substr(szptcr0001,3,1) = allele3 then '+'||peptide3 when substr(szptcr0001,3,1) = opallele1 then '-'||peptide1 when substr(szptcr0001,3,1) = opallele2 then '-'||peptide2 when substr(szptcr0001,3,1) = opallele3 then '-'||peptide3 end as t2 ,case when substr(szptcr0001,5,1) = '' then '' when substr(szptcr0001,5,1) = allele1 then '+'||peptide1 when substr(szptcr0001,5,1) = allele2 then '+'||peptide2 when substr(szptcr0001,5,1) = allele3 then '+'||peptide3 when substr(szptcr0001,5,1) = opallele1 then '-'||peptide1 when substr(szptcr0001,5,1) = opallele2 then '-'||peptide2 when substr(szptcr0001,5,1) = opallele3 then '-'||peptide3 end as t3 from mind_data_1ann) as mytable;
+ 
 
-from mind_data_1ann) as mytable;
 
-
-uniq patient names
-SZ
-CG
-EL
-GC
-
+szptcr0001 | t12  
+------------+------
+ A/A        | -F-F
+ G/G        | +K+K
+ G/G        | -T-T
+ A/A        | -F-F
+ A/A        | -F-F
+ A/A        | -F-F
+ G/G        | +K+K
+ G/G        | +K+K
+ G/G        | +K+K
+ G/G        | -T-T
+ G/G        | -T-T
 
