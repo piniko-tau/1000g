@@ -4,19 +4,18 @@ compare with patient
 replace patient with peptides
 
 add to pepstr
+ydb=# select * from mind_data_1ann limit 4;
+ bin | chromStart | chromEnd |    name     |  transcript  | frame | alleleCount | funcCodes | alleles |    codons    | peptides | peptide1 | peptide2 | peptide3 | allele1 | allele2 | allele3 | opallele1 | opallele2 | opallele3 | szptcr0001 | szptcr0002 | szptcr0003 | numid | chr |    rsid     | coordinate | idnum 
+ -----+------------+----------+-------------+--------------+-------+-------------+-----------+---------+--------------+----------+----------+----------+----------+---------+---------+---------+-----------+-----------+-----------+------------+------------+------------+-------+-----+-------------+------------+-------
+  585 |      69427 |    69428 | rs140739101 | NM_001005484 | 2     |           2 | 8,42,     | T,G,    | TTT,TGT,     | F,C,     | F        | C        |          | T       | G       |         | A         | C         |           | A/A        | A/A        | A/A        | 2     | 1   | rs140739101 | 72017      | 2
+   585 |      69427 |    69428 | rs140739101 | NM_001005484 | 2     |           2 | 8,42,     | T,G,    | TTT,TGT,     | F,C,     | F        | C        |          | T       | G       |         | A         | C         |           | A/A        | A/A        | A/A        | 2     | 1   | rs140739101 | 72017      | 2
+    585 |      69427 |    69428 | rs140739101 | NM_001005484 | 2     |           2 | 8,42,     | T,G,    | TTT,TGT,     | F,C,     | F        | C        |          | T       | G       |         | A         | C         |           | A/A        | A/A        | A/A        | 2     | 1   | rs140739101 | 72017      | 2
+     585 |      69452 |    69453 | rs2854682   | NM_001005484 | 3     |           3 | 8,42,42,  | G,C,T,  | AAG,AAC,AAT, | K,N,N,   | K        | N        | N        | G       | C       | T       | C         | G         | A         | G/G        | G/G        | G/G        | 3     | 1   | rs2854682   | 81335      | 3
 
+select szptcr0001, case when substr(szptcr0001,1,1) = opallele1 and substr(szptcr0001,3,1) = opallele2 then peptide1||peptide1 end as t from mind_data_1ann;
 
-pydb=> select * from test1;
- alleles |    codons    | peptides | peptide1 | peptide2 | peptide3 | szptcr0001 | szptcr0002 | szptcr0003 |    rsid     
----------+--------------+----------+----------+----------+----------+------------+------------+------------+-------------
- T,G,    | TTT,TGT,     | F,C,     | F        | C        |          | A/A        | A/A        | A/A        | rs140739101
- G,C,T,  | AAG,AAC,AAT, | K,N,N,   | K        | N        | N        | G/G        | G/G        | G/G        | rs2854682
- T,C,    | ATG,ACG,     | M,T,     | M        | T        |          | G/G        | G/G        | G/G        | rs148502021
+a1 a2 a3 o1 o2 o3 p1 p2 p3
 
+select szptcr0001, case (a1:p1+ if a2:p2+ if a3:p3+ if o1:p1- if o2:p2- if o3:p3-
 
-
-strand op
-T	A
-G	C	
-A	T
-C	G
+select szptcr0001, case when substr(szptcr0001,1,1) = opallele1 then peptide1 when substr(szptcr0001,3,1) = opallele2 then peptide1 end as t ,peptide2 from mind_data_1ann;)
