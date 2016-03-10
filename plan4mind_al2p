@@ -49,3 +49,13 @@ szptcr0001 | t12
  G/G        | -T-T
  G/G        | -T-T
 
+create table test2 as select idnum,t1||t2||t3 as t123 from (select case when substr(szaatn0009,1,1) = allele1 then '+'||peptide1 when substr(szaatn0009,1,1) = allele2 then '+'||peptide2 when substr(szaatn0009,1,1) = allele3 then '+'||peptide3 when substr(szaatn0009,1,1) = opallele1 then '-'||peptide1 when substr(szaatn0009,1,1) = opallele2 then '-'||peptide2 when substr(szaatn0009,1,1) = opallele3 then '-'||peptide3 end as t1 , case when substr(szaatn0009,3,1) = allele1 then '+'||peptide1 when substr(szaatn0009,3,1) = allele2 then '+'||peptide2 when substr(szaatn0009,3,1) = allele3 then '+'||peptide3 when substr(szaatn0009,3,1) = opallele1 then '-'||peptide1 when substr(szaatn0009,3,1) = opallele2 then '-'||peptide2 when substr(szaatn0009,3,1) = opallele3 then '-'||peptide3 end as t2 ,case when substr(szaatn0009,5,1) = '' then '' when substr(szaatn0009,5,1) = allele1 then '+'||peptide1 when substr(szaatn0009,5,1) = allele2 then '+'||peptide2 when substr(szaatn0009,5,1) = allele3 then '+'||peptide3 when substr(szaatn0009,5,1) = opallele1 then '-'||peptide1 when substr(szaatn0009,5,1) = opallele2 then '-'||peptide2 when substr(szaatn0009,5,1) = opallele3 then '-'||peptide3 end as t3 from test1) as mytable;
+
+update test10 set szptcr0001 = mytable.t1||mytable.t2||mytable.t3 from (select szptcr0001, case when substr(szptcr0001,1,1) = allele1 then '+'||peptide1 when substr(szptcr0001,1,1) = allele2 then '+'||peptide2 when substr(szptcr0001,1,1) = allele3 then '+'||peptide3 when substr(szptcr0001,1,1) = opallele1 then '-'||peptide1 when substr(szptcr0001,1,1) = opallele2 then '-'||peptide2 when substr(szptcr0001,1,1) = opallele3 then '-'||peptide3 end as t1 , case when substr(szptcr0001,3,1) = allele1 then '+'||peptide1 when substr(szptcr0001,3,1) = allele2 then '+'||peptide2 when substr(szptcr0001,3,1) = allele3 then '+'||peptide3 when substr(szptcr0001,3,1) = opallele1 then '-'||peptide1 when substr(szptcr0001,3,1) = opallele2 then '-'||peptide2 when substr(szptcr0001,3,1) = opallele3 then '-'||peptide3 end as t2 ,case when substr(szptcr0001,5,1) = '' then '' when substr(szptcr0001,5,1) = allele1 then '+'||peptide1 when substr(szptcr0001,5,1) = allele2 then '+'||peptide2 when substr(szptcr0001,5,1) = allele3 then '+'||peptide3 when substr(szptcr0001,5,1) = opallele1 then '-'||peptide1 when substr(szptcr0001,5,1) = opallele2 then '-'||peptide2 when substr(szptcr0001,5,1) = opallele3 then '-'||peptide3 end as t3 from test11) as mytable;
+
+create org table1 with idnum2
+create new table2 with only idnum2 and idnum
+patients loop 
+ create table3 %s as select * from %s inner join %s on (%s.gene_name = %s.gene
+ join tables 2+3
+join genes and rs from 1 with table 2

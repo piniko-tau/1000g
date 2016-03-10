@@ -1188,45 +1188,126 @@ try:
             print hg2
 
 
-# add variation peptide scetion :
-#
     if args.mind_update_table_allel2peptide:
+        
         var2all_table = args.mind_update_table_allel2peptide + "al2p"
-        check_overwrite_table(var2all_table)
-        # if not check_table_exists(var2all_table):
+        var2all2_table = args.mind_update_table_allel2peptide + "al2p2"
+        var2all_id2_table = args.mind_update_table_allel2peptide + "id2"
+        var2all_temp_table = args.mind_update_table_allel2peptide + "temp"
+        var2all_tempid2_table = args.mind_update_table_allel2peptide + "tempid2"
+        var2all_tempfirst_table = args.mind_update_table_allel2peptide + "tempfirst"
 
-        print(cur.mogrify("create table %s as select * from %s ",(AsIs(var2all_table),AsIs(args.mind_update_table_allel2peptide),)))
-        cur.execute("create table %s as select * from %s ",(AsIs(var2all_table),AsIs(args.mind_update_table_allel2peptide),))
+
+        check_overwrite_table(var2all_id2_table)
+            #make a full copy with idnum2
+        print(cur.mogrify("create table %s as select *,row_number() over() as idnum2 from %s;",(AsIs(var2all_id2_table),AsIs(args.mind_update_table_allel2peptide),)))
+        cur.execute("create table %s as select *,row_number() over() as idnum2 from %s",(AsIs(var2all_id2_table),AsIs(args.mind_update_table_allel2peptide),))
         conn.commit()
 
+        check_overwrite_table(var2all_tempfirst_table)
+        #create first table as copy with idnum2,gene_name,rsid
+        print(cur.mogrify("create table %s as select idnum2 as idnum3,gene_name,rsid from %s;",(AsIs(var2all_tempfirst_table),AsIs(var2all_id2_table),)))
+        cur.execute("create table %s as select idnum2 as idnum3,gene_name,rsid from %s",(AsIs(var2all_tempfirst_table),AsIs(var2all_id2_table),))
+        conn.commit()
+
+        check_overwrite_table(var2all_tempid2_table)
+        #make new table 2all withonly idnum2 and idnum
+        print(cur.mogrify("create table %s as select idnum,idnum2 as idnum22 from %s;",(AsIs(var2all_tempid2_table),AsIs(var2all_id2_table),)))
+        cur.execute("create table %s as select idnum,idnum2 as idnum22 from %s",(AsIs(var2all_tempid2_table),AsIs(var2all_id2_table),))
+        conn.commit()
+
+        check_overwrite_table(var2all_temp_table)
 
         print(cur.mogrify("select column_name from information_schema.columns where table_name = \'%s\' and ( column_name ~ \'^sz.*[1-9]\' or column_name ~ \'^cg.*[1-9]\' or column_name ~ \'^el.*[1-9]\' or column_name ~ \'^gc.*[1-9]\' );",(AsIs(args.mind_update_table_allel2peptide),)))
         cur.execute("select column_name from information_schema.columns where table_name = \'%s\' and ( column_name ~ \'^sz.*[1-9]\' or column_name ~ \'^cg.*[1-9]\' or column_name ~ \'^el.*[1-9]\' or column_name ~ \'^gc.*[1-9]\' );",(AsIs(args.mind_update_table_allel2peptide),))
 
         widgets = ['processing query -> '+table1000g+' :', Percentage(), ' ', Bar(marker=RotatingMarker()),' ', ETA(), ' ', FileTransferSpeed()]
 
-        pbar = ProgressBar(widgets=widgets, maxval=10000000).start()
+        pbar = ProgressBar(widgets=widgets, maxval=100000000000).start()
+
+        firstrun = True
+
+
+
 
         for hg2 in pbar(query2list()):
 
-            print (cur.mogrify("update %s set %s = t1||t2||t3 from (select case when substr(\"%s\",1,1) = allele1 then '+'||peptide1 when substr(%s,1,1) = allele2 then '+'||peptide2 when substr(%s,1,1) = allele3 then '+'||peptide3 when substr(%s,1,1) = opallele1 then '-'||peptide1 when substr(%s,1,1) = opallele2 then '-'||peptide2 when substr(%s,1,1) = opallele3 then '-'||peptide3 end as t1 , case when substr(%s,3,1) = allele1 then '+'||peptide1 when substr(%s,3,1) = allele2 then '+'||peptide2 when substr(%s,3,1) = allele3 then '+'||peptide3 when substr(%s,3,1) = opallele1 then '-'||peptide1 when substr(%s,3,1) = opallele2 then '-'||peptide2 when substr(%s,3,1) = opallele3 then '-'||peptide3 end as t2 ,case when substr(%s,5,1) = '' then '' when substr(%s,5,1) = allele1 then '+'||peptide1 when substr(%s,5,1) = allele2 then '+'||peptide2 when substr(%s,5,1) = allele3 then '+'||peptide3 when substr(%s,5,1) = opallele1 then '-'||peptide1 when substr(%s,5,1) = opallele2 then '-'||peptide2 when substr(%s,5,1) = opallele3 then '-'||peptide3 end as t3 from %s) as mytable;",(AsIs(var2all_table),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(var2all_table),)))
-            cur.execute("update %s set %s = t1||t2||t3 from (select case when substr(%s,1,1) = allele1 then '+'||peptide1 when substr(%s,1,1) = allele2 then '+'||peptide2 when substr(%s,1,1) = allele3 then '+'||peptide3 when substr(%s,1,1) = opallele1 then '-'||peptide1 when substr(%s,1,1) = opallele2 then '-'||peptide2 when substr(%s,1,1) = opallele3 then '-'||peptide3 end as t1 , case when substr(%s,3,1) = allele1 then '+'||peptide1 when substr(%s,3,1) = allele2 then '+'||peptide2 when substr(%s,3,1) = allele3 then '+'||peptide3 when substr(%s,3,1) = opallele1 then '-'||peptide1 when substr(%s,3,1) = opallele2 then '-'||peptide2 when substr(%s,3,1) = opallele3 then '-'||peptide3 end as t2 ,case when substr(%s,5,1) = '' then '' when substr(%s,5,1) = allele1 then '+'||peptide1 when substr(%s,5,1) = allele2 then '+'||peptide2 when substr(%s,5,1) = allele3 then '+'||peptide3 when substr(%s,5,1) = opallele1 then '-'||peptide1 when substr(%s,5,1) = opallele2 then '-'||peptide2 when substr(%s,5,1) = opallele3 then '-'||peptide3 end as t3 from %s) as mytable;",(AsIs(var2all_table),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(var2all_table),))
+            print (cur.mogrify("create table %s as select idnum2 as idnum4,t1||t2||t3 as %s from  (select idnum2,case when substr(%s,1,1) = allele1 then '+'||peptide1 when substr(%s,1,1) = allele2 then '+'||peptide2 when substr(%s,1,1) = allele3 then '+'||peptide3 when substr(%s,1,1) = opallele1 then '-'||peptide1 when substr(%s,1,1) = opallele2 then '-'||peptide2 when substr(%s,1,1) = opallele3 then '-'||peptide3 end as t1 , case when substr(%s,3,1) = allele1 then '+'||peptide1 when substr(%s,3,1) = allele2 then '+'||peptide2 when substr(%s,3,1) = allele3 then '+'||peptide3 when substr(%s,3,1) = opallele1 then '-'||peptide1 when substr(%s,3,1) = opallele2 then '-'||peptide2 when substr(%s,3,1) = opallele3 then '-'||peptide3 end as t2 ,case when substr(%s,5,1) = '' then '' when substr(%s,5,1) = allele1 then '+'||peptide1 when substr(%s,5,1) = allele2 then '+'||peptide2 when substr(%s,5,1) = allele3 then '+'||peptide3 when substr(%s,5,1) = opallele1 then '-'||peptide1 when substr(%s,5,1) = opallele2 then '-'||peptide2 when substr(%s,5,1) = opallele3 then '-'||peptide3 end as t3 from %s) as mytable;",(AsIs(var2all_temp_table),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(var2all_id2_table),)))
+            cur.execute("create table %s as select idnum2 as idnum4,t1||t2||t3 as %s from  (select idnum2,case when substr(%s,1,1) = allele1 then '+'||peptide1 when substr(%s,1,1) = allele2 then '+'||peptide2 when substr(%s,1,1) = allele3 then '+'||peptide3 when substr(%s,1,1) = opallele1 then '-'||peptide1 when substr(%s,1,1) = opallele2 then '-'||peptide2 when substr(%s,1,1) = opallele3 then '-'||peptide3 end as t1 , case when substr(%s,3,1) = allele1 then '+'||peptide1 when substr(%s,3,1) = allele2 then '+'||peptide2 when substr(%s,3,1) = allele3 then '+'||peptide3 when substr(%s,3,1) = opallele1 then '-'||peptide1 when substr(%s,3,1) = opallele2 then '-'||peptide2 when substr(%s,3,1) = opallele3 then '-'||peptide3 end as t2 ,case when substr(%s,5,1) = '' then '' when substr(%s,5,1) = allele1 then '+'||peptide1 when substr(%s,5,1) = allele2 then '+'||peptide2 when substr(%s,5,1) = allele3 then '+'||peptide3 when substr(%s,5,1) = opallele1 then '-'||peptide1 when substr(%s,5,1) = opallele2 then '-'||peptide2 when substr(%s,5,1) = opallele3 then '-'||peptide3 end as t3 from %s) as mytable;",(AsIs(var2all_temp_table),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(var2all_id2_table),))
             conn.commit()
-            # print hg2
+
+            if firstrun:
+
+                #join new table with gene,rsid first table
+                check_overwrite_table(var2all_table)
+                print(cur.mogrify("create table %s as select * from %s inner join %s on (%s.idnum4 = %s.idnum3) ;",(AsIs(var2all_table),AsIs(var2all_temp_table),AsIs(var2all_tempfirst_table),AsIs(var2all_temp_table),AsIs(var2all_tempfirst_table),)))
+                cur.execute("create table %s as select * from %s inner join %s on (%s.idnum4 = %s.idnum3) ;",(AsIs(var2all_table),AsIs(var2all_temp_table),AsIs(var2all_tempfirst_table),AsIs(var2all_temp_table),AsIs(var2all_tempfirst_table),))
+                conn.commit()
+                firstrun=False
+
+            print(cur.mogrify("alter table %s drop column idnum4;",(AsIs(var2all_table))))
+            cur.execute("alter table %s drop column idnum4;",(AsIs(var2all_table)))
+
+            #create var2all2 from temp and var2all
+            print(cur.mogrify("create table %s as select * from %s inner join %s on (%s.idnum4 = %s.idnum3) ;",(AsIs(var2all2_table),AsIs(var2all_temp_table),AsIs(var2all_table),AsIs(var2all_temp_table),AsIs(var2all_table),)))
+            cur.execute("create table %s as select * from %s inner join %s on (%s.idnum4 = %s.idnum3) ;",(AsIs(var2all2_table),AsIs(var2all_temp_table),AsIs(var2all_table),AsIs(var2all_temp_table),AsIs(var2all_table),))
+            conn.commit()
+
+            #create copy var2all to var2all2
+            print(cur.mogrify("create table %s as select * from %s;",(AsIs(var2all2_table),AsIs(var2all_table),)))
+            cur.execute("create table %s as select * from %s",(AsIs(var2all2_table),AsIs(var2all_table),))
+            conn.commit()
+
+            #discard var2all2
+            print(cur.mogrify("drop table %s;",(AsIs(var2all2_table),)))
+            cur.execute("drop table %s;",(AsIs(var2all2_table),))
+            conn.commit()
+
+            #discard temp
+            print(cur.mogrify("drop table %s;",(AsIs(var2all_temp_table),)))
+            cur.execute("drop table %s;",(AsIs(var2all_temp_table),))
+            conn.commit()
 
 
-
-#create new tables without duplicate alleles
-    if args.remove_dup_allele:
-
-        var_nodup_table = args.remove_dup_allele+ "nodup"
-        check_overwrite_table(var_nodup_table)
-
-
-        print(cur.mogrify("create table %s as select * from %s WHERE peptide1!=peptide2 and peptide1!=peptide3 and peptide2!=peptide3",(AsIs(var_nodup_table),AsIs(args.remove_dup_allele),)))
-        cur.execute("create table %s as select * from %s WHERE peptide1!=peptide2 and peptide1!=peptide3 and peptide2!=peptide3",(AsIs(var_nodup_table),AsIs(args.remove_dup_allele),))
-        conn.commit()
-
+# add variation peptide scetion :
+# #
+#     if args.mind_update_table_allel2peptide_OLD:
+#         var2all_table = args.mind_update_table_allel2peptide + "al2p"
+#         check_overwrite_table(var2all_table)
+#         # if not check_table_exists(var2all_table):
+#
+#         print(cur.mogrify("create table %s as select * from %s ",(AsIs(var2all_table),AsIs(args.mind_update_table_allel2peptide),)))
+#         cur.execute("create table %s as select * from %s ",(AsIs(var2all_table),AsIs(args.mind_update_table_allel2peptide),))
+#         conn.commit()
+#
+#
+#         print(cur.mogrify("select column_name from information_schema.columns where table_name = \'%s\' and ( column_name ~ \'^sz.*[1-9]\' or column_name ~ \'^cg.*[1-9]\' or column_name ~ \'^el.*[1-9]\' or column_name ~ \'^gc.*[1-9]\' );",(AsIs(args.mind_update_table_allel2peptide),)))
+#         cur.execute("select column_name from information_schema.columns where table_name = \'%s\' and ( column_name ~ \'^sz.*[1-9]\' or column_name ~ \'^cg.*[1-9]\' or column_name ~ \'^el.*[1-9]\' or column_name ~ \'^gc.*[1-9]\' );",(AsIs(args.mind_update_table_allel2peptide),))
+#
+#         widgets = ['processing query -> '+table1000g+' :', Percentage(), ' ', Bar(marker=RotatingMarker()),' ', ETA(), ' ', FileTransferSpeed()]
+#
+#         pbar = ProgressBar(widgets=widgets, maxval=10000000).start()
+#
+#         for hg2 in pbar(query2list()):
+#
+#             print (cur.mogrify("update %s set %s = t1||t2||t3 from (select case when substr(\"%s\",1,1) = allele1 then '+'||peptide1 when substr(%s,1,1) = allele2 then '+'||peptide2 when substr(%s,1,1) = allele3 then '+'||peptide3 when substr(%s,1,1) = opallele1 then '-'||peptide1 when substr(%s,1,1) = opallele2 then '-'||peptide2 when substr(%s,1,1) = opallele3 then '-'||peptide3 end as t1 , case when substr(%s,3,1) = allele1 then '+'||peptide1 when substr(%s,3,1) = allele2 then '+'||peptide2 when substr(%s,3,1) = allele3 then '+'||peptide3 when substr(%s,3,1) = opallele1 then '-'||peptide1 when substr(%s,3,1) = opallele2 then '-'||peptide2 when substr(%s,3,1) = opallele3 then '-'||peptide3 end as t2 ,case when substr(%s,5,1) = '' then '' when substr(%s,5,1) = allele1 then '+'||peptide1 when substr(%s,5,1) = allele2 then '+'||peptide2 when substr(%s,5,1) = allele3 then '+'||peptide3 when substr(%s,5,1) = opallele1 then '-'||peptide1 when substr(%s,5,1) = opallele2 then '-'||peptide2 when substr(%s,5,1) = opallele3 then '-'||peptide3 end as t3 from %s) as mytable;",(AsIs(var2all_table),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(args.mind_update_table_allel2peptide),)))
+#             cur.execute("update %s set %s = t1||t2||t3 from (select case when substr(%s,1,1) = allele1 then '+'||peptide1 when substr(%s,1,1) = allele2 then '+'||peptide2 when substr(%s,1,1) = allele3 then '+'||peptide3 when substr(%s,1,1) = opallele1 then '-'||peptide1 when substr(%s,1,1) = opallele2 then '-'||peptide2 when substr(%s,1,1) = opallele3 then '-'||peptide3 end as t1 , case when substr(%s,3,1) = allele1 then '+'||peptide1 when substr(%s,3,1) = allele2 then '+'||peptide2 when substr(%s,3,1) = allele3 then '+'||peptide3 when substr(%s,3,1) = opallele1 then '-'||peptide1 when substr(%s,3,1) = opallele2 then '-'||peptide2 when substr(%s,3,1) = opallele3 then '-'||peptide3 end as t2 ,case when substr(%s,5,1) = '' then '' when substr(%s,5,1) = allele1 then '+'||peptide1 when substr(%s,5,1) = allele2 then '+'||peptide2 when substr(%s,5,1) = allele3 then '+'||peptide3 when substr(%s,5,1) = opallele1 then '-'||peptide1 when substr(%s,5,1) = opallele2 then '-'||peptide2 when substr(%s,5,1) = opallele3 then '-'||peptide3 end as t3 from %s) as mytable;",(AsIs(var2all_table),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(args.mind_update_table_allel2peptide),))
+#             conn.commit()
+#             # print hg2
+#
+#
+#
+# #create new tables without duplicate alleles
+#     if args.remove_dup_allele:
+#
+#         var_nodup_table = args.remove_dup_allele+ "nodup"
+#         check_overwrite_table(var_nodup_table)
+#
+#
+#         print(cur.mogrify("create table %s as select * from %s WHERE peptide1!=peptide2 and peptide1!=peptide3 and peptide2!=peptide3",(AsIs(var_nodup_table),AsIs(args.remove_dup_allele),)))
+#         cur.execute("create table %s as select * from %s WHERE peptide1!=peptide2 and peptide1!=peptide3 and peptide2!=peptide3",(AsIs(var_nodup_table),AsIs(args.remove_dup_allele),))
+#         conn.commit()
+#
 
     if args.add_gene_peptide_string:
 
@@ -1281,12 +1362,6 @@ try:
 
 
 
-#get a list of patients
-
-        print(cur.mogrify("select column_name from information_schema.columns where table_name = '%s' and column_name ~ \'^sz.*[1-9]\' or column_name ~ \'^cg.*[1-9]\' or column_name ~ \'^el.*[1-9]\' or column_name ~ \'^gc.*[1-9]\';",(AsIs(var2all_table),)))
-        cur.execute("select column_name from information_schema.columns where table_name = '%s' and column_name ~ \'^sz.*[1-9]\' or column_name ~ \'^cg.*[1-9]\' or column_name ~ \'^el.*[1-9]\' or column_name ~ \'^gc.*[1-9]\';",(AsIs(var2all_table),))
-
-#load ersults into list :
 
         if not check_table_exists(varpepstr_temp_table):
 
@@ -1299,17 +1374,28 @@ try:
             cur.execute("alter table %s add column pepstr text;",(AsIs(varpepstr_temp_table),))
 
 
-            print(cur.mogrify("update test7 set pepstr ='';",(AsIs(varpepstr_temp_table),)))
-            cur.execute("update test7 set pepstr ='';",(AsIs(varpepstr_temp_table),))
+            print(cur.mogrify("update %s set pepstr ='';",(AsIs(varpepstr_temp_table),)))
+            cur.execute("update %s set pepstr ='';",(AsIs(varpepstr_temp_table),))
+
+#get a list of patients
+
+            print(cur.mogrify("select column_name from information_schema.columns where table_name = '%s' and ( column_name ~ \'^sz.*[1-9]\' or column_name ~ \'^cg.*[1-9]\' or column_name ~ \'^el.*[1-9]\' or column_name ~ \'^gc.*[1-9]\');",(AsIs(args.mind_add_gene_peptide_string),)))
+            cur.execute("select column_name from information_schema.columns where table_name = '%s' and ( column_name ~ \'^sz.*[1-9]\' or column_name ~ \'^cg.*[1-9]\' or column_name ~ \'^el.*[1-9]\' or column_name ~ \'^gc.*[1-9]\');",(AsIs(args.mind_add_gene_peptide_string),))
+
+#load ersults into list :
 
 
-            for hg2 in query2list():
+            widgets = ['processing query -> '+table1000g+' :', Percentage(), ' ', Bar(marker=RotatingMarker()),' ', ETA(), ' ', FileTransferSpeed()]
+
+            pbar = ProgressBar(widgets=widgets, maxval=10000000).start()
+
+            for hg2 in pbar(query2list()):
 
     #create table with gene and pep list :
 
 
-                print(cur.mogrify("update %s set pepstr = %s.pepstr||gtable.pepstr from (select gene_name as gene,string_agg(%s,'' order by %s) as pepstr from test8 group by gene_name) as gtable;",(AsIs(varpepstr_temp_table),AsIs(varpepstr_temp_table),AsIs(hg2),AsIs(hg2),AsIs(args.mind_add_gene_peptide_string),)))
-                cur.execute("update %s set pepstr = %s.pepstr||gtable.pepstr from (select gene_name as gene,string_agg(%s,'' order by %s) as pepstr from test8 group by gene_name) as gtable;",(AsIs(varpepstr_temp_table),AsIs(varpepstr_temp_table),AsIs(hg2),AsIs(hg2),AsIs(args.mind_add_gene_peptide_string),))
+                print(cur.mogrify("update %s set pepstr = %s.pepstr||gtable.pepstr from (select gene_name as gene,string_agg(%s,'' order by %s) as pepstr from %s group by gene_name) as gtable;",(AsIs(varpepstr_temp_table),AsIs(varpepstr_temp_table),AsIs(hg2),AsIs(hg2),AsIs(args.mind_add_gene_peptide_string),)))
+                cur.execute("update %s set pepstr = %s.pepstr||gtable.pepstr from (select gene_name as gene,string_agg(%s,'' order by %s) as pepstr from %s group by gene_name) as gtable;",(AsIs(varpepstr_temp_table),AsIs(varpepstr_temp_table),AsIs(hg2),AsIs(hg2),AsIs(args.mind_add_gene_peptide_string),))
 
                 conn.commit()
 
