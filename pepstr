@@ -1,0 +1,6 @@
+
+create table test7 as select gene_name as gene from test8 group by gene_name;
+alter table test7 add column pepstr text;
+update test7 set pepstr ='';
+
+update test7 set pepstr = test7.pepstr||gtable.pepstr from (select gene_name as gene,string_agg(szaabr0002,'' order by szaabr0002) as pepstr from test8 group by gene_name) as gtable;
