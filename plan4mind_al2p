@@ -59,3 +59,10 @@ patients loop
  create table3 %s as select * from %s inner join %s on (%s.gene_name = %s.gene
  join tables 2+3
 join genes and rs from 1 with table 2
+
+
+pydb=# select string_agg(t123,'') from  (select mytable.t1||mytable.t2||mytable.t3  as t123 from (select name,szptcr0001, case when substr(szptcr0001,1,1) = allele1 then '+'||peptide1 when substr(szptcr0001,1,1) = allele2 then '+'||peptide2 when substr(szptcr0001,1,1) = allele3 then '+'||peptide3 when substr(szptcr0001,1,1) = opallele1 then '-'||peptide1 when substr(szptcr0001,1,1) = opallele2 then '-'||peptide2 when substr(szptcr0001,1,1) = opallele3 then '-'||peptide3 end as t1 , case when substr(szptcr0001,3,1) = allele1 then '+'||peptide1 when substr(szptcr0001,3,1) = allele2 then '+'||peptide2 when substr(szptcr0001,3,1) = allele3 then '+'||peptide3 when substr(szptcr0001,3,1) = opallele1 then '-'||peptide1 when substr(szptcr0001,3,1) = opallele2 then '-'||peptide2 when substr(szptcr0001,3,1) = opallele3 then '-'||peptide3 end as t2 ,case when substr(szptcr0001,5,1) = '' then '' when substr(szptcr0001,5,1) = allele1 then '+'||peptide1 when substr(szptcr0001,5,1) = allele2 then '+'||peptide2 when substr(szptcr0001,5,1) = allele3 then '+'||peptide3 when substr(szptcr0001,5,1) = opallele1 then '-'||peptide1 when substr(szptcr0001,5,1) = opallele2 then '-'||peptide2 when substr(szptcr0001,5,1) = opallele3 then '-'||peptide3 end as t3 from test11) as mytable union all select name from test11)as table1;
+                                                            string_agg                                                             
+							    -----------------------------------------------------------------------------------------------------------------------------------
+							     -F-F-F-F-F-F+K+K+K+K+K+K-T-T-T-T-T-Trs140739101rs140739101rs140739101rs2854682rs2854682rs2854682rs148502021rs148502021rs148502021
+

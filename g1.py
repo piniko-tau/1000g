@@ -51,7 +51,10 @@ parser = argparse.ArgumentParser(prog='psql_1000g_loader',usage='psql_1000g_load
  [-mind_update_table_allel2peptide create all to peptide table] \
  [-mind_add_gene_peptide_string add gene_peptide_string fileds to table] \
  [-s show all tables] \
+ [-export_shortcut export a ml dataset of mind data]\
  [-add_meta add tables metadata]',\
+
+
  description='Load annotated snp database & Create a 1000G sql table from all Chromosomes - using a connection to a postgresql DB.')
 
 
@@ -140,6 +143,7 @@ parser.add_argument("-mind_update_table_allel2peptide",help=' create all to pept
 
 parser.add_argument("-mind_add_gene_peptide_string",help=' add gene_peptide_string fileds to table',metavar='mind_add_gene_peptide_string')
 
+parser.add_argument("-export_shortcut",help='export a ml dataset of mind data',metavar='-export_shortcut')
 
 parser.add_argument("-o", "--overwrite_tables", help="overwrites any existing tables",action="store_true")
 parser.add_argument("-v", "--verbose", help="increase output verbosity",action="store_true")
@@ -1245,8 +1249,8 @@ try:
                 conn.commit()
                 firstrun=False
 
-            print(cur.mogrify("alter table %s drop column idnum4;",(AsIs(var2all_table))))
-            cur.execute("alter table %s drop column idnum4;",(AsIs(var2all_table)))
+            print(cur.mogrify("alter table %s drop column idnum4;",(AsIs(var2all_table),)))
+            cur.execute("alter table %s drop column idnum4;",(AsIs(var2all_table),))
 
             #create var2all2 from temp and var2all
             print(cur.mogrify("create table %s as select * from %s inner join %s on (%s.idnum4 = %s.idnum3) ;",(AsIs(var2all2_table),AsIs(var2all_temp_table),AsIs(var2all_table),AsIs(var2all_temp_table),AsIs(var2all_table),)))
@@ -1294,8 +1298,48 @@ try:
 #             cur.execute("update %s set %s = t1||t2||t3 from (select case when substr(%s,1,1) = allele1 then '+'||peptide1 when substr(%s,1,1) = allele2 then '+'||peptide2 when substr(%s,1,1) = allele3 then '+'||peptide3 when substr(%s,1,1) = opallele1 then '-'||peptide1 when substr(%s,1,1) = opallele2 then '-'||peptide2 when substr(%s,1,1) = opallele3 then '-'||peptide3 end as t1 , case when substr(%s,3,1) = allele1 then '+'||peptide1 when substr(%s,3,1) = allele2 then '+'||peptide2 when substr(%s,3,1) = allele3 then '+'||peptide3 when substr(%s,3,1) = opallele1 then '-'||peptide1 when substr(%s,3,1) = opallele2 then '-'||peptide2 when substr(%s,3,1) = opallele3 then '-'||peptide3 end as t2 ,case when substr(%s,5,1) = '' then '' when substr(%s,5,1) = allele1 then '+'||peptide1 when substr(%s,5,1) = allele2 then '+'||peptide2 when substr(%s,5,1) = allele3 then '+'||peptide3 when substr(%s,5,1) = opallele1 then '-'||peptide1 when substr(%s,5,1) = opallele2 then '-'||peptide2 when substr(%s,5,1) = opallele3 then '-'||peptide3 end as t3 from %s) as mytable;",(AsIs(var2all_table),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(args.mind_update_table_allel2peptide),))
 #             conn.commit()
 #             # print hg2
-#
-#
+
+
+    def export_shortcut():
+        #get diagnosis, patient name,peptides string,gene in single line and string_agg it , output to file , for each of the four tables, for each patient
+
+        # print(cur.mogrify("select column_name from information_schema.columns where table_name = \'%s\' and ( column_name ~ \'^sz.*[1-9]\' or column_name ~ \'^cg.*[1-9]\' or column_name ~ \'^el.*[1-9]\' or column_name ~ \'^gc.*[1-9]\' );",(AsIs(args.export_shortcut),)))
+        cur.execute("select column_name from information_schema.columns where table_name = \'%s\' and ( column_name ~ \'^sz.*[1-9]\' or column_name ~ \'^cg.*[1-9]\' or column_name ~ \'^el.*[1-9]\' or column_name ~ \'^gc.*[1-9]\' );",(AsIs(args.export_shortcut),))
+
+        widgets = ['processing query -> '+table1000g+' :', Percentage(), ' ', Bar(marker=RotatingMarker()),' ', ETA(), ' ', FileTransferSpeed()]
+
+        pbar = ProgressBar(widgets=widgets, maxval=10000000).start()
+
+        with open('exported_mind.txt',"a") as export_file:
+
+            for hg2 in pbar(query2list()):
+
+                export_file.write(hg2)
+                export_file.write(',')
+
+                cur.execute("",(AsIs(hg2),AsIs(args.export_shortcut),))
+                #                                                             select gcobbn4655 from mind_data_4_rs where idnum='1' limit 1; 
+                                                                  
+
+                cur.execute("select t1||t2||t3 from (select case when substr(%s,1,1) = allele1 then '+'||peptide1 when substr(%s,1,1) = allele2 then '+'||peptide2 when substr(%s,1,1) = allele3 then '+'||peptide3 when substr(%s,1,1) = opallele1 then '-'||peptide1 when substr(%s,1,1) = opallele2 then '-'||peptide2 when substr(%s,1,1) = opallele3 then '-'||peptide3 end as t1 , case when substr(%s,3,1) = allele1 then '+'||peptide1 when substr(%s,3,1) = allele2 then '+'||peptide2 when substr(%s,3,1) = allele3 then '+'||peptide3 when substr(%s,3,1) = opallele1 then '-'||peptide1 when substr(%s,3,1) = opallele2 then '-'||peptide2 when substr(%s,3,1) = opallele3 then '-'||peptide3 end as t2 ,case when substr(%s,5,1) = '' then '' when substr(%s,5,1) = allele1 then '+'||peptide1 when substr(%s,5,1) = allele2 then '+'||peptide2 when substr(%s,5,1) = allele3 then '+'||peptide3 when substr(%s,5,1) = opallele1 then '-'||peptide1 when substr(%s,5,1) = opallele2 then '-'||peptide2 when substr(%s,5,1) = opallele3 then '-'||peptide3 end as t3 from %s) as mytable;",(AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(args.export_shortcut),))
+                print(cur.mogrify("select t1||t2||t3 from (select case when substr(%s,1,1) = allele1 then '+'||peptide1 when substr(%s,1,1) = allele2 then '+'||peptide2 when substr(%s,1,1) = allele3 then '+'||peptide3 when substr(%s,1,1) = opallele1 then '-'||peptide1 when substr(%s,1,1) = opallele2 then '-'||peptide2 when substr(%s,1,1) = opallele3 then '-'||peptide3 end as t1 , case when substr(%s,3,1) = allele1 then '+'||peptide1 when substr(%s,3,1) = allele2 then '+'||peptide2 when substr(%s,3,1) = allele3 then '+'||peptide3 when substr(%s,3,1) = opallele1 then '-'||peptide1 when substr(%s,3,1) = opallele2 then '-'||peptide2 when substr(%s,3,1) = opallele3 then '-'||peptide3 end as t2 ,case when substr(%s,5,1) = '' then '' when substr(%s,5,1) = allele1 then '+'||peptide1 when substr(%s,5,1) = allele2 then '+'||peptide2 when substr(%s,5,1) = allele3 then '+'||peptide3 when substr(%s,5,1) = opallele1 then '-'||peptide1 when substr(%s,5,1) = opallele2 then '-'||peptide2 when substr(%s,5,1) = opallele3 then '-'||peptide3 end as t3 from %s) as mytable;",(AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(args.export_shortcut),)))
+
+                # print(cur.fetchall())
+                # print(hg2)
+                # export_file.write(cur.fetchall())
+                # export_file.write(',')
+                row12 = cur.fetchall()
+                for index,i2 in enumerate(row12):
+
+                    if index == len(row12) - 1 :
+                        word12 = ''.join(i2)
+                        export_file.write(word12)
+                    else:
+                        word12 = ''.join(i2) + ","
+                        export_file.write(word12)
+                export_file.write("\n")
+
+
 #
 # #create new tables without duplicate alleles
 #     if args.remove_dup_allele:
@@ -1689,6 +1733,8 @@ try:
         uscs_split_allels(args.mind_prepare_ucsc_4_mind_annotations)
         ucsc_add_op_allele_strand(ucsc_table_split_alleles)
 
+    if args.export_shortcut:
+        export_shortcut()
 
 # # *************************************************************8
 # #multi core section
