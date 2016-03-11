@@ -818,6 +818,21 @@ def query2list():
             # print hglist
     return hglist
 
+def query2list2():
+    global hglist2
+    hglist2 = []
+    va2all_query = cur.fetchall()
+    for i3 in va2all_query:
+        for index,i2 in enumerate(i3):
+
+            if index == len(i3) - 1:
+                word12 = ''.join(i2)
+                # print(word12)
+            hglist2.extend([word12])
+            # print hglist
+    return hglist2
+
+
 def gethg():
 
     # varhgstr = "%peptide_string"
@@ -1317,43 +1332,83 @@ try:
 
             for hg2 in pbar(query2list()):
 
-                export_file.write(hg2)
+                export_file.write('\''+hg2+'\'')
                 export_file.write(',')
-                # mind_data_4_rs_ensorted_by_gene_posann 
+                # # mind_data_4_rs_ensorted_by_gene_posann 
 
                 # print(cur.mogrify("select %s from %s where idnum='1' limit 1;",(AsIs(hg2),AsIs(rstable),)))
                 cur.execute("select %s from %s where idnum='1' limit 1;",(AsIs(hg2),AsIs(rstable),))
 
-                row12 = cur.fetchall()
 
-                for index,i2 in enumerate(row12):
 
-                    if index == len(row12) - 1 :
-                        word12 = ''.join(i2)
-                        export_file.write(word12)
-                    else:
-                        word12 = ''.join(i2) + ","
-                        export_file.write(word12)
-                export_file.write(',')
+                # # if cur.fetchall():
+                # row12 = cur.fetchall()
+                # for index,i2 in enumerate(row12):
+                #
+                #
+                #     if index == len(row12) - 1 :
+                #         word12 = ''.join(i2)
+                #         export_file.write(word12)
+                #     else:
+                #         word12 = ''.join(i2) + ","
+                #         export_file.write(word12)
+
+
+
+                #
+                for i2 in cur.fetchall():
+                    # export_file.write(str(i2))
+                    export_file.write(re.sub('(\()|(\[)|(\])|(\))','',str(i2)))
+
+
 
                 cur.execute("select t1||t2||t3 from (select case when substr(%s,1,1) = allele1 then '+'||peptide1 when substr(%s,1,1) = allele2 then '+'||peptide2 when substr(%s,1,1) = allele3 then '+'||peptide3 when substr(%s,1,1) = opallele1 then '-'||peptide1 when substr(%s,1,1) = opallele2 then '-'||peptide2 when substr(%s,1,1) = opallele3 then '-'||peptide3 end as t1 , case when substr(%s,3,1) = allele1 then '+'||peptide1 when substr(%s,3,1) = allele2 then '+'||peptide2 when substr(%s,3,1) = allele3 then '+'||peptide3 when substr(%s,3,1) = opallele1 then '-'||peptide1 when substr(%s,3,1) = opallele2 then '-'||peptide2 when substr(%s,3,1) = opallele3 then '-'||peptide3 end as t2 ,case when substr(%s,5,1) = '' then '' when substr(%s,5,1) = allele1 then '+'||peptide1 when substr(%s,5,1) = allele2 then '+'||peptide2 when substr(%s,5,1) = allele3 then '+'||peptide3 when substr(%s,5,1) = opallele1 then '-'||peptide1 when substr(%s,5,1) = opallele2 then '-'||peptide2 when substr(%s,5,1) = opallele3 then '-'||peptide3 end as t3 from %s) as mytable;",(AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(args.export_shortcut),))
                 # print(cur.mogrify("select t1||t2||t3 from (select case when substr(%s,1,1) = allele1 then '+'||peptide1 when substr(%s,1,1) = allele2 then '+'||peptide2 when substr(%s,1,1) = allele3 then '+'||peptide3 when substr(%s,1,1) = opallele1 then '-'||peptide1 when substr(%s,1,1) = opallele2 then '-'||peptide2 when substr(%s,1,1) = opallele3 then '-'||peptide3 end as t1 , case when substr(%s,3,1) = allele1 then '+'||peptide1 when substr(%s,3,1) = allele2 then '+'||peptide2 when substr(%s,3,1) = allele3 then '+'||peptide3 when substr(%s,3,1) = opallele1 then '-'||peptide1 when substr(%s,3,1) = opallele2 then '-'||peptide2 when substr(%s,3,1) = opallele3 then '-'||peptide3 end as t2 ,case when substr(%s,5,1) = '' then '' when substr(%s,5,1) = allele1 then '+'||peptide1 when substr(%s,5,1) = allele2 then '+'||peptide2 when substr(%s,5,1) = allele3 then '+'||peptide3 when substr(%s,5,1) = opallele1 then '-'||peptide1 when substr(%s,5,1) = opallele2 then '-'||peptide2 when substr(%s,5,1) = opallele3 then '-'||peptide3 end as t3 from %s) as mytable;",(AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(args.export_shortcut),)))
 
-                # print(cur.fetchall())
-                # print(hg2)
-                # export_file.write(cur.fetchall())
-                # export_file.write(',')
-                row12 = cur.fetchall()
-                for index,i2 in enumerate(row12):
+                # for vart in query2list2():
+                #     export_file.write(vart)
+                #     export_file.write(',')
+                # row12 = cur.fetchall()
+                # for i3 in row12:
+                #     for index,i2 in enumerate(i3):
+                #
+                #         if index == len(i3) - 1:
+                #             word12 = ''.join(i2)
+                #             export_file.write(word12)
+                #         else:
+                #             if str(i2).isspace():
+                #                 i2 = re.sub('\s+','',str(i2))
+                #                 word12 = str(i2) + ","
+                #                 export_file.write(word12)
+                #             elif str(i2).isdigit():
+                #                 i2 = str(i2).strip()
+                #                 word12 = "\""+str(i2)+"\""
+                #                 word12 = str(i2) + ","
+                #                 export_file.write(word12)
+                #             elif not str(i2).isdigit():
+                #                 if str(i2) == "None":
+                #                     i2 = " "
+                #                 i2 = str(i2).strip()
+                #                 i2 = re.sub(',$','',i2)
+                #                 i2= re.sub(',',',',i2)
+                #                 word12 = str(i2) + "\',"
+                #                 export_file.write("\'"+word12)
+                # export_file.write("\n")
 
-                    if index == len(row12) - 1 :
-                        word12 = ''.join(i2)
-                        export_file.write(word12)
-                    else:
-                        word12 = ''.join(i2) + ","
-                        export_file.write(word12)
+                # row12 = cur.fetchall()
+                # for index,i2 in enumerate(row12):
+                #
+                #     if index == len(row12) - 1 :
+                #         word12 = ''.join(i2)
+                #         export_file.write(word12)
+                #     else:
+                #         word12 = ''.join(i2) + ","
+                #         export_file.write(word12)
+                for i2 in cur.fetchall():
+                    # export_file.write(str(i2))
+                   export_file.write(re.sub('(\()|(\[)|(\])|(\))','',str(i2)))
+
                 export_file.write("\n")
-
 
 #
 # #create new tables without duplicate alleles
