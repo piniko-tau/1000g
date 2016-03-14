@@ -1,0 +1,21 @@
+patients diagnosis gene1i 	gene2
+                   rsid		 
+msk3001	  2	   f+f+,-g-k	
+
+
+- print "patients",print diagnosis, print gene list order by gene
+
+query for header : 
+
+pydb=> select gene_name, string_agg(rsid,',' order by rsid) as rsids from (select distinct gene_name,rsid from mind_data_1_rs_ensorted_by_gene_posann )as t1 group by t1.gene_name order by t1.gene_name;
+
+two columns :- select gene_name from header table
+		- select rsids from header table
+
+
+for patient : 
+
+print patient id, print diagnosis, then : 
+
+select !!!string_agg(al to peptide)!!! + select gene_name, string_agg(!!! maybe drop ? !!! rsid,',' order by rsid) as rsids from (select distinct gene_name,rsid from mind_data_1_rs_ensorted_by_gene_posann )as t1 group by t1.gene_name order by t1.gene_name;
+
