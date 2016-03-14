@@ -1330,6 +1330,7 @@ try:
 
         with open('exported_mind.txt',"a") as export_file:
 
+            export_file.write("'patient','diagnosis',")
             cur.execute("select gene_name||' | '||rsids from %s_dist_header ;",(AsIs(args.export_shortcut),))
             for i2 in cur.fetchall():
                     # export_file.write(str(i2))

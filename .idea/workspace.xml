@@ -3,10 +3,12 @@
   <component name="BookmarkManager">
     <bookmark url="file://$PROJECT_DIR$/g1.py" line="1189" />
     <bookmark url="file://$PROJECT_DIR$/g1.py" />
-    <bookmark url="file://$PROJECT_DIR$/g1.py" line="1375" />
+    <bookmark url="file://$PROJECT_DIR$/g1.py" line="1376" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5891d722-a753-4925-b54f-308cf61cf348" name="Default" comment="" />
+    <list default="true" id="5891d722-a753-4925-b54f-308cf61cf348" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/g1.py" afterPath="$PROJECT_DIR$/g1.py" />
+    </list>
     <ignored path="1000g.iws" />
     <ignored path=".idea/workspace.xml" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -29,8 +31,8 @@
       <file leaf-file-name="g1.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/g1.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.60638297">
-              <caret line="1375" column="1344" selection-start-line="1375" selection-start-column="1344" selection-end-line="1375" selection-end-column="1344" />
+            <state vertical-scroll-proportion="0.3556231">
+              <caret line="1332" column="53" selection-start-line="1332" selection-start-column="53" selection-end-line="1332" selection-end-column="53" />
               <folding>
                 <element signature="e#24#34#0" expanded="true" />
               </folding>
@@ -51,7 +53,8 @@
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="y" value="-796" />
+    <option name="x" value="1366" />
+    <option name="y" value="-28" />
     <option name="width" value="1366" />
     <option name="height" value="796" />
   </component>
@@ -233,7 +236,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="-796" width="1366" height="796" extended-state="6" />
+    <frame x="1366" y="-28" width="1366" height="796" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -502,8 +505,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/g1.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.60638297">
-          <caret line="1375" column="1344" selection-start-line="1375" selection-start-column="1344" selection-end-line="1375" selection-end-column="1344" />
+        <state vertical-scroll-proportion="0.3556231">
+          <caret line="1332" column="53" selection-start-line="1332" selection-start-column="53" selection-end-line="1332" selection-end-column="53" />
           <folding>
             <element signature="e#24#34#0" expanded="true" />
           </folding>
