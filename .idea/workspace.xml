@@ -5,6 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5891d722-a753-4925-b54f-308cf61cf348" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/g1.py" afterPath="$PROJECT_DIR$/g1.py" />
     </list>
     <ignored path="1000g.iws" />
@@ -29,8 +30,8 @@
       <file leaf-file-name="g1.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/g1.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.5486212">
-              <caret line="1336" column="37" selection-start-line="1336" selection-start-column="37" selection-end-line="1336" selection-end-column="37" />
+            <state vertical-scroll-proportion="0.8171263">
+              <caret line="1375" column="1353" selection-start-line="1375" selection-start-column="1353" selection-end-line="1375" selection-end-column="1353" />
               <folding>
                 <element signature="e#24#34#0" expanded="true" />
               </folding>
@@ -503,8 +504,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/g1.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.5486212">
-          <caret line="1336" column="37" selection-start-line="1336" selection-start-column="37" selection-end-line="1336" selection-end-column="37" />
+        <state vertical-scroll-proportion="0.8171263">
+          <caret line="1375" column="1353" selection-start-line="1375" selection-start-column="1353" selection-end-line="1375" selection-end-column="1353" />
           <folding>
             <element signature="e#24#34#0" expanded="true" />
           </folding>
