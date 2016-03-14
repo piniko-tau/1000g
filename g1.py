@@ -1334,7 +1334,7 @@ try:
             for i2 in cur.fetchall():
                     # export_file.write(str(i2))
                     export_file.write(re.sub('(\()|(\[)|(\])|(\))','',str(i2)))
-                    export_file.writable("\n")
+                    export_file.write("\n")
 
             cur.execute("select column_name from information_schema.columns where table_name = \'%s\' and ( column_name ~ \'^sz.*[1-9]\' or column_name ~ \'^cg.*[1-9]\' or column_name ~ \'^el.*[1-9]\' or column_name ~ \'^gc.*[1-9]\' );",(AsIs(args.export_shortcut),))
 
