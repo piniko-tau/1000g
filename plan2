@@ -7,12 +7,15 @@ msk3001	  2	   f+f+,-g-k
 
 query for header : 
 
-pydb=> create table mind_data_4_rs_ensorted_by_gene_posann_dist_header  as select gene_name, string_agg(rsid,',' order by rsid) as rsids from (select distinct gene_name,rsid from mind_data_4_rs_ensorted_by_gene_posann )as t1 group by t1.gene_name order by t1.gene_name;
+pydb=> create table mind_data_4_rs_ensorted_by_gene_posann_dist_header  as select gene_name, string_agg(rsid,' ' order by rsid) as rsids from (select distinct gene_name,rsid from mind_data_4_rs_ensorted_by_gene_posann )as t1 group by t1.gene_name order by t1.gene_name;
 
 
 two columns :- select gene_name from header table
 		- select rsids from header table
-select gene_name,rsids from mind_data_4_rs_ensorted_by_gene_posann_dist_header;
+
+
+
+select gene_name||' | '||rsids from mind_data_4_rs_ensorted_by_gene_posann_dist_header ;
 
 
 for patient : 
