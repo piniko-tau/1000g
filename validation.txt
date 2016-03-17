@@ -113,7 +113,7 @@ target :
 
 
 
-final file export validation - allele to peptide translation and table transpose validation: validation ok 
+final file export validation - allele to peptide translation and table transpose validation: validation - ok 
 
 source database table : 
 
