@@ -1,0 +1,27 @@
+#C:\Python27\python.exe d:\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -h
+
+#start C:\Python27\python.exe d:\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -mind_update_table_allel2peptide mind_data_1_rs_ensorted_by_gene_posann
+
+C:\Python27\python.exe d:\g1.py -dbname pydb -dbuser pyuser -dbpass pyuser -mind_update_table_allel2peptide mind_data_1_rs_ensorted_by_gene_posann
+
+select column_name from information_schema.columns where table_name = 'mind_data_2_rs' and column_name ~ '[0-9]';select column_name from information_schema.columns where table_name = 'mind_data_1_rs_ensorted_by_gene_posannal2p' and column_name ~ '^sz.*[1-9]' or column_name ~ '^cg.*[1-9]' or column_name ~ '^el.*[1-9]' or column_name ~ '^gc.*[1-9]';
+
+C:\Python27\python.exe d:\g1.py -dbname pydb -dbuser pyuser -dbpass pyuser -export_shortcut mind_data_1_rs_ensorted_by_gene_posann & C:\Python27\python.exe d:\g1.py -dbname pydb -dbuser pyuser -dbpass pyuser -export_shortcut mind_data_2_rs_ensorted_by_gene_posann & C:\Python27\python.exe d:\g1.py -dbname pydb -dbuser pyuser -dbpass pyuser -export_shortcut mind_data_3_rs_ensorted_by_gene_posann & C:\Python27\python.exe d:\g1.py -dbname pydb -dbuser pyuser -dbpass pyuser -export_shortcut mind_data_4_rs_ensorted_by_gene_posann
+
+pydb=> create table rsids_by_gene as select gene_name,string_agg(rsid,',' order by rs
+id) from (select distinct gene_name, rsid from mind_data_4_rs_ensorted_by_gene_posann
+) as t1 group by gene_name;
+SELECT 18737
+
+select column_name from information_schema.columns where table_name = 'test2' and ( c
+olumn_name ~ '^sz.*[1-9]' or column_name ~ '^cg.*[1-9]' or column_name ~ '^el.*[1-9]'
+ or column_name ~ '^gc.*[1-9]' );
+
+
+select peptid_group from (select gene_name , string_agg(rsid,',' order by rsid) as rsids, string_agg(peptid_grou,szpabr0002, case when substr(szpabr0002,1,1) = allele1 then '+'||peptide1 when substr(szpabr0002,1,1) = allele2
+en substr(szpabr0002,1,1) = opallele2 then '-'||peptide2 when substr(szpabr0002,1,1) = opallele3 then '-'||pepti
+n substr(szpabr0002,3,1) = allele3 then '+'||peptide3 when substr(szpabr0002,3,1) = opallele1 then '-'||peptide1
+n substr(szpabr0002,5,1) = '' then '' when substr(szpabr0002,5,1) = allele1 then '+'||peptide1 when substr(szpab
+hen '-'||peptide1 when substr(szpabr0002,5,1) = opallele2 then '-'||peptide2 when substr(szpabr0002,5,1) = opall
+e) as tablea2;
+
