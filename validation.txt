@@ -1,0 +1,130 @@
+* t1 = copy of Individual_Phenotype_AllGenotypes file
+
+data transpose validation : validation - OK
+
+	source d:/nihtemp/test2/t1 
+ 	
+	$ head -n 2 t1 |awk '{print $1 " " $2 " " $3 " " $4}'
+	SZPABR0002 2 A/A G/G
+	SZPABR0003 2 A/A G/G
+	
+	
+	target d:/nihtemp/test2/fint
+	
+	$ cut -d' ' -f 1-2 fint|head -n 4
+	SZPABR0002 SZPABR0003
+	2 2
+	A/A A/A
+	G/G G/G
+
+
+database upload validation : validation - OK
+
+	pydb=> select szpabr0002, szpabr0003  from mind_data_1 limit 3;
+	 szpabr0002 | szpabr0003
+	------------+------------
+	 2          | 2
+	 A/A        | A/A
+	 G/G        | G/G
+
+
+
+mind_rsids file upload validation : validation - ok
+
+source file : /d/nihtemp/test2
+	$ head -n 4 chr_rsID_Coordinate.w_lnum
+	     numid      Chr     rsID    Coordinate
+	     1  null    null    null
+	     2  1       rs4477212       72017
+	     3  1       rs6680825       81335
+
+target : database table 
+	pydb=> select * from mind_rsids limit 3;
+	 numid | chr  |   rsid    | coordinate
+	-------+------+-----------+------------
+	 1     | null | null      | null
+	 2     | 1    | rs4477212 | 72017
+	 3     | 1    | rs6680825 | 81335
+
+
+
+
+mind_data and ucsc_data sql join : validation - ok
+
+source 1: 
+	pydb=>  select  szpabr0003, szpabr0004, numid, rsid from mind_data_1_rs where numid = '3' or numid = '4' order by numid;
+	 szpabr0003 | szpabr0004 | numid |   rsid
+	------------+------------+-------+-----------
+	 G/G        | G/G        | 3     | rs6680825
+	 G/G        | G/G        | 4     | rs4096712
+
+source 2: 
+	pydb=> select gene_name,rs_name from variation_genename_4ann where rs_name ='rs6680825' or rs_name = 'rs4096712';
+	  gene_name   |  rs_name
+	--------------+-----------
+	 RP11-34P13.7 | rs6680825
+	 RP11-34P13.8 | rs6680825
+	 AC137934.1   | rs4096712
+	 AP006222.2   | rs4096712
+	 RP11-34P13.7 | rs4096712
+
+target : 
+	pydb=> select  distinct szpabr0004, szpabr0003, rsid,gene_name,rs_name from mind_data_1_rs_en where rs_name ='rs6680825' or rs_name = 'rs4096712';
+	 szpabr0004 | szpabr0003 |   rsid    |  gene_name   |  rs_name
+	------------+------------+-----------+--------------+-----------
+	 G/G        | G/G        | rs6680825 | RP11-34P13.7 | rs6680825
+	 G/G        | G/G        | rs4096712 | AC137934.1   | rs4096712
+	 G/G        | G/G        | rs6680825 | RP11-34P13.8 | rs6680825
+	 G/G        | G/G        | rs4096712 | RP11-34P13.7 | rs4096712
+	 G/G        | G/G        | rs4096712 | AP006222.2   | rs4096712
+
+
+mind_data and ensemble join && peptide and allel opposite strand translation : valiadtion - ok
+
+source 1: 
+
+	pydb=> select distinct rs_name,szpabr0003,szpabr0004 from mind_data_1_rs_ensorted_by_gene_pos where rs_name='rs6875902' or rs_name='rs2297587';
+	  rs_name  | szpabr0003 | szpabr0004
+	-----------+------------+------------
+	 rs6875902 | C/C        | A/C
+	 rs2297587 | A/G        | G/G	
+
+source 2: 
+
+		pydb=> select distinct name,peptides, peptide1, peptide2, peptide3,alleles,allele1,allele2,allele3,opallele1,opallele2,opallele3 from asnp_s_ch_filtered_final_s
+		pltal where name='rs2297587' or name='rs6875902';
+		   name    | peptides | peptide1 | peptide2 | peptide3 | alleles | allele1 | allele2 | allele3 | opallele1 | opallele2 | opallele3
+		-----------+----------+----------+----------+----------+---------+---------+---------+---------+-----------+-----------+-----------
+		 rs2297587 | R,H,     | R        | H        |          | G,A,    | G       | A       |         | C         | T         |
+		 rs6875902 | A,S,     | A        | S        |          | G,T,    | G       | T       |         | C         | A         |
+
+target : 
+
+		pydb=> select distinct rs_name,szpabr0003,szpabr0004,name,peptides, peptide1, peptide2, peptide3,alleles,allele1,allele2,allele3,opallele1,opallele2,opallele3 f
+		rom  mind_data_1_rs_ensorted_by_gene_posann where name='rs2297587' or name='rs6875902';
+		  rs_name  | szpabr0003 | szpabr0004 |   name    | peptides | peptide1 | peptide2 | peptide3 | alleles | allele1 | allele2 | allele3 | opallele1 | opallele2 | o
+		pallele3
+		-----------+------------+------------+-----------+----------+----------+----------+----------+---------+---------+---------+---------+-----------+-----------+--
+		---------
+		 rs2297587 | A/G        | G/G        | rs2297587 | R,H,     | R        | H        |          | G,A,    | G       | A       |         | C         | T         |
+		 rs6875902 | C/C        | A/C        | rs6875902 | A,S,     | A        | S        |          | G,T,    | G       | T       |         | C         | A         |
+		(2 rows)
+
+
+
+
+final file export validation - allele to peptide translation and table transpose validation: validation - ok 
+
+source database table : 
+
+	pydb=> select distinct rs_name,szpabr0002,szpabr0003,peptides,peptide1,peptide2,peptide3,alleles,allele1,allele2,allele3,opallele1,opallele2,opallele3 from mind
+	_data_1_rs_ensorted_by_gene_posann where  rs_name='rs12211410';
+	  rs_name   | szpabr0002 | szpabr0003 | peptides | peptide1 | peptide2 | peptide3 | alleles | allele1 | allele2 | allele3 | opallele1 | opallele2 | opallele3
+	------------+------------+------------+----------+----------+----------+----------+---------+---------+---------+---------+-----------+-----------+-----------
+	 rs12211410 | A/G        | G/G        | R,H,     | R        | H        |          | G,A,    | G       | A       |         | C         | T         |
+	
+target final file: 
+
+	row 1: 'patient','diagnosis','5S_rRNA | rs12211410 rs185819 rs6910390','7SK | rs10081449 rs1318196 rs2242093 rs3750206 rs3750207 rs3750208 rs4873802 rs4874147',
+	row 2: 'szpabr0002','2','+H+R+H+R-T-T'
+	row 3: 'szpabr0003','2','+R+R-T-T+R+R',
