@@ -1,4 +1,4 @@
-C   #!/usr/bin/env python
+#!/usr/bin/env python
 
 
 import sys
@@ -52,6 +52,8 @@ parser = argparse.ArgumentParser(prog='psql_1000g_loader',usage='psql_1000g_load
  [-s show all tables] \
  [-mind_export_ml export a ml dataset of mind data]\
  [-add_meta add tables metadata]',\
+
+
 
 
  description='Load annotated snp database & Create a 1000G sql table from all Chromosomes - using a connection to a postgresql DB.')
@@ -722,6 +724,9 @@ def add_meta():
         conn.commit()
         print("insert into tables_meta values(\'1000genomes\', \'GRCh37\', \'ALL.chrXX.phase3\', \'ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/20130502/\', \'ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/20130502/\', \'http://www.1000genomes.org/faq\', \'7.2015\')")
         cur.execute("insert into tables_meta values(\'1000genomes\', \'GRCh37\', \'ALL.chrXX.phase3\', \'ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/20130502/\', \'ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/20130502/\', \'http://www.1000genomes.org/faq\', \'7.2015\')")
+        conn.commit()
+        print("insert into tables_meta values(\'DGIdb\', \'all\', \'all\', \'DGIdb_tables drug genes\', \'http://dgidb.genome.wustl.edu/downloads\', \'https://github.com/genome/dgi-db/blob/master/db/structure.sql\', \'5.2016\')")
+        cur.execute("insert into tables_meta values(\'DGIdb\', \'all\', \'all\', \'DGIdb_tables drug genes\', \'http://dgidb.genome.wustl.edu/downloads\', \'https://github.com/genome/dgi-db/blob/master/db/structure.sql\', \'5.2016\')")
         conn.commit()
 
 
