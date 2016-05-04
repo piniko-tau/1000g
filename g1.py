@@ -51,6 +51,7 @@ parser = argparse.ArgumentParser(prog='psql_1000g_loader',usage='psql_1000g_load
  [-mind_update_table_allel2peptide create all to peptide table] \
  [-s show all tables]\
  [-load_DBIdb_tables_preprocess]\
+ [-create_drugs_genes_table]\
  [-mind_export_ml export a ml dataset of mind data]\
  [-add_meta add tables metadata]',\
 
@@ -140,6 +141,10 @@ parser.add_argument("-mind_sort_by_gene_and_pos",help='annotated table to be sor
 
 # mind_prepare_ucsc_4_mind_annotations
 parser.add_argument("-mind_prepare_ucsc_4_mind_annotations",help='preprocess ucsc table for mind ann',metavar='mind_prepare_ucsc_4_mind_annotations')
+
+parser.add_argument("-load_DBIdb_tables_preprocess",help='list how to load_DBIdb_tables_preprocess',metavar='load_DBIdb_tables_preprocess')
+
+parser.add_argument("-create_drugs_genes_table",help='create_drugs_genes_table',metavar='create_drugs_genes_table')
 
 parser.add_argument("-mind_export_ml",help='export a ml dataset of mind data',metavar='-mind_export_ml')
 
@@ -1673,6 +1678,17 @@ try:
         print "DBidb load whole database preprocess how to: "
         print "D:\DGIdb>D:\postgresql9.4\bin\psql.exe -U pyuser -d pydb -f DGIdb_schema.sql"
         print  "D:\DGIdb>D:\postgresql9.4\bin\psql.exe -U pyuser -d pydb -f DGIdb_dump.sql"
+
+#add genes to drugs names here to a new table named drugs_genes_names;
+    if args.create_drugs_genes_table:
+
+        # join 
+            pass
+            # print(cur.mogrify("",(AsIs(hg),AsIs(hg),)))
+            # cur.execute("",(AsIs(hg),AsIs(hg),))
+            # conn.commit()
+
+
 
 # # *************************************************************8
 # #multi core section
