@@ -49,7 +49,8 @@ parser = argparse.ArgumentParser(prog='psql_1000g_loader',usage='psql_1000g_load
  [-mind_sort_by_gene_and_pos ann_table]\
  [-mind_prepare_ucsc_4_mind_annotations table]\
  [-mind_update_table_allel2peptide create all to peptide table] \
- [-s show all tables] \
+ [-s show all tables]\
+ [-load_DBIdb_tables_preprocess]\
  [-mind_export_ml export a ml dataset of mind data]\
  [-add_meta add tables metadata]',\
 
@@ -1605,7 +1606,7 @@ try:
                         export_file.write("\n")
 
     if args.mind_data_preprocess:
-        pass
+
         print " see the folowing steps :"
         print '#! /bin/bash'
         print 'echo "split -l 100 --verbose -d t1"'
@@ -1619,6 +1620,8 @@ try:
         print 'cut -d " " -f1-900 fint333>fint_1;cut -d " " -f1,901-1800 fint333>fint_2;cut -d " " -f1,1801-2700 fint333>fint_3;cut -d " " -f1,2701- fint333>fint_4;'
         # cut - " "\
         # echo "done"\                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     '
+
+
 
     if args.load_mind_data_f and args.load_mind_data_t:
 
@@ -1664,6 +1667,12 @@ try:
 
     if args.mind_export_ml:
         mind_export_ml()
+
+    if args.load_DBIdb_tables_preprocess:
+
+        print "DBidb load whole database preprocess how to: "
+        print "D:\DGIdb>D:\postgresql9.4\bin\psql.exe -U pyuser -d pydb -f DGIdb_schema.sql"
+        print  "D:\DGIdb>D:\postgresql9.4\bin\psql.exe -U pyuser -d pydb -f DGIdb_dump.sql"
 
 # # *************************************************************8
 # #multi core section
