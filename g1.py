@@ -144,7 +144,7 @@ parser.add_argument("-mind_prepare_ucsc_4_mind_annotations",help='preprocess ucs
 
 parser.add_argument("-load_DBIdb_tables_preprocess",help='list how to load_DBIdb_tables_preprocess',metavar='load_DBIdb_tables_preprocess')
 
-parser.add_argument("-create_drugs_genes_table",help='create_drugs_genes_table',metavar='create_drugs_genes_table')
+parser.add_argument("-create_drugs_genes_table",help='create_drugs_genes_table',action="store_true")
 
 parser.add_argument("-mind_export_ml",help='export a ml dataset of mind data',metavar='-mind_export_ml')
 
