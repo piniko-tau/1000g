@@ -1688,14 +1688,11 @@ try:
         table_gene_name_and_drug_name = "gene_name_and_drug_name"
 
 
-
-
-
         # join tables drugs and drug claim aliases - > creating name and drug claim id = drug_name_and_claim_id
 
         check_overwrite_table(table_drug_name_and_claim_id)
-        print(cur.mogrify("CREATE TABLE %s AS SELECT name as drug_name,drug_claim_id FROM drugs inner join drug_claim_aliases on (drugs.id = drug_claim_aliases.drug_claim_id)",(AsIs(table_drug_name_and_claim_id),)))
-        cur.execute("CREATE TABLE %s AS SELECT name as drug_name,drug_claim_id FROM drugs inner join drug_claim_aliases on (drugs.id = drug_claim_aliases.drug_claim_id)",(AsIs(table_drug_name_and_claim_id),))
+        print(cur.mogrify("CREATE TABLE %s AS SELECT name as drug_name,drug_claim_id FROM drugs inner join drug_claims_drugs on (drugs.id = drug_claims_drugs.drug_id)",(AsIs(table_drug_name_and_claim_id),)))
+        cur.execute("CREATE TABLE %s AS SELECT name as drug_name,drug_claim_id FROM drugs inner join drug_claims_drugs on (drugs.id = drug_claims_drugs.drug_id)",(AsIs(table_drug_name_and_claim_id),))
         conn.commit()
 
         #join tables genes and gene_claims_genes -> creating name and gene_claim_id = gene_name_and_claim_id
