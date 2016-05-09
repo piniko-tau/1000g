@@ -52,6 +52,7 @@ parser = argparse.ArgumentParser(prog='psql_1000g_loader',usage='psql_1000g_load
  [-s show all tables]\
  [-load_DBIdb_tables_preprocess]\
  [-create_drugs_genes_table]\
+ [-filter_mind_table_by_drugs]\
  [-mind_export_ml export a ml dataset of mind data]\
  [-add_meta add tables metadata]',\
 
@@ -146,7 +147,9 @@ parser.add_argument("-load_DBIdb_tables_preprocess",help='list how to load_DBIdb
 
 parser.add_argument("-create_drugs_genes_table",help='create_drugs_genes_table',action="store_true")
 
-parser.add_argument("-mind_export_ml",help='export a ml dataset of mind data',metavar='-mind_export_ml')
+parser.add_argument("filter_mind_table_by_drugs,help='filter_mind_table_by_drugs',metavar='filter_mind_table_by_drugs')
+
+parser.add_argument("-mind_export_ml",help='export a ml dataset of mind data',metavar='mind_export_ml')
 
 parser.add_argument("-o", "--overwrite_tables", help="overwrites any existing tables",action="store_true")
 parser.add_argument("-v", "--verbose", help="increase output verbosity",action="store_true")
@@ -1716,6 +1719,31 @@ try:
         cur.execute("CREATE TABLE %s AS SELECT gene_name,drug_claim_and_gene_name_1_intermediate.gene_claim_id,drug_claim_and_gene_name_1_intermediate.drug_claim_id,drug_name FROM drug_claim_and_gene_name_1_intermediate inner join drug_name_and_claim_id on (drug_name_and_claim_id.drug_claim_id = drug_claim_and_gene_name_1_intermediate.drug_claim_id)",(AsIs(table_gene_name_and_drug_name),))
         conn.commit()
 
+
+    if args.filter_mind_table_by_drugs:
+#filter mind_data_1-4_rs_ensorted_by_gene_posann tables by : join with table gene_name_and_drug_name on gene_name
+        table_mind_data_n_rs_ensorted_by_gene_posann = args.filter_mind_table_by_drugs
+        table_mind_data_n_rs_ensorted_by_gene_posann_by_drug = args.filter_mind_table_by_drugs+"_by_drug"
+        table_gene_name_and_drug_name_2_intermediate = "table_gene_name_and_drug_name_2_intermediate"
+
+        check_overwrite_table(table_gene_name_and_drug_name_2_intermediate)
+
+        #copy and alter drugs table gene_name column to gene_name2 for easy joining
+        print(cur.mogrify("CREATE TABLE %s AS SELECT * FROM gene_name_and_drug_name",(AsIs(table_gene_name_and_drug_name_2_intermediate),)))
+        cur.execute("CREATE TABLE %s AS SELECT * FROM gene_name_and_drug_name",(AsIs(table_gene_name_and_drug_name_2_intermediate),))
+        conn.commit()
+
+        #copy and alter drugs table gene_name column to gene_name2 for easy joining
+        print(cur.mogrify("alter table  %s rename column gene_name to gene_name2",(AsIs(table_gene_name_and_drug_name_2_intermediate),)))
+        cur.execute("alter table  %s rename column gene_name to gene_name2",(AsIs(table_gene_name_and_drug_name_2_intermediate),))
+        conn.commit()
+
+        check_overwrite_table(table_mind_data_n_rs_ensorted_by_gene_posann_by_drug)
+
+        # join mind table with table gene_name_and_drug_name on gene_name
+        print(cur.mogrify("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.gene_name2 = %s.gene_name)",(AsIs(table_mind_data_n_rs_ensorted_by_gene_posann_by_drug),AsIs(table_gene_name_and_drug_name_2_intermediate),AsIs(table_mind_data_n_rs_ensorted_by_gene_posann),AsIs(table_gene_name_and_drug_name_2_intermediate),AsIs(table_mind_data_n_rs_ensorted_by_gene_posann),)))
+        cur.execute("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.gene_name2 = %s.gene_name)",(AsIs(table_mind_data_n_rs_ensorted_by_gene_posann_by_drug),AsIs(table_gene_name_and_drug_name_2_intermediate),AsIs(table_mind_data_n_rs_ensorted_by_gene_posann),AsIs(table_gene_name_and_drug_name_2_intermediate),AsIs(table_mind_data_n_rs_ensorted_by_gene_posann),))
+        conn.commit()
 
 
 # # *************************************************************8
