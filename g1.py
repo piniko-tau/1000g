@@ -153,7 +153,7 @@ parser.add_argument("-mind_export_ml",help='export a ml dataset of mind data',me
 
 parser.add_argument("-o", "--overwrite_tables", help="overwrites any existing tables",action="store_true")
 parser.add_argument("-v", "--verbose", help="increase output verbosity",action="store_true")
-args=parser.parse_args()
+args = parser.parse_args()
 
 #setup logging option
 if args.verbose:
@@ -1727,7 +1727,7 @@ try:
         table_gene_name_and_drug_name_2_intermediate = "table_gene_name_and_drug_name_2_intermediate"
 
         if not (check_table_exists(table_gene_name_and_drug_name_2_intermediate)):
-            
+
             check_overwrite_table(table_gene_name_and_drug_name_2_intermediate)
 
             #copy and alter drugs table gene_name column to gene_name2 for easy joining
