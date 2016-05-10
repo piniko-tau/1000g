@@ -1689,6 +1689,7 @@ try:
         table_gene_name_and_claim_id = "gene_name_and_claim_id"
         table_drug_claim_and_gene_name_1_intermediate = "drug_claim_and_gene_name_1_intermediate"
         table_gene_name_and_drug_name = "gene_name_and_drug_name"
+        table_gene_name_and_drug_name_and_category = "gene_name_and_drug_name_and_category"
 
 
         # join tables drugs and drug claim aliases - > creating name and drug claim id = drug_name_and_claim_id
@@ -1719,8 +1720,21 @@ try:
         cur.execute("CREATE TABLE %s AS SELECT gene_name,drug_claim_and_gene_name_1_intermediate.gene_claim_id,drug_claim_and_gene_name_1_intermediate.drug_claim_id,drug_name FROM drug_claim_and_gene_name_1_intermediate inner join drug_name_and_claim_id on (drug_name_and_claim_id.drug_claim_id = drug_claim_and_gene_name_1_intermediate.drug_claim_id)",(AsIs(table_gene_name_and_drug_name),))
         conn.commit()
 
+          #create gene_name_and_drug_name_and_category table join table_gene_name_and_drug_name with drug_claim_attributes = gene_name,drug_name,drug_claim_id, value,name
+
+        check_overwrite_table(table_gene_name_and_drug_name)
+        print(cur.mogrify("CREATE TABLE %s AS SELECT gene_name,drug_claim_and_gene_name_1_intermediate.gene_claim_id,drug_claim_and_gene_name_1_intermediate.drug_claim_id,drug_name FROM drug_claim_and_gene_name_1_intermediate inner join drug_name_and_claim_id on (drug_name_and_claim_id.drug_claim_id = drug_claim_and_gene_name_1_intermediate.drug_claim_id)",(AsIs(table_gene_name_and_drug_name),)))
+        cur.execute("CREATE TABLE %s AS SELECT gene_name,drug_claim_and_gene_name_1_intermediate.gene_claim_id,drug_claim_and_gene_name_1_intermediate.drug_claim_id,drug_name FROM drug_claim_and_gene_name_1_intermediate inner join drug_name_and_claim_id on (drug_name_and_claim_id.drug_claim_id = drug_claim_and_gene_name_1_intermediate.drug_claim_id)",(AsIs(table_gene_name_and_drug_name),))
+        conn.commit()
+
+      #create an string agged table of the latter with these columns :
 #add column "drug_function_categories" string_agg of gene | drug categories...
 #add column "gene_affective_drugs" string_agg of gene | drugs ...
+#use string_agg(column to agg,',') : select drug_claim_id,string_agg(value,',') from drug_claim_attributes where name='Drug Categories' group by drug_claim_id; 
+
+
+
+
 
     if args.filter_mind_table_by_drugs:
 #filter mind_data_1-4_rs_ensorted_by_gene_posann tables by : join with table gene_name_and_drug_name on gene_name
