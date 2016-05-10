@@ -1724,15 +1724,15 @@ try:
 #filter mind_data_1-4_rs_ensorted_by_gene_posann tables by : join with table gene_name_and_drug_name on gene_name
         table_mind_data_n_rs_ensorted_by_gene_posann = args.filter_mind_table_by_drugs
         table_mind_data_n_rs_ensorted_by_gene_posann_by_drug = args.filter_mind_table_by_drugs+"_by_drug"
-        table_gene_name_and_drug_name_2_intermediate = "table_gene_name_and_drug_name_2_intermediate"
+        table_gene_name_and_drug_name_2_intermediate = "gene_name_and_drug_name_2_intermediate"
 
         if not (check_table_exists(table_gene_name_and_drug_name_2_intermediate)):
 
             check_overwrite_table(table_gene_name_and_drug_name_2_intermediate)
 
             #copy and alter drugs table gene_name column to gene_name2 for easy joining
-            print(cur.mogrify("CREATE TABLE %s AS SELECT * FROM gene_name_and_drug_name",(AsIs(table_gene_name_and_drug_name_2_intermediate),)))
-            cur.execute("CREATE TABLE %s AS SELECT * FROM gene_name_and_drug_name",(AsIs(table_gene_name_and_drug_name_2_intermediate),))
+            print(cur.mogrify("CREATE TABLE %s AS SELECT distinct gene_name,drug_name FROM gene_name_and_drug_name",(AsIs(table_gene_name_and_drug_name_2_intermediate),)))
+            cur.execute("CREATE TABLE %s AS SELECT distinct gene_name,drug_name FROM gene_name_and_drug_name",(AsIs(table_gene_name_and_drug_name_2_intermediate),))
             conn.commit()
 
             #copy and alter drugs table gene_name column to gene_name2 for easy joining
