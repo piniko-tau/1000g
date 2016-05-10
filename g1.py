@@ -1719,6 +1719,8 @@ try:
         cur.execute("CREATE TABLE %s AS SELECT gene_name,drug_claim_and_gene_name_1_intermediate.gene_claim_id,drug_claim_and_gene_name_1_intermediate.drug_claim_id,drug_name FROM drug_claim_and_gene_name_1_intermediate inner join drug_name_and_claim_id on (drug_name_and_claim_id.drug_claim_id = drug_claim_and_gene_name_1_intermediate.drug_claim_id)",(AsIs(table_gene_name_and_drug_name),))
         conn.commit()
 
+#add column "drug_function_categories" string_agg of gene | drug categories...
+#add column "gene_affective_drugs" string_agg of gene | drugs ...
 
     if args.filter_mind_table_by_drugs:
 #filter mind_data_1-4_rs_ensorted_by_gene_posann tables by : join with table gene_name_and_drug_name on gene_name
