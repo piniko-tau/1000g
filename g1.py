@@ -1691,7 +1691,8 @@ try:
         table_gene_name_and_drug_name = "gene_name_and_drug_name"
         table_gene_name_and_drug_name_and_category = "gene_name_and_drug_name_and_category"
         table_gene_name_and_drug_name_and_category_filtered = "gene_name_and_drug_name_and_category_filtered"
-
+        table_gene_name_and_drug_name_and_category_aggcat = "gene_name_and_drug_name_and_category_aggcat"
+        table_gene_name_and_drug_name_and_category_aggcat_aggdrug = "gene_name_and_drug_name_and_category_aggcat_aggdrug"
 
         # join tables drugs and drug claim aliases - > creating name and drug claim id = drug_name_and_claim_id
 
@@ -1725,19 +1726,23 @@ try:
 
         check_overwrite_table(table_gene_name_and_drug_name_and_category)
 
-        #---> change here ...
-
-        print(cur.mogrify("CREATE TABLE %s AS SELECT gene_name,drug_claim_and_gene_name_1_intermediate.gene_claim_id,drug_claim_and_gene_name_1_intermediate.drug_claim_id,drug_name FROM drug_claim_and_gene_name_1_intermediate inner join drug_name_and_claim_id on (drug_name_and_claim_id.drug_claim_id = drug_claim_and_gene_name_1_intermediate.drug_claim_id)",(AsIs(table_gene_name_and_drug_name),)))
-        cur.execute("CREATE TABLE %s AS SELECT gene_name,drug_claim_and_gene_name_1_intermediate.gene_claim_id,drug_claim_and_gene_name_1_intermediate.drug_claim_id,drug_name FROM drug_claim_and_gene_name_1_intermediate inner join drug_name_and_claim_id on (drug_name_and_claim_id.drug_claim_id = drug_claim_and_gene_name_1_intermediate.drug_claim_id)",(AsIs(table_gene_name_and_drug_name),))
+        print(cur.mogrify("CREATE TABLE %s AS SELECT gene_name,gene_claim_id,gene_name_and_drug_name.drug_claim_id,drug_name,drug_claim_attributes.value ,drug_claim_attributes.name FROM drug_claim_attributes inner join gene_name_and_drug_name on (drug_claim_attributes.drug_claim_id = gene_name_and_drug_name.drug_claim_id)",(AsIs(table_gene_name_and_drug_name_and_category),)))
+        cur.execute("CREATE TABLE %s AS SELECT gene_name,gene_claim_id,gene_name_and_drug_name.drug_claim_id,drug_name,drug_claim_attributes.value ,drug_claim_attributes.name FROM drug_claim_attributes inner join gene_name_and_drug_name on (drug_claim_attributes.drug_claim_id = gene_name_and_drug_name.drug_claim_id)",(AsIs(table_gene_name_and_drug_name_and_category),))
         conn.commit()
 
-      #create an string agged table of the latter with these columns :
 #add column "drug_function_categories" string_agg of gene | drug categories...
+
+        check_overwrite_table(table_gene_name_and_drug_name_and_category_aggcat)
+
+        print(cur.mogrify("CREATE TABLE %s AS select gene_name,gene_claim_id,drug_name,drug_claim_id,string_agg(value,',') as drug_categories from (select distinct gene_name,gene_claim_id,drug_name,drug_claim_id,name,value from gene_name_and_drug_name_and_category) as gdc where name='Drug Categories' group by drug_claim_id,gene_name,gene_claim_id,drug_name; ",(AsIs(table_gene_name_and_drug_name_and_category_aggcat),)))
+        cur.execute("CREATE TABLE %s AS select gene_name,gene_claim_id,drug_name,drug_claim_id,string_agg(value,',') as drug_categories from (select distinct gene_name,gene_claim_id,drug_name,drug_claim_id,name,value from gene_name_and_drug_name_and_category) as gdc where name='Drug Categories' group by drug_claim_id,gene_name,gene_claim_id,drug_name; ",(AsIs(table_gene_name_and_drug_name_and_category_aggcat),))
+        conn.commit()
+
+#create an string agged table of the latter with these columns :
+
 #add column "gene_affective_drugs" string_agg of gene | drugs ...
-#use string_agg(column to agg,',') : select drug_claim_id,string_agg(value,',') from drug_claim_attributes where name='Drug Categories' group by drug_claim_id; 
-
-
-...
+#4 category use string_agg(column to agg,',') : select drug_claim_id,string_agg(value,',') from drug_claim_attributes where name='Drug Categories' group by drug_claim_id; 
+#4 gene drugs : select drug_claim_id,string_agg(value,',') from drug_claim_attributes where name='Drug Categories' group by drug_claim_id;
 
 
     if args.filter_mind_table_by_drugs:
