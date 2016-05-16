@@ -1738,9 +1738,6 @@ try:
         cur.execute("CREATE TABLE %s AS select gene_name,gene_claim_id,drug_name,drug_claim_id,string_agg(value,',') as drug_categories from (select distinct gene_name,gene_claim_id,drug_name,drug_claim_id,name,value from gene_name_and_drug_name_and_category) as gdc where name='Drug Categories' group by drug_claim_id,gene_name,gene_claim_id,drug_name; ",(AsIs(table_gene_name_and_drug_name_and_category_aggcat),))
         conn.commit()
 
-#add column "gene_affective_drugs" string_agg of gene | drugs |(categories in here)...
-
-#pydb=> select gene_name,string_agg(dg1.drug_name2,',') from (select distinct gene_name,drug_name||'('||drug_categories||')' as drug_name2 from gene_name_and_drug_name_and_category_aggcat)as dg1 group by gene_name; 
 
         check_overwrite_table(table_gene_name_and_drug_name_and_category_aggcat_aggdrug)
 
