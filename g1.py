@@ -1741,8 +1741,8 @@ try:
 
         check_overwrite_table(table_gene_name_and_drug_name_and_category_aggcat_aggdrug)
 
-        print(cur.mogrify("CREATE TABLE %s AS select gene_name,string_agg(dg1.drug_name2,',') from (select distinct gene_name,drug_name||'('||drug_categories||')' as drug_name2 from gene_name_and_drug_name_and_category_aggcat) as dg1 group by gene_name;  ",(AsIs(table_gene_name_and_drug_name_and_category_aggcat_aggdrug),)))
-        cur.execute("CREATE TABLE %s AS select gene_name,string_agg(dg1.drug_name2,',') from (select distinct gene_name,drug_name||'('||drug_categories||')' as drug_name2 from gene_name_and_drug_name_and_category_aggcat) as dg1 group by gene_name;  ",(AsIs(table_gene_name_and_drug_name_and_category_aggcat_aggdrug),))
+        print(cur.mogrify("CREATE TABLE %s AS select gene_name,string_agg(dg1.drug_name2,',') as drugs from (select distinct gene_name,drug_name||'('||drug_categories||')' as drug_name2 from gene_name_and_drug_name_and_category_aggcat) as dg1 group by gene_name;  ",(AsIs(table_gene_name_and_drug_name_and_category_aggcat_aggdrug),)))
+        cur.execute("CREATE TABLE %s AS select gene_name,string_agg(dg1.drug_name2,',') as drugs from (select distinct gene_name,drug_name||'('||drug_categories||')' as drug_name2 from gene_name_and_drug_name_and_category_aggcat) as dg1 group by gene_name;  ",(AsIs(table_gene_name_and_drug_name_and_category_aggcat_aggdrug),))
         conn.commit()        
         
 
