@@ -1741,8 +1741,8 @@ try:
 
         check_overwrite_table(table_gene_name_and_drug_name_and_category_aggcat_aggdrug)
 
-        print(cur.mogrify("CREATE TABLE %s AS select gene_name,string_agg(dg1.drug_name2,',') as drugs from (select distinct gene_name,drug_name||'('||drug_categories||')' as drug_name2 from gene_name_and_drug_name_and_category_aggcat) as dg1 group by gene_name;  ",(AsIs(table_gene_name_and_drug_name_and_category_aggcat_aggdrug),)))
-        cur.execute("CREATE TABLE %s AS select gene_name,string_agg(dg1.drug_name2,',') as drugs from (select distinct gene_name,drug_name||'('||drug_categories||')' as drug_name2 from gene_name_and_drug_name_and_category_aggcat) as dg1 group by gene_name;  ",(AsIs(table_gene_name_and_drug_name_and_category_aggcat_aggdrug),))
+        print(cur.mogrify("CREATE TABLE %s AS select gene_name,string_agg(dg1.drug_name2,',') as drugs_info from (select distinct gene_name,drug_name||'('||drug_categories||')' as drug_name2 from gene_name_and_drug_name_and_category_aggcat) as dg1 group by gene_name;  ",(AsIs(table_gene_name_and_drug_name_and_category_aggcat_aggdrug),)))
+        cur.execute("CREATE TABLE %s AS select gene_name,string_agg(dg1.drug_name2,',') as drugs_info from (select distinct gene_name,drug_name||'('||drug_categories||')' as drug_name2 from gene_name_and_drug_name_and_category_aggcat) as dg1 group by gene_name;  ",(AsIs(table_gene_name_and_drug_name_and_category_aggcat_aggdrug),))
         conn.commit()        
         
 
@@ -1751,27 +1751,27 @@ try:
 #filter mind_data_1-4_rs_ensorted_by_gene_posann tables by : join with table gene_name_and_drug_name on gene_name
         table_mind_data_n_rs_ensorted_by_gene_posann = args.filter_mind_table_by_drugs
         table_mind_data_n_rs_ensorted_by_gene_posann_by_drug = args.filter_mind_table_by_drugs+"_by_drug"
-        table_gene_name_and_drug_name_2_intermediate = "gene_name_and_drug_name_2_intermediate"
+        table_gene_name_and_drug_name_and_category_aggcat_aggdrug2 = "gene_name_and_drug_name_and_category_aggcat_aggdrug2"
 
-        if not (check_table_exists(table_gene_name_and_drug_name_2_intermediate)):
+        if not (check_table_exists(table_gene_name_and_drug_name_and_category_aggcat_aggdrug2)):
 
-            check_overwrite_table(table_gene_name_and_drug_name_2_intermediate)
+            check_overwrite_table(table_gene_name_and_drug_name_and_category_aggcat_aggdrug2)
 
             #copy and alter drugs table gene_name column to gene_name2 for easy joining
-            print(cur.mogrify("CREATE TABLE %s AS SELECT distinct gene_name,drug_name FROM gene_name_and_drug_name",(AsIs(table_gene_name_and_drug_name_2_intermediate),)))
-            cur.execute("CREATE TABLE %s AS SELECT distinct gene_name,drug_name FROM gene_name_and_drug_name",(AsIs(table_gene_name_and_drug_name_2_intermediate),))
+            print(cur.mogrify("CREATE TABLE %s AS SELECT * FROM gene_name_and_drug_name_and_category_aggcat_aggdrug",(AsIs(table_gene_name_and_drug_name_and_category_aggcat_aggdrug2),)))
+            cur.execute("CREATE TABLE %s AS SELECT * FROM gene_name_and_drug_name_and_category_aggcat_aggdrug",(AsIs(table_gene_name_and_drug_name_and_category_aggcat_aggdrug2),))
             conn.commit()
 
             #copy and alter drugs table gene_name column to gene_name2 for easy joining
-            print(cur.mogrify("alter table  %s rename column gene_name to gene_name2",(AsIs(table_gene_name_and_drug_name_2_intermediate),)))
-            cur.execute("alter table  %s rename column gene_name to gene_name2",(AsIs(table_gene_name_and_drug_name_2_intermediate),))
+            print(cur.mogrify("alter table  %s rename column gene_name to gene_name2",(AsIs(table_gene_name_and_drug_name_and_category_aggcat_aggdrug2),)))
+            cur.execute("alter table  %s rename column gene_name to gene_name2",(AsIs(table_gene_name_and_drug_name_and_category_aggcat_aggdrug2),))
             conn.commit()
 
         check_overwrite_table(table_mind_data_n_rs_ensorted_by_gene_posann_by_drug)
 
         # join mind table with table gene_name_and_drug_name on gene_name
-        print(cur.mogrify("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.gene_name2 = %s.gene_name)",(AsIs(table_mind_data_n_rs_ensorted_by_gene_posann_by_drug),AsIs(table_gene_name_and_drug_name_2_intermediate),AsIs(table_mind_data_n_rs_ensorted_by_gene_posann),AsIs(table_gene_name_and_drug_name_2_intermediate),AsIs(table_mind_data_n_rs_ensorted_by_gene_posann),)))
-        cur.execute("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.gene_name2 = %s.gene_name)",(AsIs(table_mind_data_n_rs_ensorted_by_gene_posann_by_drug),AsIs(table_gene_name_and_drug_name_2_intermediate),AsIs(table_mind_data_n_rs_ensorted_by_gene_posann),AsIs(table_gene_name_and_drug_name_2_intermediate),AsIs(table_mind_data_n_rs_ensorted_by_gene_posann),))
+        print(cur.mogrify("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.gene_name2 = %s.gene_name)",(AsIs(table_mind_data_n_rs_ensorted_by_gene_posann_by_drug),AsIs(table_gene_name_and_drug_name_and_category_aggcat_aggdrug2),AsIs(table_mind_data_n_rs_ensorted_by_gene_posann),AsIs(table_gene_name_and_drug_name_and_category_aggcat_aggdrug2),AsIs(table_mind_data_n_rs_ensorted_by_gene_posann),)))
+        cur.execute("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.gene_name2 = %s.gene_name)",(AsIs(table_mind_data_n_rs_ensorted_by_gene_posann_by_drug),AsIs(table_gene_name_and_drug_name_and_category_aggcat_aggdrug2),AsIs(table_mind_data_n_rs_ensorted_by_gene_posann),AsIs(table_gene_name_and_drug_name_and_category_aggcat_aggdrug2),AsIs(table_mind_data_n_rs_ensorted_by_gene_posann),))
         conn.commit()
 
 
