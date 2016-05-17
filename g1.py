@@ -1347,6 +1347,9 @@ try:
 
         # print(cur.mogrify("select column_name from information_schema.columns where table_name = \'%s\' and ( column_name ~ \'^sz.*[1-9]\' or column_name ~ \'^cg.*[1-9]\' or column_name ~ \'^el.*[1-9]\' or column_name ~ \'^gc.*[1-9]\' );",(AsIs(args.mind_export_ml),)))
 
+        #dist_header = was made by select distinct gene_name from mind_data_1_rs_ensorted_by_gene_posann order by gene_name  + string agg rsids distinct
+                                                                                            
+
         rstable = args.mind_export_ml.replace("_ensorted_by_gene_posann_by_drug","")
 
 
@@ -1355,7 +1358,7 @@ try:
 
         pbar = ProgressBar(widgets=widgets, maxval=10000000).start()
 
-        with open('exported_mind.txt',"a") as export_file:
+        with open('exported_mind_by_drugs.txt',"a") as export_file:
 
             export_file.write("'patient','diagnosis',")
             cur.execute("select gene_name||' | '||rsids from %s_dist_header ;",(AsIs(args.mind_export_ml),))
