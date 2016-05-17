@@ -1351,6 +1351,11 @@ try:
 
         rstable = args.mind_export_ml_with_drugs.replace("_ensorted_by_gene_posann_by_drug","")
 
+        # pydb=> select gene_name , string_agg(rsid,' ' order by rsid) as rsids from (select distinct gene_name,rsid from mind_data_1_rs_ensorted_by_gene_posann_by_drug) as t1 group by t1.gene_name order by t1.gene_name;
+
+# create dist header for ml with drugs here .....
+
+
 
 
         widgets = ['processing query -> '+table1000g+' :', Percentage(), ' ', Bar(marker=RotatingMarker()),' ', ETA(), ' ', FileTransferSpeed()]
@@ -1818,8 +1823,6 @@ try:
 #filter mind_data_1-4_rs_ensorted_by_gene_posann tables by : join with table gene_name_and_drug_name on gene_name
         table_mind_data_n_rs_ensorted_by_gene_posann = args.filter_mind_table_by_drugs
         table_mind_data_n_rs_ensorted_by_gene_posann_by_drug = args.filter_mind_table_by_drugs+"_by_drug"
-
-#!!!!!!!!!!!!   fix !!!!!!!!! make the following table variable!!!0
         table_gene_name_and_drug_name_and_category_aggcat_aggdrug2 = "gene_name_and_drug_name_and_category_aggcat_aggdrug2"
 
         if not (check_table_exists(table_gene_name_and_drug_name_and_category_aggcat_aggdrug2)):
