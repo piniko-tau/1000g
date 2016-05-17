@@ -1360,6 +1360,8 @@ try:
         with open('exported_mind_by_drugs.txt',"a") as export_file:
 
             #I delete the header line manually for the 3 last files
+            # this is useful for quality control
+
             export_file.write("'patient','diagnosis',")
             cur.execute("select gene_name||' | '||rsids from %s_dist_header ;",(AsIs(args.mind_export_ml_with_drugs),))
             for i2 in cur.fetchall():
@@ -1374,9 +1376,8 @@ try:
 
                 export_file.write('\''+hg2+'\'')
                 export_file.write(',')
-                # # mind_data_4_rs_ensorted_by_gene_posann
 
-                # print(cur.mogrify("select %s from %s where idnum='1' limit 1;",(AsIs(hg2),AsIs(rstable),)))
+                #add correct diagnosis for each patient , idnum=1 is the row with diagnosis for each patient column
                 cur.execute("select %s from %s where idnum='1' limit 1;",(AsIs(hg2),AsIs(rstable),))
 
                 for i2 in cur.fetchall():
