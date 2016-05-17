@@ -1381,7 +1381,6 @@ try:
                 cur.execute("select %s from %s where idnum='1' limit 1;",(AsIs(hg2),AsIs(rstable),))
 
                 for i2 in cur.fetchall():
-                    # export_file.write(str(i2))
                     export_file.write(re.sub('(\()|(\[)|(\])|(\))','',str(i2)))
 
 
@@ -1390,7 +1389,6 @@ try:
 
 
                 for i2 in cur.fetchall():
-                    # export_file.write(str(i2))
                    export_file.write(re.sub('(\()|(\[)|(\])|(\))','',str(i2)))
 
                 export_file.write("\n")
