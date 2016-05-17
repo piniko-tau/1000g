@@ -54,6 +54,7 @@ parser = argparse.ArgumentParser(prog='psql_1000g_loader',usage='psql_1000g_load
  [-create_drugs_genes_table]\
  [-filter_mind_table_by_drugs]\
  [-mind_export_ml export a ml dataset of mind data]\
+ [-mind_export_ml_with_drugs export a ml dataset of mind data with drug fields]\
  [-add_meta add tables metadata]',\
 
 
@@ -150,6 +151,9 @@ parser.add_argument("-create_drugs_genes_table",help='create_drugs_genes_table',
 parser.add_argument("-filter_mind_table_by_drugs",help='filter_mind_table_by_drugs',metavar='filter_mind_table_by_drugs')
 
 parser.add_argument("-mind_export_ml",help='export a ml dataset of mind data',metavar='mind_export_ml')
+
+parser.add_argument("-mind_export_ml_with_drugs",help='export a ml dataset of mind data with drug fields',metavar='mind_export_ml_with_drugs')
+
 
 parser.add_argument("-o", "--overwrite_tables", help="overwrites any existing tables",action="store_true")
 parser.add_argument("-v", "--verbose", help="increase output verbosity",action="store_true")
@@ -1334,7 +1338,64 @@ try:
 #         print(cur.mogrify("create table %s as select * from %s WHERE peptide1!=peptide2 and peptide1!=peptide3 and peptide2!=peptide3",(AsIs(var_nodup_table),AsIs(args.remove_dup_allele),)))
 #         cur.execute("create table %s as select * from %s WHERE peptide1!=peptide2 and peptide1!=peptide3 and peptide2!=peptide3",(AsIs(var_nodup_table),AsIs(args.remove_dup_allele),))
 #         conn.commit()
-#
+#_ensorted_by_gene_posann_by_drug 
+
+
+    def mind_export_ml_with_drugs():
+
+        #get diagnosis, patient name,peptides string,gene in single line and string_agg it , output to file , for each of the four tables, for each patient
+
+        # print(cur.mogrify("select column_name from information_schema.columns where table_name = \'%s\' and ( column_name ~ \'^sz.*[1-9]\' or column_name ~ \'^cg.*[1-9]\' or column_name ~ \'^el.*[1-9]\' or column_name ~ \'^gc.*[1-9]\' );",(AsIs(args.mind_export_ml),)))
+
+        rstable = args.mind_export_ml.replace("_ensorted_by_gene_posann_by_drug","")
+
+
+
+        widgets = ['processing query -> '+table1000g+' :', Percentage(), ' ', Bar(marker=RotatingMarker()),' ', ETA(), ' ', FileTransferSpeed()]
+
+        pbar = ProgressBar(widgets=widgets, maxval=10000000).start()
+
+        with open('exported_mind.txt',"a") as export_file:
+
+            export_file.write("'patient','diagnosis',")
+            cur.execute("select gene_name||' | '||rsids from %s_dist_header ;",(AsIs(args.mind_export_ml),))
+            for i2 in cur.fetchall():
+                    # export_file.write(str(i2))
+                    export_file.write(re.sub('(\()|(\[)|(\])|(\))','',str(i2)))
+            export_file.write("\n")
+
+            cur.execute("select column_name from information_schema.columns where table_name = \'%s\' and ( column_name ~ \'^sz.*[1-9]\' or column_name ~ \'^cg.*[1-9]\' or column_name ~ \'^el.*[1-9]\' or column_name ~ \'^gc.*[1-9]\' );",(AsIs(args.mind_export_ml),))
+
+            for hg2 in pbar(query2list()):
+
+
+                export_file.write('\''+hg2+'\'')
+                export_file.write(',')
+                # # mind_data_4_rs_ensorted_by_gene_posann
+
+                # print(cur.mogrify("select %s from %s where idnum='1' limit 1;",(AsIs(hg2),AsIs(rstable),)))
+                cur.execute("select %s from %s where idnum='1' limit 1;",(AsIs(hg2),AsIs(rstable),))
+
+                for i2 in cur.fetchall():
+                    # export_file.write(str(i2))
+                    export_file.write(re.sub('(\()|(\[)|(\])|(\))','',str(i2)))
+
+
+
+                cur.execute("select peptid_group from (select gene_name , string_agg(rsid,',' order by rsid) as rsids, string_agg(peptid_group,'') as peptid_group from (select distinct gene_name,rsid,mytable.t1||mytable.t2||mytable.t3  as peptid_group from (select gene_name,rsid,%s, case when substr(%s,1,1) = allele1 then '+'||peptide1 when substr(%s,1,1) = allele2 then '+'||peptide2 when substr(%s,1,1) = allele3 then '+'||peptide3 when substr(%s,1,1) = opallele1 then '-'||peptide1 when substr(%s,1,1) = opallele2 then '-'||peptide2 when substr(%s,1,1) = opallele3 then '-'||peptide3 end as t1 , case when substr(%s,3,1) = allele1 then '+'||peptide1 when substr(%s,3,1) = allele2 then '+'||peptide2 when substr(%s,3,1) = allele3 then '+'||peptide3 when substr(%s,3,1) = opallele1 then '-'||peptide1 when substr(%s,3,1) = opallele2 then '-'||peptide2 when substr(%s,3,1) = opallele3 then '-'||peptide3 end as t2 ,case when substr(%s,5,1) = '' then '' when substr(%s,5,1) = allele1 then '+'||peptide1 when substr(%s,5,1) = allele2 then '+'||peptide2 when substr(%s,5,1) = allele3 then '+'||peptide3 when substr(%s,5,1) = opallele1 then '-'||peptide1 when substr(%s,5,1) = opallele2 then '-'||peptide2 when substr(%s,5,1) = opallele3 then '-'||peptide3 end as t3 from  %s) as mytable )as t1 group by t1.gene_name order by t1.gene_name) as t5;",(AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(args.mind_export_ml),))
+
+
+                for i2 in cur.fetchall():
+                    # export_file.write(str(i2))
+                   export_file.write(re.sub('(\()|(\[)|(\])|(\))','',str(i2)))
+
+                export_file.write("\n")
+
+
+
+
+
+
 
     if args.add_gene_peptide_string:
 
@@ -1675,6 +1736,10 @@ try:
 
     if args.mind_export_ml:
         mind_export_ml()
+
+     if args.mind_export_ml_with_drugs:
+        mind_export_ml_with_drugs()
+
 
     if args.load_DBIdb_tables_preprocess:
 
