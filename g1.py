@@ -1351,6 +1351,8 @@ try:
 
         rstable = args.mind_export_ml_with_drugs.replace("_ensorted_by_gene_posann_by_drug","")
 
+
+
         # pydb=> select gene_name , string_agg(rsid,' ' order by rsid) as rsids from (select distinct gene_name,rsid from mind_data_1_rs_ensorted_by_gene_posann_by_drug) as t1 group by t1.gene_name order by t1.gene_name;
 
 # create dist header for ml with drugs here .....
@@ -1366,7 +1368,7 @@ try:
 
             #I delete the header line manually for the 3 last files
             # this is useful for quality control
-
+                                                        #add |drug_info here after "||rsids"
             export_file.write("'patient','diagnosis',")
             cur.execute("select gene_name||' | '||rsids from %s_dist_header ;",(AsIs(args.mind_export_ml_with_drugs),))
             for i2 in cur.fetchall():
