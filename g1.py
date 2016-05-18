@@ -1836,8 +1836,8 @@ try:
 
         check_overwrite_table(table_gene_name_and_drug_name_and_category_aggcat)
 
-        print(cur.mogrify("CREATE TABLE %s AS select gene_name,gene_claim_id,drug_name,drug_claim_id,string_agg(value,' ') as drug_categories from (select distinct gene_name,gene_claim_id,drug_name,drug_claim_id,name,value from gene_name_and_drug_name_and_category) as gdc where name='Drug Categories' group by drug_claim_id,gene_name,gene_claim_id,drug_name; ",(AsIs(table_gene_name_and_drug_name_and_category_aggcat),)))
-        cur.execute("CREATE TABLE %s AS select gene_name,gene_claim_id,drug_name,drug_claim_id,string_agg(value,' ') as drug_categories from (select distinct gene_name,gene_claim_id,drug_name,drug_claim_id,name,value from gene_name_and_drug_name_and_category) as gdc where name='Drug Categories' group by drug_claim_id,gene_name,gene_claim_id,drug_name; ",(AsIs(table_gene_name_and_drug_name_and_category_aggcat),))
+        print(cur.mogrify("CREATE TABLE %s AS select gene_name,gene_claim_id,drug_name,drug_claim_id,string_agg(value,'/') as drug_categories from (select distinct gene_name,gene_claim_id,drug_name,drug_claim_id,name,value from gene_name_and_drug_name_and_category) as gdc where name='Drug Categories' group by drug_claim_id,gene_name,gene_claim_id,drug_name; ",(AsIs(table_gene_name_and_drug_name_and_category_aggcat),)))
+        cur.execute("CREATE TABLE %s AS select gene_name,gene_claim_id,drug_name,drug_claim_id,string_agg(value,'/') as drug_categories from (select distinct gene_name,gene_claim_id,drug_name,drug_claim_id,name,value from gene_name_and_drug_name_and_category) as gdc where name='Drug Categories' group by drug_claim_id,gene_name,gene_claim_id,drug_name; ",(AsIs(table_gene_name_and_drug_name_and_category_aggcat),))
         conn.commit()
 
 
