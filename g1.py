@@ -1346,19 +1346,38 @@ try:
 
         #get diagnosis, patient name,peptides string,gene in single line and string_agg it , output to file , for each of the four tables, for each patient
 
+
         # pydb=> select gene_name , string_agg(rsid,' ' order by rsid) as rsids ,string_agg(drugs_info,' ' order by drugs_info) as gene_drugs from (select distinct gene_name,rsid,drugs_info from mind_data_1_rs_ensorted_by_gene_posann_by_drug) as t1 group by t1.gene_name order by t1.gene_name; 
 
+# pydb=> select gene_name ,string_agg(drugs_info,' ' order by drugs_info) as gene_drugs from (select distinct gene_name,drugs_info from mind_data_1_rs_ensorted_by_gene_posann_by_drug) as t1 group by t1.gene_name order by t1.gene_name; 
 
-        table_mind_export_ml_with_drugs_header = args.mind_export_ml_with_drugs + "_header"
+
+        table_mind_export_ml_with_drugs_header_rsids = args.mind_export_ml_with_drugs + "_header_rsids"
+
+        table_mind_export_ml_with_drugs_header_drugs = args.mind_export_ml_with_drugs + "_header_drugs"
+
+        table_mind_export_ml_with_drugs_header_rsids_and_drugs = args.mind_export_ml_with_drugs + "_header_rsids_and_drugs"
+
 
 
         rstable = args.mind_export_ml_with_drugs.replace("_ensorted_by_gene_posann_by_drug","")
 
-        # create dist header for ml with drugs here .....
-        print(cur.mogrify("CREATE TABLE %s AS select gene_name , string_agg(rsid,' ' order by rsid) as rsids ,string_agg(drugs_info,' ' order by drugs_info) as gene_drugs from (select distinct gene_name,rsid,drugs_info from %s) as t1 group by t1.gene_name order by t1.gene_name; ",(AsIs(table_mind_export_ml_with_drugs_header),AsIs(args.mind_export_ml_with_drugs),)))
-        cur.execute("CREATE TABLE %s AS select gene_name , string_agg(rsid,' ' order by rsid) as rsids ,string_agg(drugs_info,' ' order by drugs_info) as gene_drugs from (select distinct gene_name,rsid,drugs_info from %s) as t1 group by t1.gene_name order by t1.gene_name; ",(AsIs(table_mind_export_ml_with_drugs_header),AsIs(args.mind_export_ml_with_drugs),))
+        # create dist header for ml with rsids here .....
+        print(cur.mogrify("CREATE TABLE %s AS select gene_name , string_agg(rsid,' ' order by rsid) as rsids from (select distinct gene_name,rsid from %s) as t1 group by t1.gene_name order by t1.gene_name; ",(AsIs(table_mind_export_ml_with_drugs_header_rsids),AsIs(args.mind_export_ml_with_drugs),)))
+        cur.execute("CREATE TABLE %s AS select gene_name , string_agg(rsid,' ' order by rsid) as rsids from (select distinct gene_name,rsid from %s) as t1 group by t1.gene_name order by t1.gene_name; ",(AsIs(table_mind_export_ml_with_drugs_header_rsids),AsIs(args.mind_export_ml_with_drugs),))
         conn.commit()
 
+        # create dist header with drugs for ml here .....
+        print(cur.mogrify("CREATE TABLE %s AS select gene_name ,string_agg(drugs_info,' ' order by drugs_info) as gene_drugs from (select distinct gene_name,drugs_info from %s) as t1 group by t1.gene_name order by t1.gene_name; ",(AsIs(table_mind_export_ml_with_drugs_header_drugs),AsIs(args.mind_export_ml_with_drugs),)))
+
+        cur.execute("CREATE TABLE %s AS select gene_name as gene_name2,string_agg(drugs_info,' ' order by drugs_info) as gene_drugs from (select distinct gene_name,drugs_info from %s) as t1 group by t1.gene_name order by t1.gene_name; ",(AsIs(table_mind_export_ml_with_drugs_header_drugs),AsIs(args.mind_export_ml_with_drugs),))
+        conn.commit()
+
+        #join the previouse tables into one final header table
+
+        print(cur.mogrify("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.gene_name2 = %s.gene_name)",(AsIs(table_mind_export_ml_with_drugs_header_rsids_and_drugs),AsIs(table_mind_export_ml_with_drugs_header_rsids),AsIs(table_mind_export_ml_with_drugs_header_drugs),AsIs(table_mind_export_ml_with_drugs_header_rsids),AsIs(table_mind_export_ml_with_drugs_header_drugs),)))
+        cur.execute("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.gene_name2 = %s.gene_name)",(AsIs(table_mind_export_ml_with_drugs_header_rsids_and_drugs),AsIs(table_mind_export_ml_with_drugs_header_rsids),AsIs(table_mind_export_ml_with_drugs_header_drugs),AsIs(table_mind_export_ml_with_drugs_header_rsids),AsIs(table_mind_export_ml_with_drugs_header_drugs),))
+        conn.commit()
 
 
         widgets = ['processing query -> '+table1000g+' :', Percentage(), ' ', Bar(marker=RotatingMarker()),' ', ETA(), ' ', FileTransferSpeed()]
