@@ -1362,18 +1362,24 @@ try:
 
         rstable = args.mind_export_ml_with_drugs.replace("_ensorted_by_gene_posann_by_drug","")
 
+
+        check_overwrite_table(table_mind_export_ml_with_drugs_header_rsids)
+
         # create dist header for ml with rsids here .....
         print(cur.mogrify("CREATE TABLE %s AS select gene_name , string_agg(rsid,' ' order by rsid) as rsids from (select distinct gene_name,rsid from %s) as t1 group by t1.gene_name order by t1.gene_name; ",(AsIs(table_mind_export_ml_with_drugs_header_rsids),AsIs(args.mind_export_ml_with_drugs),)))
         cur.execute("CREATE TABLE %s AS select gene_name , string_agg(rsid,' ' order by rsid) as rsids from (select distinct gene_name,rsid from %s) as t1 group by t1.gene_name order by t1.gene_name; ",(AsIs(table_mind_export_ml_with_drugs_header_rsids),AsIs(args.mind_export_ml_with_drugs),))
         conn.commit()
+
+        check_overwrite_table(table_mind_export_ml_with_drugs_header_drugs)
 
         # create dist header with drugs for ml here .....
         print(cur.mogrify("CREATE TABLE %s AS select gene_name ,string_agg(drugs_info,' ' order by drugs_info) as gene_drugs from (select distinct gene_name,drugs_info from %s) as t1 group by t1.gene_name order by t1.gene_name; ",(AsIs(table_mind_export_ml_with_drugs_header_drugs),AsIs(args.mind_export_ml_with_drugs),)))
         cur.execute("CREATE TABLE %s AS select gene_name as gene_name2,string_agg(drugs_info,' ' order by drugs_info) as gene_drugs from (select distinct gene_name,drugs_info from %s) as t1 group by t1.gene_name order by t1.gene_name; ",(AsIs(table_mind_export_ml_with_drugs_header_drugs),AsIs(args.mind_export_ml_with_drugs),))
         conn.commit()
 
-        #join the previouse tables into one final header table
+        check_overwrite_table(table_mind_export_ml_with_drugs_header_rsids_and_drugs)
 
+        #join the previouse tables into one final header table
         print(cur.mogrify("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.gene_name2 = %s.gene_name)",(AsIs(table_mind_export_ml_with_drugs_header_rsids_and_drugs),AsIs(table_mind_export_ml_with_drugs_header_rsids),AsIs(table_mind_export_ml_with_drugs_header_drugs),AsIs(table_mind_export_ml_with_drugs_header_drugs),AsIs(table_mind_export_ml_with_drugs_header_rsids),)))
         cur.execute("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.gene_name2 = %s.gene_name)",(AsIs(table_mind_export_ml_with_drugs_header_rsids_and_drugs),AsIs(table_mind_export_ml_with_drugs_header_rsids),AsIs(table_mind_export_ml_with_drugs_header_drugs),AsIs(table_mind_export_ml_with_drugs_header_drugs),AsIs(table_mind_export_ml_with_drugs_header_rsids),))
         conn.commit()
@@ -1390,10 +1396,12 @@ try:
             # this is useful for quality control
                                                         #add |drugs_info here after "||rsids"
             export_file.write("'patient','diagnosis',")
-            cur.execute("select gene_name||' | '||rsids from %s_dist_header ;",(AsIs(args.mind_export_ml_with_drugs),))
+            cur.execute("select gene_name||' | '||rsids||' | '||gene_drugs from %s ;",(AsIs(table_mind_export_ml_with_drugs_header_rsids_and_drugs),))
+
             for i2 in cur.fetchall():
-                    # export_file.write(str(i2))
+
                     export_file.write(re.sub('(\()|(\[)|(\])|(\))','',str(i2)))
+
             export_file.write("\n")
 
             cur.execute("select column_name from information_schema.columns where table_name = \'%s\' and ( column_name ~ \'^sz.*[1-9]\' or column_name ~ \'^cg.*[1-9]\' or column_name ~ \'^el.*[1-9]\' or column_name ~ \'^gc.*[1-9]\' );",(AsIs(args.mind_export_ml_with_drugs),))
