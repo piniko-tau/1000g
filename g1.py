@@ -1855,19 +1855,18 @@ try:
         table_mind_data_n_rs_ensorted_by_gene_posann_by_drug = args.filter_mind_table_by_drugs+"_by_drug"
         table_gene_name_and_drug_name_and_category_aggcat_aggdrug2 = "gene_name_and_drug_name_and_category_aggcat_aggdrug2"
 
-        if not (check_table_exists(table_gene_name_and_drug_name_and_category_aggcat_aggdrug2)):
 
-            check_overwrite_table(table_gene_name_and_drug_name_and_category_aggcat_aggdrug2)
+        check_overwrite_table(table_gene_name_and_drug_name_and_category_aggcat_aggdrug2)
 
-            #copy and alter drugs table gene_name column to gene_name2 for easy joining
-            print(cur.mogrify("CREATE TABLE %s AS SELECT * FROM gene_name_and_drug_name_and_category_aggcat_aggdrug",(AsIs(table_gene_name_and_drug_name_and_category_aggcat_aggdrug2),)))
-            cur.execute("CREATE TABLE %s AS SELECT * FROM gene_name_and_drug_name_and_category_aggcat_aggdrug",(AsIs(table_gene_name_and_drug_name_and_category_aggcat_aggdrug2),))
-            conn.commit()
+        #copy and alter drugs table gene_name column to gene_name2 for easy joining
+        print(cur.mogrify("CREATE TABLE %s AS SELECT * FROM gene_name_and_drug_name_and_category_aggcat_aggdrug",(AsIs(table_gene_name_and_drug_name_and_category_aggcat_aggdrug2),)))
+        cur.execute("CREATE TABLE %s AS SELECT * FROM gene_name_and_drug_name_and_category_aggcat_aggdrug",(AsIs(table_gene_name_and_drug_name_and_category_aggcat_aggdrug2),))
+        conn.commit()
 
-            #copy and alter drugs table gene_name column to gene_name2 for easy joining
-            print(cur.mogrify("alter table  %s rename column gene_name to gene_name2",(AsIs(table_gene_name_and_drug_name_and_category_aggcat_aggdrug2),)))
-            cur.execute("alter table  %s rename column gene_name to gene_name2",(AsIs(table_gene_name_and_drug_name_and_category_aggcat_aggdrug2),))
-            conn.commit()
+        #copy and alter drugs table gene_name column to gene_name2 for easy joining
+        print(cur.mogrify("alter table  %s rename column gene_name to gene_name2",(AsIs(table_gene_name_and_drug_name_and_category_aggcat_aggdrug2),)))
+        cur.execute("alter table  %s rename column gene_name to gene_name2",(AsIs(table_gene_name_and_drug_name_and_category_aggcat_aggdrug2),))
+        conn.commit()
 
         check_overwrite_table(table_mind_data_n_rs_ensorted_by_gene_posann_by_drug)
 
