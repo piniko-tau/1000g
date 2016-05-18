@@ -1346,9 +1346,7 @@ try:
 
         #get diagnosis, patient name,peptides string,gene in single line and string_agg it , output to file , for each of the four tables, for each patient
 
-        #dist_header = was made by select distinct gene_name from mind_data_1_rs_ensorted_by_gene_posann order by gene_name  + string agg rsids distinct
-
-        # pydb=> select gene_name , string_agg(rsid,' ' order by rsid) as rsids from (select distinct gene_name,rsid from mind_data_1_rs_ensorted_by_gene_posann_by_drug) as t1 group by t1.gene_name order by t1.gene_name;
+        # pydb=> select gene_name , string_agg(rsid,' ' order by rsid) as rsids ,string_agg(drugs_info,' ' order by drugs_info) as gene_drugs from (select distinct gene_name,rsid,drugs_info from mind_data_1_rs_ensorted_by_gene_posann_by_drug) as t1 group by t1.gene_name order by t1.gene_name; 
 
 
         table_mind_export_ml_with_drugs_header = args.mind_export_ml_with_drugs + "_header"
@@ -1357,8 +1355,8 @@ try:
         rstable = args.mind_export_ml_with_drugs.replace("_ensorted_by_gene_posann_by_drug","")
 
         # create dist header for ml with drugs here .....
-        print(cur.mogrify("CREATE TABLE %s AS select gene_name , string_agg(rsid,' ' order by rsid) as rsids from (select distinct gene_name,rsid from %s) as t1 group by t1.gene_name order by t1.gene_name; ",(AsIs(table_mind_export_ml_with_drugs_header),AsIs(args.mind_export_ml_with_drugs),)))
-        cur.execute("CREATE TABLE %s AS select gene_name , string_agg(rsid,' ' order by rsid) as rsids from (select distinct gene_name,rsid from %s) as t1 group by t1.gene_name order by t1.gene_name; ",(AsIs(table_mind_export_ml_with_drugs_header),AsIs(args.mind_export_ml_with_drugs),))
+        print(cur.mogrify("CREATE TABLE %s AS select gene_name , string_agg(rsid,' ' order by rsid) as rsids ,string_agg(drugs_info,' ' order by drugs_info) as gene_drugs from (select distinct gene_name,rsid,drugs_info from %s) as t1 group by t1.gene_name order by t1.gene_name; ",(AsIs(table_mind_export_ml_with_drugs_header),AsIs(args.mind_export_ml_with_drugs),)))
+        cur.execute("CREATE TABLE %s AS select gene_name , string_agg(rsid,' ' order by rsid) as rsids ,string_agg(drugs_info,' ' order by drugs_info) as gene_drugs from (select distinct gene_name,rsid,drugs_info from %s) as t1 group by t1.gene_name order by t1.gene_name; ",(AsIs(table_mind_export_ml_with_drugs_header),AsIs(args.mind_export_ml_with_drugs),))
         conn.commit()
 
 
@@ -1369,10 +1367,10 @@ try:
 
         with open('exported_mind_by_drugs.txt',"a") as export_file:
 
-            #all 4 files are appended 
+            #all 4 files are appended
             #I delete the header line manually for the 3 last files
             # this is useful for quality control
-                                                        #add |drug_info here after "||rsids"
+                                                        #add |drugs_info here after "||rsids"
             export_file.write("'patient','diagnosis',")
             cur.execute("select gene_name||' | '||rsids from %s_dist_header ;",(AsIs(args.mind_export_ml_with_drugs),))
             for i2 in cur.fetchall():
