@@ -1356,7 +1356,7 @@ try:
 
         table_mind_export_ml_with_drugs_header_drugs = args.mind_export_ml_with_drugs + "_header_drugs"
 
-        table_mind_export_ml_with_drugs_header_rsids_and_drugs = args.mind_export_ml_with_drugs + "_header_rsids_and_drugs"
+        table_mind_export_ml_with_drugs_header_rsids_and_drugs = args.mind_export_ml_with_drugs + "_header_rsids_drugs"
 
 
 
