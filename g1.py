@@ -1343,20 +1343,23 @@ try:
 
     def mind_export_ml_with_drugs():
 
-        #get diagnosis, patient name,peptides string,gene in single line and string_agg it , output to file , for each of the four tables, for each patient
 
-        # print(cur.mogrify("select column_name from information_schema.columns where table_name = \'%s\' and ( column_name ~ \'^sz.*[1-9]\' or column_name ~ \'^cg.*[1-9]\' or column_name ~ \'^el.*[1-9]\' or column_name ~ \'^gc.*[1-9]\' );",(AsIs(args.mind_export_ml_with_drugs),)))
+        #get diagnosis, patient name,peptides string,gene in single line and string_agg it , output to file , for each of the four tables, for each patient
 
         #dist_header = was made by select distinct gene_name from mind_data_1_rs_ensorted_by_gene_posann order by gene_name  + string agg rsids distinct
 
-        rstable = args.mind_export_ml_with_drugs.replace("_ensorted_by_gene_posann_by_drug","")
-
-
-
         # pydb=> select gene_name , string_agg(rsid,' ' order by rsid) as rsids from (select distinct gene_name,rsid from mind_data_1_rs_ensorted_by_gene_posann_by_drug) as t1 group by t1.gene_name order by t1.gene_name;
 
-# create dist header for ml with drugs here .....
 
+        table_mind_export_ml_with_drugs_header = args.mind_export_ml_with_drugs + "_header"
+
+
+        rstable = args.mind_export_ml_with_drugs.replace("_ensorted_by_gene_posann_by_drug","")
+
+        # create dist header for ml with drugs here .....
+        print(cur.mogrify("CREATE TABLE %s AS select gene_name , string_agg(rsid,' ' order by rsid) as rsids from (select distinct gene_name,rsid from %s) as t1 group by t1.gene_name order by t1.gene_name; ",(AsIs(table_mind_export_ml_with_drugs_header),AsIs(args.mind_export_ml_with_drugs),)))
+        cur.execute("CREATE TABLE %s AS select gene_name , string_agg(rsid,' ' order by rsid) as rsids from (select distinct gene_name,rsid from %s) as t1 group by t1.gene_name order by t1.gene_name; ",(AsIs(table_mind_export_ml_with_drugs_header),AsIs(args.mind_export_ml_with_drugs),))
+        conn.commit()
 
 
 
@@ -1746,7 +1749,7 @@ try:
     if args.mind_export_ml:
         mind_export_ml()
 
-     if args.mind_export_ml_with_drugs:
+    if args.mind_export_ml_with_drugs:
         mind_export_ml_with_drugs()
 
 
