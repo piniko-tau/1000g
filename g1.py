@@ -1389,7 +1389,7 @@ try:
 
         pbar = ProgressBar(widgets=widgets, maxval=10000000).start()
 
-        with open('exported_mind_by_drugs.txt',"a") as export_file:
+        with open('exported_mind_by_drugs.csv',"a") as export_file:
 
             #all 4 files are appended
             #I delete the header line manually for the 3 last files
