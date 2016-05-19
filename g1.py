@@ -1410,9 +1410,9 @@ try:
 
                     i2_filter2 = re.sub(',','',i2_filter1)
 
-                    i2_final = re.sub('\'\'','\',\'',i2_filter2)
+                    export_file.write(i2_filter2)
 
-                    export_file.write(i2_final)
+                    export_file.write(',')
 
             export_file.write("\n")
 
