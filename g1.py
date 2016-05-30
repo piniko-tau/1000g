@@ -1869,6 +1869,7 @@ try:
         #this isa copy of the prefiouse function change it :
 
         table_drug_name_and_claim_id_alt = "drug_name_and_claim_id_alt"
+        table_gene_name_alt = "gene_name_alt"
         table_gene_name_and_claim_id_alt = "gene_name_and_claim_id_alt"
         table_drug_claim_and_gene_name_1_intermediate_alt = "drug_claim_and_gene_name_1_intermediate_alt"
         table_gene_name_and_drug_name_alt = "gene_name_and_drug_name_alt"
@@ -1884,6 +1885,14 @@ try:
         cur.execute("CREATE TABLE %s AS SELECT name as drug_name,drug_claim_id FROM drugs inner join drug_claims_drugs on (drugs.id = drug_claims_drugs.drug_id)",(AsIs(table_drug_name_and_claim_id_alt),))
         conn.commit()
 
+        #create join table of alt genes and their names gene_id,gene_id_alt,name.
+
+        check_overwrite_table(table_gene_name_alt)
+        print(cur.mogrify("CREATE TABLE %s AS SELECT name as gene_name,gene_id,interacting_gene_id as gene_id_alt FROM genes inner join gene_gene_interaction_claims on (genes.id = gene_gene_interaction_claims.gene_id)",(AsIs(table_gene_name_alt),)))
+        cur.execute("CREATE TABLE %s AS SELECT name as gene_name,gene_id,interacting_gene_id as gene_id_alt FROM genes inner join gene_gene_interaction_claims on (genes.id = gene_gene_interaction_claims.gene_id)",(AsIs(table_gene_name_alt),))
+        conn.commit()
+
+        #replace genes table here for gene_name_alt above.
         #join tables genes and gene_claims_genes -> creating name and gene_claim_id = gene_name_and_claim_id_alt
 
         check_overwrite_table(table_gene_name_and_claim_id_alt)
