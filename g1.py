@@ -1870,13 +1870,15 @@ try:
 
         table_drug_name_and_claim_id_alt = "drug_name_and_claim_id_alt"
         table_gene_name_alt = "gene_name_alt"
+        table_gene_name_and_interactive_gene_name_alt = "gene_name_and_interactive_gene_name_alt"
         table_gene_name_and_claim_id_alt = "gene_name_and_claim_id_alt"
         table_drug_claim_and_gene_name_1_intermediate_alt = "drug_claim_and_gene_name_1_intermediate_alt"
         table_gene_name_and_drug_name_alt = "gene_name_and_drug_name_alt"
         table_gene_name_and_drug_name_and_category_alt = "gene_name_and_drug_name_and_category_alt"
         table_gene_name_and_drug_name_and_category_filtered_alt = "gene_name_and_drug_name_and_category_filtered_alt"
         table_gene_name_and_drug_name_and_category_aggcat_alt= "gene_name_and_drug_name_and_category_aggcat_alt"
-        table_gene_name_and_drug_name_and_category_aggcat_aggdrug_alt = "gene_name_and_drug_name_and_category_aggcat_aggdrug_alt"
+        table_gene_and_drug_name_category_agg_cat_drug_alt = "gene_and_drug_name_category_agg_cat_drug_alt"
+        table_gene_and_drug_name_category_agg_cat_drug_int_alt = "gene_and_drug_name_category_agg_cat_drug_int_alt"
 
         # join tables drugs and drug claim aliases - > creating name and drug claim id = drug_name_and_claim_id_alt
 
@@ -1892,33 +1894,40 @@ try:
         cur.execute("CREATE TABLE %s AS SELECT name as gene_name,gene_id,interacting_gene_id as gene_id_alt FROM genes inner join gene_gene_interaction_claims on (genes.id = gene_gene_interaction_claims.interacting_gene_id)",(AsIs(table_gene_name_alt),))
         conn.commit()
 
+        #create join table of alt genes and their names gene_id,gene_id_alt,name.
+
+        check_overwrite_table(table_gene_name_and_interactive_gene_name_alt)
+        print(cur.mogrify("CREATE TABLE %s AS SELECT name as interactive_gene_name,gene_name,gene_id,interacting_gene_id as gene_id_alt FROM genes inner join gene_name_alt on (genes.id = gene_name_alt.gene_id)",(AsIs(table_gene_name_and_interactive_gene_name_alt),)))
+        cur.execute("CREATE TABLE %s AS SELECT name as interactive_gene_name,gene_name,gene_id,interacting_gene_id as gene_id_alt FROM genes inner join gene_name_alt on (genes.id = gene_name_alt.gene_id)",(AsIs(table_gene_name_and_interactive_gene_name_alt),))
+        conn.commit()
+
         #join tables genes and gene_claims_genes -> creating name and gene_claim_id = gene_name_and_claim_id_alt
 
         check_overwrite_table(table_gene_name_and_claim_id_alt)
-        print(cur.mogrify("CREATE TABLE %s AS SELECT gene_name_alt,gene_name,gene_claim_id FROM gene_name_alt inner join gene_claims_genes on (gene_name_alt.gene_id = gene_claims_genes.gene_id)",(AsIs(table_gene_name_and_claim_id_alt),)))
-        cur.execute("CREATE TABLE %s AS SELECT gene_name_alt,gene_name,gene_claim_id FROM gene_name_alt inner join gene_claims_genes on (gene_name_alt.gene_id = gene_claims_genes.gene_id)",(AsIs(table_gene_name_and_claim_id_alt),))
+        print(cur.mogrify("CREATE TABLE %s AS SELECT gene_id_alt,gene_name,gene_claim_id FROM gene_name_alt inner join gene_claims_genes on (gene_name_alt.gene_id = gene_claims_genes.gene_id)",(AsIs(table_gene_name_and_claim_id_alt),)))
+        cur.execute("CREATE TABLE %s AS SELECT gene_id_alt,gene_name,gene_claim_id FROM gene_name_alt inner join gene_claims_genes on (gene_name_alt.gene_id = gene_claims_genes.gene_id)",(AsIs(table_gene_name_and_claim_id_alt),))
         conn.commit()
 
         #join tables gene_name_and_claim_id_alt and interaction_claims creating -> gene_name , gene_claim_id and drug_claim_id = drug_claim_and_gene_name_1_intermediate_alt
 
         check_overwrite_table(table_drug_claim_and_gene_name_1_intermediate_alt)
-        print(cur.mogrify("CREATE TABLE %s AS SELECT gene_name_alt,gene_name,gene_name_and_claim_id_alt.gene_claim_id,drug_claim_id FROM gene_name_and_claim_id_alt inner join interaction_claims on (gene_name_and_claim_id_alt.gene_claim_id = interaction_claims.gene_claim_id)",(AsIs(table_drug_claim_and_gene_name_1_intermediate_alt),)))
-        cur.execute("CREATE TABLE %s AS SELECT gene_name_alt,gene_name,gene_name_and_claim_id_alt.gene_claim_id,drug_claim_id FROM gene_name_and_claim_id_alt inner join interaction_claims on (gene_name_and_claim_id_alt.gene_claim_id = interaction_claims.gene_claim_id)",(AsIs(table_drug_claim_and_gene_name_1_intermediate_alt),))
+        print(cur.mogrify("CREATE TABLE %s AS SELECT gene_id_alt,gene_name,gene_name_and_claim_id_alt.gene_claim_id,drug_claim_id FROM gene_name_and_claim_id_alt inner join interaction_claims on (gene_name_and_claim_id_alt.gene_claim_id = interaction_claims.gene_claim_id)",(AsIs(table_drug_claim_and_gene_name_1_intermediate_alt),)))
+        cur.execute("CREATE TABLE %s AS SELECT gene_id_alt,gene_name,gene_name_and_claim_id_alt.gene_claim_id,drug_claim_id FROM gene_name_and_claim_id_alt inner join interaction_claims on (gene_name_and_claim_id_alt.gene_claim_id = interaction_claims.gene_claim_id)",(AsIs(table_drug_claim_and_gene_name_1_intermediate_alt),))
         conn.commit()
 
         #join tables  gene_name_and_claim_id_alt and interaction_claims creating -> gene_name and drug_name = drug_name_gene_name
 
         check_overwrite_table(table_gene_name_and_drug_name_alt)
-        print(cur.mogrify("CREATE TABLE %s AS SELECT gene_name_alt,gene_name,drug_claim_and_gene_name_1_intermediate_alt.gene_claim_id,drug_claim_and_gene_name_1_intermediate_alt.drug_claim_id,drug_name FROM drug_claim_and_gene_name_1_intermediate_alt inner join drug_name_and_claim_id_alt on (drug_name_and_claim_id_alt.drug_claim_id = drug_claim_and_gene_name_1_intermediate_alt.drug_claim_id)",(AsIs(table_gene_name_and_drug_name_alt),)))
-        cur.execute("CREATE TABLE %s AS SELECT gene_name_alt,gene_name,drug_claim_and_gene_name_1_intermediate_alt.gene_claim_id,drug_claim_and_gene_name_1_intermediate_alt.drug_claim_id,drug_name FROM drug_claim_and_gene_name_1_intermediate_alt inner join drug_name_and_claim_id_alt on (drug_name_and_claim_id_alt.drug_claim_id = drug_claim_and_gene_name_1_intermediate_alt.drug_claim_id)",(AsIs(table_gene_name_and_drug_name_alt),))
+        print(cur.mogrify("CREATE TABLE %s AS SELECT gene_id_alt,gene_name,drug_claim_and_gene_name_1_intermediate_alt.gene_claim_id,drug_claim_and_gene_name_1_intermediate_alt.drug_claim_id,drug_name FROM drug_claim_and_gene_name_1_intermediate_alt inner join drug_name_and_claim_id_alt on (drug_name_and_claim_id_alt.drug_claim_id = drug_claim_and_gene_name_1_intermediate_alt.drug_claim_id)",(AsIs(table_gene_name_and_drug_name_alt),)))
+        cur.execute("CREATE TABLE %s AS SELECT gene_id_alt,gene_name,drug_claim_and_gene_name_1_intermediate_alt.gene_claim_id,drug_claim_and_gene_name_1_intermediate_alt.drug_claim_id,drug_name FROM drug_claim_and_gene_name_1_intermediate_alt inner join drug_name_and_claim_id_alt on (drug_name_and_claim_id_alt.drug_claim_id = drug_claim_and_gene_name_1_intermediate_alt.drug_claim_id)",(AsIs(table_gene_name_and_drug_name_alt),))
         conn.commit()
 
           #create gene_name_and_drug_name_and_category_alt table join table_gene_name_and_drug_name_alt with drug_claim_attributes = gene_name,drug_name,drug_claim_id, value,name
 
         check_overwrite_table(table_gene_name_and_drug_name_and_category_alt)
 
-        print(cur.mogrify("CREATE TABLE %s AS SELECT gene_name_alt,gene_name,gene_claim_id,gene_name_and_drug_name_alt.drug_claim_id,drug_name,drug_claim_attributes.value ,drug_claim_attributes.name FROM drug_claim_attributes inner join gene_name_and_drug_name_alt on (drug_claim_attributes.drug_claim_id = gene_name_and_drug_name_alt.drug_claim_id)",(AsIs(table_gene_name_and_drug_name_and_category_alt),)))
-        cur.execute("CREATE TABLE %s AS SELECT gene_name_alt,gene_name,gene_claim_id,gene_name_and_drug_name_alt.drug_claim_id,drug_name,drug_claim_attributes.value ,drug_claim_attributes.name FROM drug_claim_attributes inner join gene_name_and_drug_name_alt on (drug_claim_attributes.drug_claim_id = gene_name_and_drug_name_alt.drug_claim_id)",(AsIs(table_gene_name_and_drug_name_and_category_alt),))
+        print(cur.mogrify("CREATE TABLE %s AS SELECT gene_id_alt,gene_name,gene_claim_id,gene_name_and_drug_name_alt.drug_claim_id,drug_name,drug_claim_attributes.value ,drug_claim_attributes.name FROM drug_claim_attributes inner join gene_name_and_drug_name_alt on (drug_claim_attributes.drug_claim_id = gene_name_and_drug_name_alt.drug_claim_id)",(AsIs(table_gene_name_and_drug_name_and_category_alt),)))
+        cur.execute("CREATE TABLE %s AS SELECT gene_id_alt,gene_name,gene_claim_id,gene_name_and_drug_name_alt.drug_claim_id,drug_name,drug_claim_attributes.value ,drug_claim_attributes.name FROM drug_claim_attributes inner join gene_name_and_drug_name_alt on (drug_claim_attributes.drug_claim_id = gene_name_and_drug_name_alt.drug_claim_id)",(AsIs(table_gene_name_and_drug_name_and_category_alt),))
         conn.commit()
 
 #add column "drug_function_categories" string_agg of gene | drug categories...
@@ -1930,11 +1939,19 @@ try:
         conn.commit()
 
 
-        check_overwrite_table(table_gene_name_and_drug_name_and_category_aggcat_aggdrug_alt)
+        check_overwrite_table(table_gene_and_drug_name_category_agg_cat_drug_alt)
 
-        print(cur.mogrify("CREATE TABLE %s AS select gene_name,string_agg(dg1.drug_name2,' ') as drugs_info from (select distinct gene_name,drug_name||'{'||drug_categories||'}' as drug_name2 from gene_name_and_drug_name_and_category_aggcat_alt) as dg1 group by gene_name;  ",(AsIs(table_gene_name_and_drug_name_and_category_aggcat_aggdrug_alt),)))
-        cur.execute("CREATE TABLE %s AS select gene_name,string_agg(dg1.drug_name2,' ') as drugs_info from (select distinct gene_name,drug_name||'{'||drug_categories||'}' as drug_name2 from gene_name_and_drug_name_and_category_aggcat_alt) as dg1 group by gene_name;  ",(AsIs(table_gene_name_and_drug_name_and_category_aggcat_aggdrug_alt),))
+        print(cur.mogrify("CREATE TABLE %s AS select gene_name,string_agg(dg1.drug_name2,' ') as drugs_info from (select distinct gene_name,drug_name||'{'||drug_categories||'}' as drug_name2 from gene_name_and_drug_name_and_category_aggcat_alt) as dg1 group by gene_name;  ", (AsIs(table_gene_and_drug_name_category_agg_cat_drug_alt),)))
+        cur.execute("CREATE TABLE %s AS select gene_name,string_agg(dg1.drug_name2,' ') as drugs_info from (select distinct gene_name,drug_name||'{'||drug_categories||'}' as drug_name2 from gene_name_and_drug_name_and_category_aggcat_alt) as dg1 group by gene_name;  ", (AsIs(table_gene_and_drug_name_category_agg_cat_drug_alt),))
         conn.commit()
+
+#add gene_name_and_interactive_gene_name_alt annotation with :  | interactive_gene_name
+
+        check_overwrite_table(table_gene_and_drug_name_category_agg_cat_drug_int_alt)
+        print(cur.mogrify("CREATE TABLE %s AS SELECT gene_and_drug_name_category_agg_cat_drug_alt.gene_name,drugs_info||' | interactive_gene: '||interactive_gene_name as drugs_info FROM gene_and_drug_name_category_agg_cat_drug_alt inner join gene_and_drug_name_category_agg_cat_drug_int_alt on (gene_and_drug_name_category_agg_cat_drug_alt.gene_name = gene_and_drug_name_category_agg_cat_drug_int_alt.gene_name)",(AsIs(table_gene_and_drug_name_category_agg_cat_drug_int_alt),)))
+        cur.execute("CREATE TABLE %s AS SELECT gene_and_drug_name_category_agg_cat_drug_alt.gene_name,drugs_info||' | interactive_gene: '||interactive_gene_name as drugs_info FROM gene_and_drug_name_category_agg_cat_drug_alt inner join gene_and_drug_name_category_agg_cat_drug_int_alt on (gene_and_drug_name_category_agg_cat_drug_alt.gene_name = gene_and_drug_name_category_agg_cat_drug_int_alt.gene_name)",(AsIs(table_gene_and_drug_name_category_agg_cat_drug_int_alt),))
+        conn.commit()
+
 
 
     if args.filter_mind_table_by_drugs:
