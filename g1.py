@@ -1946,7 +1946,8 @@ try:
         conn.commit()
 
 #add gene_name_and_interactive_gene_name_alt annotation with :  | interactive_gene_name
-
+# fix this :
+        
         check_overwrite_table(table_gene_and_drug_name_category_agg_cat_drug_int_alt)
         print(cur.mogrify("CREATE TABLE %s AS SELECT gene_and_drug_name_category_agg_cat_drug_alt.gene_name,drugs_info||' | interactive_gene: '||interactive_gene_name as drugs_info FROM gene_and_drug_name_category_agg_cat_drug_alt inner join gene_and_drug_name_category_agg_cat_drug_int_alt on (gene_and_drug_name_category_agg_cat_drug_alt.gene_name = gene_and_drug_name_category_agg_cat_drug_int_alt.gene_name)",(AsIs(table_gene_and_drug_name_category_agg_cat_drug_int_alt),)))
         cur.execute("CREATE TABLE %s AS SELECT gene_and_drug_name_category_agg_cat_drug_alt.gene_name,drugs_info||' | interactive_gene: '||interactive_gene_name as drugs_info FROM gene_and_drug_name_category_agg_cat_drug_alt inner join gene_and_drug_name_category_agg_cat_drug_int_alt on (gene_and_drug_name_category_agg_cat_drug_alt.gene_name = gene_and_drug_name_category_agg_cat_drug_int_alt.gene_name)",(AsIs(table_gene_and_drug_name_category_agg_cat_drug_int_alt),))
