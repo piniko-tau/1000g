@@ -1904,8 +1904,8 @@ try:
         #join tables genes and gene_claims_genes -> creating name and gene_claim_id = gene_name_and_claim_id_alt
 
         check_overwrite_table(table_gene_name_and_claim_id_alt)
-        print(cur.mogrify("CREATE TABLE %s AS SELECT gene_id_alt,gene_name,gene_claim_id FROM gene_name_alt inner join gene_claims_genes on (gene_name_alt.gene_id = gene_claims_genes.gene_id)",(AsIs(table_gene_name_and_claim_id_alt),)))
-        cur.execute("CREATE TABLE %s AS SELECT gene_id_alt,gene_name,gene_claim_id FROM gene_name_alt inner join gene_claims_genes on (gene_name_alt.gene_id = gene_claims_genes.gene_id)",(AsIs(table_gene_name_and_claim_id_alt),))
+        print(cur.mogrify("CREATE TABLE %s AS SELECT gene_name_alt.gene_id,gene_id_alt,gene_name,gene_claim_id FROM gene_name_alt inner join gene_claims_genes on (gene_name_alt.gene_id_alt = gene_claims_genes.gene_id)",(AsIs(table_gene_name_and_claim_id_alt),)))
+        cur.execute("CREATE TABLE %s AS SELECT gene_name_alt.gene_id,gene_id_alt,gene_name,gene_claim_id FROM gene_name_alt inner join gene_claims_genes on (gene_name_alt.gene_id_alt = gene_claims_genes.gene_id)",(AsIs(table_gene_name_and_claim_id_alt),))
         conn.commit()
 
         #join tables gene_name_and_claim_id_alt and interaction_claims creating -> gene_name , gene_claim_id and drug_claim_id = drug_claim_and_gene_name_1_intermediate_alt
