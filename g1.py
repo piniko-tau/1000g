@@ -1945,14 +1945,16 @@ try:
         cur.execute("CREATE TABLE %s AS select gene_name,string_agg(dg1.drug_name2,' ') as drugs_info from (select distinct gene_name,drug_name||'{'||drug_categories||'}' as drug_name2 from gene_name_and_drug_name_and_category_aggcat_alt) as dg1 group by gene_name;  ", (AsIs(table_gene_and_drug_name_category_agg_cat_drug_alt),))
         conn.commit()
 
-#add gene_name_and_interactive_gene_name_alt annotation with :  | interactive_gene_name
+        # add gene_name_and_interactive_gene_name_alt annotation with :  | interactive_gene_name
 
         check_overwrite_table(table_gene_and_drug_name_category_agg_cat_drug_int_alt)
-        print(cur.mogrify("CREATE TABLE %s AS SELECT gene_and_drug_name_category_agg_cat_drug_alt.gene_name,drugs_info||' | interactive_gene: '||interactive_gene_name as drugs_info FROM gene_and_drug_name_category_agg_cat_drug_alt inner join gene_name_and_interactive_gene_name_alt on (gene_and_drug_name_category_agg_cat_drug_alt.gene_name = gene_name_and_interactive_gene_name_alt.gene_name)",(AsIs(table_gene_and_drug_name_category_agg_cat_drug_int_alt),)))
-        cur.execute("CREATE TABLE %s AS SELECT gene_and_drug_name_category_agg_cat_drug_alt.gene_name,drugs_info||' | interactive_gene: '||interactive_gene_name as drugs_info FROM gene_and_drug_name_category_agg_cat_drug_alt inner join gene_name_and_interactive_gene_name_alt on (gene_and_drug_name_category_agg_cat_drug_alt.gene_name = gene_name_and_interactive_gene_name_alt.gene_name)",(AsIs(table_gene_and_drug_name_category_agg_cat_drug_int_alt),))
+        print(cur.mogrify(
+            "CREATE TABLE %s AS SELECT interactive_gene_name,drugs_info||' | interacting_gene: '||gene_and_drug_name_category_agg_cat_drug_alt.gene_name as drugs_info FROM gene_and_drug_name_category_agg_cat_drug_alt inner join gene_name_and_interactive_gene_name_alt on (gene_and_drug_name_category_agg_cat_drug_alt.gene_name = gene_name_and_interactive_gene_name_alt.gene_name)",
+            (AsIs(table_gene_and_drug_name_category_agg_cat_drug_int_alt),)))
+        cur.execute(
+            "CREATE TABLE %s AS SELECT interactive_gene_name,drugs_info||' | interacting_gene: '||gene_and_drug_name_category_agg_cat_drug_alt.gene_name as drugs_info FROM gene_and_drug_name_category_agg_cat_drug_alt inner join gene_name_and_interactive_gene_name_alt on (gene_and_drug_name_category_agg_cat_drug_alt.gene_name = gene_name_and_interactive_gene_name_alt.gene_name)",
+            (AsIs(table_gene_and_drug_name_category_agg_cat_drug_int_alt),))
         conn.commit()
-
-
 
     if args.filter_mind_table_by_drugs:
 #filter mind_data_1-4_rs_ensorted_by_gene_posann tables by : join with table gene_name_and_drug_name on gene_name
