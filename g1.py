@@ -1991,14 +1991,14 @@ try:
 
         filter_mind_table_by_drugs_extended_gene_interactions_alt = args.filter_mind_table_by_drugs_extended_gene_interactions
         filter_mind_table_by_drugs_extended_gene_interactions_alt_by_drug = args.filter_mind_table_by_drugs_extended_gene_interactions+"_by_drug_alt"
-        table_gene_drug_name_and_category_aggcat_aggdrug2_alt = "gene_drug_name_and_category_aggcat_aggdrug2"
+        table_gene_drug_name_and_category_aggcat_aggdrug2_alt = "gene_and_drug_name_category_agg_cat_drug_int_alt2"
 
 
         check_overwrite_table(table_gene_drug_name_and_category_aggcat_aggdrug2_alt)
 
         #copy and alter drugs table gene_name column to gene_name2 for easy joining
-        print(cur.mogrify("CREATE TABLE %s AS SELECT * FROM gene_name_and_drug_name_and_category_aggcat_aggdrug",(AsIs(table_gene_drug_name_and_category_aggcat_aggdrug2_alt),)))
-        cur.execute("CREATE TABLE %s AS SELECT * FROM gene_name_and_drug_name_and_category_aggcat_aggdrug",(AsIs(table_gene_drug_name_and_category_aggcat_aggdrug2_alt),))
+        print(cur.mogrify("CREATE TABLE %s AS SELECT * FROM gene_and_drug_name_category_agg_cat_drug_int_alt",(AsIs(table_gene_drug_name_and_category_aggcat_aggdrug2_alt),)))
+        cur.execute("CREATE TABLE %s AS SELECT * FROM gene_and_drug_name_category_agg_cat_drug_int_alt",(AsIs(table_gene_drug_name_and_category_aggcat_aggdrug2_alt),))
         conn.commit()
 
         #copy and alter drugs table gene_name column to gene_name2 for easy joining
