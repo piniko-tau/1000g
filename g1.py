@@ -54,6 +54,7 @@ parser = argparse.ArgumentParser(prog='psql_1000g_loader',usage='psql_1000g_load
  [-create_drugs_genes_table]\
  [-create_drugs_genes_table_extended_gene_interactions]\
  [-filter_mind_table_by_drugs]\
+ [-filter_mind_table_by_drugs_extended_gene_interactions]\
  [-mind_export_ml export a ml dataset of mind data]\
  [-mind_export_ml_with_drugs export a ml dataset of mind data with drug fields]\
  [-add_meta add tables metadata]',\
@@ -152,6 +153,8 @@ parser.add_argument("-create_drugs_genes_table",help='create_drugs_genes_table',
 parser.add_argument("-create_drugs_genes_table_extended_gene_interactions",help='create_drugs_genes_table_extended_gene_interactions',action="store_true")
 
 parser.add_argument("-filter_mind_table_by_drugs",help='filter_mind_table_by_drugs',metavar='filter_mind_table_by_drugs')
+
+parser.add_argument("-filter_mind_table_by_drugs_extended_gene_interactions",help='filter_mind_table_by_drugs_extended_gene_interactions',metavar='filter_mind_table_by_drugs_extended_gene_interactions')
 
 parser.add_argument("-mind_export_ml",help='export a ml dataset of mind data',metavar='mind_export_ml')
 
@@ -1981,6 +1984,35 @@ try:
         print(cur.mogrify("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.gene_name2 = %s.gene_name)",(AsIs(table_mind_data_n_rs_ensorted_by_gene_posann_by_drug),AsIs(table_gene_name_and_drug_name_and_category_aggcat_aggdrug2),AsIs(table_mind_data_n_rs_ensorted_by_gene_posann),AsIs(table_gene_name_and_drug_name_and_category_aggcat_aggdrug2),AsIs(table_mind_data_n_rs_ensorted_by_gene_posann),)))
         cur.execute("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.gene_name2 = %s.gene_name)",(AsIs(table_mind_data_n_rs_ensorted_by_gene_posann_by_drug),AsIs(table_gene_name_and_drug_name_and_category_aggcat_aggdrug2),AsIs(table_mind_data_n_rs_ensorted_by_gene_posann),AsIs(table_gene_name_and_drug_name_and_category_aggcat_aggdrug2),AsIs(table_mind_data_n_rs_ensorted_by_gene_posann),))
         conn.commit()
+
+
+    if args.filter_mind_table_by_drugs_extended_gene_interactions_extended_gene_interactions:
+#filter mind_data_1-4_rs_ensorted_by_gene_posann tables by : join with table gene_name_and_drug_name on gene_name
+
+        filter_mind_table_by_drugs_extended_gene_interactions_alt = args.filter_mind_table_by_drugs_extended_gene_interactions
+        filter_mind_table_by_drugs_extended_gene_interactions_alt_by_drug = args.filter_mind_table_by_drugs_extended_gene_interactions+"_by_drug_alt"
+        table_gene_drug_name_and_category_aggcat_aggdrug2_alt = "gene_drug_name_and_category_aggcat_aggdrug2"
+
+
+        check_overwrite_table(table_gene_drug_name_and_category_aggcat_aggdrug2_alt)
+
+        #copy and alter drugs table gene_name column to gene_name2 for easy joining
+        print(cur.mogrify("CREATE TABLE %s AS SELECT * FROM gene_name_and_drug_name_and_category_aggcat_aggdrug",(AsIs(table_gene_drug_name_and_category_aggcat_aggdrug2_alt),)))
+        cur.execute("CREATE TABLE %s AS SELECT * FROM gene_name_and_drug_name_and_category_aggcat_aggdrug",(AsIs(table_gene_drug_name_and_category_aggcat_aggdrug2_alt),))
+        conn.commit()
+
+        #copy and alter drugs table gene_name column to gene_name2 for easy joining
+        print(cur.mogrify("alter table  %s rename column gene_name to gene_name2",(AsIs(table_gene_drug_name_and_category_aggcat_aggdrug2_alt),)))
+        cur.execute("alter table  %s rename column gene_name to gene_name2",(AsIs(table_gene_drug_name_and_category_aggcat_aggdrug2_alt),))
+        conn.commit()
+
+        check_overwrite_table(filter_mind_table_by_drugs_extended_gene_interactions_alt_by_drug)
+
+        # join mind table with table gene_name_and_drug_name on gene_name
+        print(cur.mogrify("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.gene_name2 = %s.gene_name)",(AsIs(filter_mind_table_by_drugs_extended_gene_interactions_alt_by_drug),AsIs(table_gene_drug_name_and_category_aggcat_aggdrug2_alt),AsIs(filter_mind_table_by_drugs_extended_gene_interactions_alt),AsIs(table_gene_drug_name_and_category_aggcat_aggdrug2_alt),AsIs(filter_mind_table_by_drugs_extended_gene_interactions_alt),)))
+        cur.execute("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.gene_name2 = %s.gene_name)",(AsIs(filter_mind_table_by_drugs_extended_gene_interactions_alt_by_drug),AsIs(table_gene_drug_name_and_category_aggcat_aggdrug2_alt),AsIs(filter_mind_table_by_drugs_extended_gene_interactions_alt),AsIs(table_gene_drug_name_and_category_aggcat_aggdrug2_alt),AsIs(filter_mind_table_by_drugs_extended_gene_interactions_alt),))
+        conn.commit()
+
 
 
 # # *************************************************************8
