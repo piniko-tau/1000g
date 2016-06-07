@@ -1451,6 +1451,8 @@ try:
                 export_file.write("\n")
 
     def mind_export_ml_with_drugs_alt():
+##add correct alt stuff here !
+
 
             # get diagnosis, patient name,peptides string,gene in single line and string_agg it , output to file , for each of the four tables, for each patient
 
