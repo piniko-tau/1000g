@@ -1506,7 +1506,7 @@ try:
 
             pbar = ProgressBar(widgets=widgets, maxval=10000000).start()
 
-            with open('exported_mind_by_drugs.csv', "a") as export_file:
+            with open('exported_mind_by_drugs_alt.csv', "a") as export_file:
 
                 # all 4 files are appended
                 # I delete the header line manually for the 3 last files
@@ -1516,7 +1516,7 @@ try:
                 # add |drugs_info here after "||rsids"
                 export_file.write("'patient','diagnosis',")
 
-                cur.execute("select gene_name||' | '||rsids||' | '||gene_drugs from %s ;",
+                cur.execute("select interactive_gene_name2||' | '||rsids||' | '||gene_drugs from %s ;",
                             (AsIs(table_mem_with_drugs_header_rsids_and_drugs),))
 
                 for i2 in cur.fetchall():
@@ -1548,7 +1548,7 @@ try:
                         export_file.write(re.sub('(\()|(\[)|(\])|(\))', '', str(i2)))
 
                     cur.execute(
-                        "select peptid_group from (select gene_name , string_agg(rsid,',' order by rsid) as rsids, string_agg(peptid_group,'') as peptid_group from (select distinct gene_name,rsid,mytable.t1||mytable.t2||mytable.t3  as peptid_group from (select gene_name,rsid,%s, case when substr(%s,1,1) = allele1 then '+'||peptide1 when substr(%s,1,1) = allele2 then '+'||peptide2 when substr(%s,1,1) = allele3 then '+'||peptide3 when substr(%s,1,1) = opallele1 then '-'||peptide1 when substr(%s,1,1) = opallele2 then '-'||peptide2 when substr(%s,1,1) = opallele3 then '-'||peptide3 end as t1 , case when substr(%s,3,1) = allele1 then '+'||peptide1 when substr(%s,3,1) = allele2 then '+'||peptide2 when substr(%s,3,1) = allele3 then '+'||peptide3 when substr(%s,3,1) = opallele1 then '-'||peptide1 when substr(%s,3,1) = opallele2 then '-'||peptide2 when substr(%s,3,1) = opallele3 then '-'||peptide3 end as t2 ,case when substr(%s,5,1) = '' then '' when substr(%s,5,1) = allele1 then '+'||peptide1 when substr(%s,5,1) = allele2 then '+'||peptide2 when substr(%s,5,1) = allele3 then '+'||peptide3 when substr(%s,5,1) = opallele1 then '-'||peptide1 when substr(%s,5,1) = opallele2 then '-'||peptide2 when substr(%s,5,1) = opallele3 then '-'||peptide3 end as t3 from  %s) as mytable )as t1 group by t1.gene_name order by t1.gene_name) as t5;",
+                        "select peptid_group from (select interactive_gene_name2 , string_agg(rsid,',' order by rsid) as rsids, string_agg(peptid_group,'') as peptid_group from (select distinct interactive_gene_name2,rsid,mytable.t1||mytable.t2||mytable.t3  as peptid_group from (select interactive_gene_name2,rsid,%s, case when substr(%s,1,1) = allele1 then '+'||peptide1 when substr(%s,1,1) = allele2 then '+'||peptide2 when substr(%s,1,1) = allele3 then '+'||peptide3 when substr(%s,1,1) = opallele1 then '-'||peptide1 when substr(%s,1,1) = opallele2 then '-'||peptide2 when substr(%s,1,1) = opallele3 then '-'||peptide3 end as t1 , case when substr(%s,3,1) = allele1 then '+'||peptide1 when substr(%s,3,1) = allele2 then '+'||peptide2 when substr(%s,3,1) = allele3 then '+'||peptide3 when substr(%s,3,1) = opallele1 then '-'||peptide1 when substr(%s,3,1) = opallele2 then '-'||peptide2 when substr(%s,3,1) = opallele3 then '-'||peptide3 end as t2 ,case when substr(%s,5,1) = '' then '' when substr(%s,5,1) = allele1 then '+'||peptide1 when substr(%s,5,1) = allele2 then '+'||peptide2 when substr(%s,5,1) = allele3 then '+'||peptide3 when substr(%s,5,1) = opallele1 then '-'||peptide1 when substr(%s,5,1) = opallele2 then '-'||peptide2 when substr(%s,5,1) = opallele3 then '-'||peptide3 end as t3 from  %s) as mytable )as t1 group by t1.interactive_gene_name2 order by t1.interactive_gene_name2) as t5;",
                         (AsIs(hg2), AsIs(hg2), AsIs(hg2), AsIs(hg2), AsIs(hg2), AsIs(hg2), AsIs(hg2), AsIs(hg2),
                          AsIs(hg2), AsIs(hg2), AsIs(hg2), AsIs(hg2), AsIs(hg2), AsIs(hg2), AsIs(hg2), AsIs(hg2),
                          AsIs(hg2), AsIs(hg2), AsIs(hg2), AsIs(hg2), AsIs(args.mind_export_ml_with_drugs_alt),))
