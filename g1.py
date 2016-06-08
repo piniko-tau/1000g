@@ -1481,7 +1481,7 @@ try:
 
             # create dist header with drugs for ml here .....
             print(cur.mogrify("CREATE TABLE %s AS select interactive_gene_name2 as interactive_gene_name22,string_agg(drugs_info,' ' order by drugs_info) as gene_drugs from (select distinct interactive_gene_name2,drugs_info from %s) as t1 group by t1.interactive_gene_name2 order by t1.interactive_gene_name2; ",(AsIs(table_mem_with_drugs_alt_header_drugs), AsIs(args.mind_export_ml_with_drugs_alt),)))
-            cur.execute("CREATE TABLE %s AS select interactive_gene_name2 as interactive_gene_name22,string_agg(drugs_info,' ' order by drugs_info) as gene_drugs from (select distinct interactive_gene_name2,drugs_info from %s) as t1 group by t1.interactive_gene_name2 order by t1.interactive_gene_name2; ",
+            cur.execute("CREATE TABLE %s AS select interactive_gene_name2 as interactive_gene_name22,string_agg(drugs_info,' ' order by drugs_info) as gene_drugs from (select distinct interactive_gene_name2,drugs_info from %s) as t1 group by t1.interactive_gene_name22 order by t1.interactive_gene_name22; ",
                 (AsIs(table_mem_with_drugs_alt_header_drugs), AsIs(args.mind_export_ml_with_drugs_alt),))
             conn.commit()
 
