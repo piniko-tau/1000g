@@ -1473,7 +1473,7 @@ try:
             check_overwrite_table(table_mem_with_drugs_header_rsids)
 
             # create dist header for ml with rsids here .....
-            print(cur.mogrify("CREATE TABLE %s AS select interactive_gene_name2                          , string_agg(rsid,' ' order by rsid) as rsids from (select distinct interactive_gene_name2,rsid from %s) as t1 group by t1.interactive_gene_name2 order by t1.interactive_gene_name2; ",(AsIs(table_mem_with_drugs_header_rsids), AsIs(args.mind_export_ml_with_drugs_alt),)))
+            print(cur.mogrify("CREATE TABLE %s AS select interactive_gene_name2 , string_agg(rsid,' ' order by rsid) as rsids from (select distinct interactive_gene_name2,rsid from %s) as t1 group by t1.interactive_gene_name2 order by t1.interactive_gene_name2; ",(AsIs(table_mem_with_drugs_header_rsids), AsIs(args.mind_export_ml_with_drugs_alt),)))
             cur.execute("CREATE TABLE %s AS select interactive_gene_name2, string_agg(rsid,' ' order by rsid) as rsids from (select distinct interactive_gene_name2,rsid from %s) as t1 group by t1.interactive_gene_name2 order by t1.interactive_gene_name2; ",(AsIs(table_mem_with_drugs_header_rsids), AsIs(args.mind_export_ml_with_drugs_alt),))
             conn.commit()
 
@@ -1481,7 +1481,7 @@ try:
 
             # create dist header with drugs for ml here .....
             print(cur.mogrify("CREATE TABLE %s AS select interactive_gene_name2 as interactive_gene_name22,string_agg(drugs_info,' ' order by drugs_info) as gene_drugs from (select distinct interactive_gene_name2,drugs_info from %s) as t1 group by t1.interactive_gene_name2 order by t1.interactive_gene_name2; ",(AsIs(table_mem_with_drugs_alt_header_drugs), AsIs(args.mind_export_ml_with_drugs_alt),)))
-            cur.execute("CREATE TABLE %s AS select interactive_gene_name2 as interactive_gene_name22,string_agg(drugs_info,' ' order by drugs_info) as gene_drugs from (select distinct interactive_gene_name2,drugs_info from %s) as t1 group by t1.interactive_gene_name22 order by t1.interactive_gene_name22; ",
+            cur.execute("CREATE TABLE %s AS select interactive_gene_name2 as interactive_gene_name22,string_agg(drugs_info,' ' order by drugs_info) as gene_drugs from (select distinct interactive_gene_name2,drugs_info from %s) as t1 group by t1.interactive_gene_name2 order by t1.interactive_gene_name2; ",
                 (AsIs(table_mem_with_drugs_alt_header_drugs), AsIs(args.mind_export_ml_with_drugs_alt),))
             conn.commit()
 
