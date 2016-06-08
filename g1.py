@@ -1450,7 +1450,7 @@ try:
 
                 export_file.write("\n")
 
-    def mind_export_ml_with_drugs_alt_alt():
+    def mind_export_ml_with_drugs_alt():
 ##add correct alt stuff here !
 
 
