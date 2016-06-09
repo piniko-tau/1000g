@@ -1980,6 +1980,8 @@ try:
         #create extended genes tables
         #this isa copy of the prefiouse function change it :
 
+        ##we want the gene_name to be derived from interactive_gene_id and the grnr_claim_id from gene_name_id
+
         table_drug_name_and_claim_id_alt = "drug_name_and_claim_id_alt"
         table_gene_name_alt = "gene_name_alt"
         table_gene_name_and_interactive_gene_name_alt = "gene_name_and_interactive_gene_name_alt"
