@@ -2002,8 +2002,8 @@ try:
         #create join table of alt genes and their names gene_id,gene_id_alt,name.
 
         check_overwrite_table(table_gene_name_alt)
-        print(cur.mogrify("CREATE TABLE %s AS SELECT name as gene_name,gene_id,interacting_gene_id as gene_id_alt FROM genes inner join gene_gene_interaction_claims on (genes.id = gene_gene_interaction_claims.gene_id)",(AsIs(table_gene_name_alt),)))
-        cur.execute("CREATE TABLE %s AS SELECT name as gene_name,gene_id,interacting_gene_id as gene_id_alt FROM genes inner join gene_gene_interaction_claims on (genes.id = gene_gene_interaction_claims.gene_id)",(AsIs(table_gene_name_alt),))
+        print(cur.mogrify("CREATE TABLE %s AS SELECT name as gene_name,gene_id,interacting_gene_id as gene_id_alt FROM genes inner join gene_gene_interaction_claims on (genes.id = gene_gene_interaction_claims.interacting_gene_id)",(AsIs(table_gene_name_alt),)))
+        cur.execute("CREATE TABLE %s AS SELECT name as gene_name,gene_id,interacting_gene_id as gene_id_alt FROM genes inner join gene_gene_interaction_claims on (genes.id = gene_gene_interaction_claims.interacting_gene_id)",(AsIs(table_gene_name_alt),))
         conn.commit()
 
         #create join table of alt genes and their names gene_id,gene_id_alt,name.
