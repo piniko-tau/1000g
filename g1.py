@@ -1473,15 +1473,15 @@ try:
             check_overwrite_table(table_mem_with_drugs_header_rsids)
 
             # create dist header for ml with rsids here .....
-            print(cur.mogrify("CREATE TABLE %s AS select gene_name , string_agg(rsid,' ' order by rsid) as rsids from (select distinct gene_name,rsid from %s) as t1 group by t1.gene_name order by t1.gene_name; ",(AsIs(table_mem_with_drugs_header_rsids), AsIs(args.mind_export_ml_with_drugs_alt),)))
-            cur.execute("CREATE TABLE %s AS select gene_name, string_agg(rsid,' ' order by rsid) as rsids from (select distinct gene_name,rsid from %s) as t1 group by t1.gene_name order by t1.gene_name; ",(AsIs(table_mem_with_drugs_header_rsids), AsIs(args.mind_export_ml_with_drugs_alt),))
+            print(cur.mogrify("CREATE TABLE %s AS select gene_name , string_agg(rsid,' ' order by rsid) as rsids from (select distinct gene_name,rsid from %s) as t1 group by t1.gene_name order by t1.gene_name,t1.interactive_gene_name; ",(AsIs(table_mem_with_drugs_header_rsids), AsIs(args.mind_export_ml_with_drugs_alt),)))
+            cur.execute("CREATE TABLE %s AS select gene_name, string_agg(rsid,' ' order by rsid) as rsids from (select distinct gene_name,rsid from %s) as t1 group by t1.gene_name order by t1.gene_name,t1.interactive_gene_name; ",(AsIs(table_mem_with_drugs_header_rsids), AsIs(args.mind_export_ml_with_drugs_alt),))
             conn.commit()
 
             check_overwrite_table(table_mem_with_drugs_alt_header_drugs)
 
             # create dist header with drugs for ml here .....
-            print(cur.mogrify("CREATE TABLE %s AS select gene_name as gene_name2,string_agg(drugs_info,' ' order by drugs_info) as gene_drugs,interactive_gene_name from (select distinct gene_name,interactive_gene_name,drugs_info from %s) as t1 group by t1.gene_name,t1.interactive_gene_name order by t1.gene_name; ",(AsIs(table_mem_with_drugs_alt_header_drugs), AsIs(args.mind_export_ml_with_drugs_alt),)))
-            cur.execute("CREATE TABLE %s AS select gene_name as gene_name2,string_agg(drugs_info,' ' order by drugs_info) as gene_drugs,interactive_gene_name from (select distinct gene_name,interactive_gene_name,drugs_info from %s) as t1 group by t1.gene_name,t1.interactive_gene_name order by t1.gene_name; ",
+            print(cur.mogrify("CREATE TABLE %s AS select gene_name as gene_name2,string_agg(drugs_info,' ' order by drugs_info) as gene_drugs,interactive_gene_name from (select distinct gene_name,interactive_gene_name,drugs_info from %s) as t1 group by t1.gene_name,t1.interactive_gene_name order by t1.gene_name,t1.interactive_gene_name; ",(AsIs(table_mem_with_drugs_alt_header_drugs), AsIs(args.mind_export_ml_with_drugs_alt),)))
+            cur.execute("CREATE TABLE %s AS select gene_name as gene_name2,string_agg(drugs_info,' ' order by drugs_info) as gene_drugs,interactive_gene_name from (select distinct gene_name,interactive_gene_name,drugs_info from %s) as t1 group by t1.gene_name,t1.interactive_gene_name order by t1.gene_name,t1.interactive_gene_name; ",
                 (AsIs(table_mem_with_drugs_alt_header_drugs), AsIs(args.mind_export_ml_with_drugs_alt),))
             conn.commit()
 
@@ -1489,11 +1489,12 @@ try:
 
             # join the previouse tables into one final header table
             print(
-            cur.mogrify("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.gene_name2 = %s.gene_name)", (
+            cur.mogrify("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.gene_name2 = %s.gene_name) ", (
             AsIs(table_mem_with_drugs_header_rsids_and_drugs),
             AsIs(table_mem_with_drugs_header_rsids), AsIs(table_mem_with_drugs_alt_header_drugs),
             AsIs(table_mem_with_drugs_alt_header_drugs),
             AsIs(table_mem_with_drugs_header_rsids),)))
+
             cur.execute("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.gene_name2 = %s.gene_name)", (
             AsIs(table_mem_with_drugs_header_rsids_and_drugs),
             AsIs(table_mem_with_drugs_header_rsids), AsIs(table_mem_with_drugs_alt_header_drugs),
@@ -1548,7 +1549,7 @@ try:
                         export_file.write(re.sub('(\()|(\[)|(\])|(\))', '', str(i2)))
 
                     cur.execute(
-                        "select peptid_group from (select gene_name , string_agg(rsid,',' order by rsid) as rsids, string_agg(peptid_group,'') as peptid_group from (select distinct gene_name,rsid,mytable.t1||mytable.t2||mytable.t3  as peptid_group from (select gene_name,rsid,%s, case when substr(%s,1,1) = allele1 then '+'||peptide1 when substr(%s,1,1) = allele2 then '+'||peptide2 when substr(%s,1,1) = allele3 then '+'||peptide3 when substr(%s,1,1) = opallele1 then '-'||peptide1 when substr(%s,1,1) = opallele2 then '-'||peptide2 when substr(%s,1,1) = opallele3 then '-'||peptide3 end as t1 , case when substr(%s,3,1) = allele1 then '+'||peptide1 when substr(%s,3,1) = allele2 then '+'||peptide2 when substr(%s,3,1) = allele3 then '+'||peptide3 when substr(%s,3,1) = opallele1 then '-'||peptide1 when substr(%s,3,1) = opallele2 then '-'||peptide2 when substr(%s,3,1) = opallele3 then '-'||peptide3 end as t2 ,case when substr(%s,5,1) = '' then '' when substr(%s,5,1) = allele1 then '+'||peptide1 when substr(%s,5,1) = allele2 then '+'||peptide2 when substr(%s,5,1) = allele3 then '+'||peptide3 when substr(%s,5,1) = opallele1 then '-'||peptide1 when substr(%s,5,1) = opallele2 then '-'||peptide2 when substr(%s,5,1) = opallele3 then '-'||peptide3 end as t3 from  %s) as mytable )as t1 group by t1.gene_name,t1.interactive_gene_name order by t1.gene_name) as t5;",
+                        "select peptid_group from (select gene_name , interactive_gene_name, string_agg(rsid,',' order by rsid) as rsids, string_agg(peptid_group,'') as peptid_group from (select distinct gene_name,interactive_gene_name,rsid,mytable.t1||mytable.t2||mytable.t3  as peptid_group from (select gene_name,interactive_gene_name,rsid,%s, case when substr(%s,1,1) = allele1 then '+'||peptide1 when substr(%s,1,1) = allele2 then '+'||peptide2 when substr(%s,1,1) = allele3 then '+'||peptide3 when substr(%s,1,1) = opallele1 then '-'||peptide1 when substr(%s,1,1) = opallele2 then '-'||peptide2 when substr(%s,1,1) = opallele3 then '-'||peptide3 end as t1 , case when substr(%s,3,1) = allele1 then '+'||peptide1 when substr(%s,3,1) = allele2 then '+'||peptide2 when substr(%s,3,1) = allele3 then '+'||peptide3 when substr(%s,3,1) = opallele1 then '-'||peptide1 when substr(%s,3,1) = opallele2 then '-'||peptide2 when substr(%s,3,1) = opallele3 then '-'||peptide3 end as t2 ,case when substr(%s,5,1) = '' then '' when substr(%s,5,1) = allele1 then '+'||peptide1 when substr(%s,5,1) = allele2 then '+'||peptide2 when substr(%s,5,1) = allele3 then '+'||peptide3 when substr(%s,5,1) = opallele1 then '-'||peptide1 when substr(%s,5,1) = opallele2 then '-'||peptide2 when substr(%s,5,1) = opallele3 then '-'||peptide3 end as t3 from  %s) as mytable )as t1 group by t1.gene_name,t1.interactive_gene_name order by t1.gene_name,t1.interactive_gene_name) as t5;",
                         (AsIs(hg2), AsIs(hg2), AsIs(hg2), AsIs(hg2), AsIs(hg2), AsIs(hg2), AsIs(hg2), AsIs(hg2),
                          AsIs(hg2), AsIs(hg2), AsIs(hg2), AsIs(hg2), AsIs(hg2), AsIs(hg2), AsIs(hg2), AsIs(hg2),
                          AsIs(hg2), AsIs(hg2), AsIs(hg2), AsIs(hg2), AsIs(args.mind_export_ml_with_drugs_alt),))
