@@ -1499,13 +1499,13 @@ try:
 
             # join the previouse tables into one final header table
             print(
-            cur.mogrify("CREATE TABLE %s AS SELECT * FROM ( %s inner join %s on (%s.gene_name2 = %s.gene_name)) as t1 group by t1.gene_name,t1.interactive_gene_name order by t1.gene_name,t1.interactive_gene_name ", (
+            cur.mogrify("CREATE TABLE %s AS SELECT * FROM  %s inner join %s on (%s.gene_name2 = %s.gene_name) as t1 group by t1.gene_name,t1.interactive_gene_name order by t1.gene_name,t1.interactive_gene_name ", (
             AsIs(table_mem_with_drugs_header_rsids_and_drugs),
             AsIs(table_mem_with_drugs_header_rsids), AsIs(table_mem_with_drugs_alt_header_drugs),
             AsIs(table_mem_with_drugs_alt_header_drugs),
             AsIs(table_mem_with_drugs_header_rsids),)))
 
-            cur.execute("CREATE TABLE %s AS SELECT * FROM ( %s inner join %s on (%s.gene_name2 = %s.gene_name)) as t1 group by t1.gene_name,t1.interactive_gene_name order by t1.gene_name,t1.interactive_gene_name", (
+            cur.execute("CREATE TABLE %s AS SELECT * FROM  %s inner join %s on (%s.gene_name2 = %s.gene_name) as t1 group by t1.gene_name,t1.interactive_gene_name order by t1.gene_name,t1.interactive_gene_name", (
             AsIs(table_mem_with_drugs_header_rsids_and_drugs),
             AsIs(table_mem_with_drugs_header_rsids), AsIs(table_mem_with_drugs_alt_header_drugs),
             AsIs(table_mem_with_drugs_alt_header_drugs),
