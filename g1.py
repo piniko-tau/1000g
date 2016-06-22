@@ -20,7 +20,7 @@ from psycopg2.extensions import AsIs
 import argparse
 import logging
 from progressbar import AnimatedMarker, Bar, BouncingBar, Counter, ETA, FileTransferSpeed, FormatLabel, Percentage, ProgressBar, ReverseBar, RotatingMarker, SimpleProgress, Timer
-
+import datetime
 
 parser = argparse.ArgumentParser(prog='psql_1000g_loader',usage='psql_1000g_loader \
  [-t table_name prefix -f file_input or -list file_input_list]\
@@ -557,7 +557,9 @@ def check_1000g_table():
 
 def check_overwrite_table(table8):
 
-        if check_table_exists(table8):
+    time_it()
+
+    if check_table_exists(table8):
             print "Table "+table8+" exists !"
             ans = (raw_input("Are you sure you want to reset this table ? (yes/no)"))
             if ans == "yes":
@@ -1450,6 +1452,10 @@ try:
 
                 export_file.write("\n")
 
+    def time_it():
+        print "time: " + datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d %H:%M:%S')
+
+
     def mind_export_ml_with_drugs_alt():
 ##add correct alt stuff here !
 
@@ -1470,12 +1476,15 @@ try:
 
             rstable = args.mind_export_ml_with_drugs_alt.replace("_ensorted_by_gene_posann_by_drug_alt", "")
 
+
             check_overwrite_table(table_mem_with_drugs_header_rsids)
 
             # create dist header for ml with rsids here .....
-            print(cur.mogrify("CREATE TABLE %s AS select gene_name , string_agg(rsid,' ' order by rsid) as rsids from (select distinct gene_name,rsid from %s) as t1 group by t1.gene_name order by t1.gene_name,t1.interactive_gene_name; ",(AsIs(table_mem_with_drugs_header_rsids), AsIs(args.mind_export_ml_with_drugs_alt),)))
-            cur.execute("CREATE TABLE %s AS select gene_name, string_agg(rsid,' ' order by rsid) as rsids from (select distinct gene_name,rsid from %s) as t1 group by t1.gene_name order by t1.gene_name,t1.interactive_gene_name; ",(AsIs(table_mem_with_drugs_header_rsids), AsIs(args.mind_export_ml_with_drugs_alt),))
+            print(cur.mogrify("CREATE TABLE %s AS select gene_name , string_agg(rsid,' ' order by rsid) as rsids from (select distinct gene_name,rsid from %s) as t1 group by t1.gene_name,t1.interactive_gene_name order by t1.gene_name,t1.interactive_gene_name; ",(AsIs(table_mem_with_drugs_header_rsids), AsIs(args.mind_export_ml_with_drugs_alt),)))
+            cur.execute("CREATE TABLE %s AS select gene_name, string_agg(rsid,' ' order by rsid) as rsids from (select distinct gene_name,rsid from %s) as t1 group by t1.gene_name,t1.interactive_gene_name order by t1.gene_name,t1.interactive_gene_name; ",(AsIs(table_mem_with_drugs_header_rsids), AsIs(args.mind_export_ml_with_drugs_alt),))
             conn.commit()
+
+            time_it()
 
             check_overwrite_table(table_mem_with_drugs_alt_header_drugs)
 
@@ -1485,22 +1494,26 @@ try:
                 (AsIs(table_mem_with_drugs_alt_header_drugs), AsIs(args.mind_export_ml_with_drugs_alt),))
             conn.commit()
 
+            time_it()
+
             check_overwrite_table(table_mem_with_drugs_header_rsids_and_drugs)
 
             # join the previouse tables into one final header table
             print(
-            cur.mogrify("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.gene_name2 = %s.gene_name) ", (
+            cur.mogrify("CREATE TABLE %s AS SELECT * FROM ( %s inner join %s on (%s.gene_name2 = %s.gene_name)) as t1 group by t1.gene_name,t1.interactive_gene_name order by t1.gene_name,t1.interactive_gene_name ", (
             AsIs(table_mem_with_drugs_header_rsids_and_drugs),
             AsIs(table_mem_with_drugs_header_rsids), AsIs(table_mem_with_drugs_alt_header_drugs),
             AsIs(table_mem_with_drugs_alt_header_drugs),
             AsIs(table_mem_with_drugs_header_rsids),)))
 
-            cur.execute("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.gene_name2 = %s.gene_name)", (
+            cur.execute("CREATE TABLE %s AS SELECT * FROM ( %s inner join %s on (%s.gene_name2 = %s.gene_name)) as t1 group by t1.gene_name,t1.interactive_gene_name order by t1.gene_name,t1.interactive_gene_name", (
             AsIs(table_mem_with_drugs_header_rsids_and_drugs),
             AsIs(table_mem_with_drugs_header_rsids), AsIs(table_mem_with_drugs_alt_header_drugs),
             AsIs(table_mem_with_drugs_alt_header_drugs),
             AsIs(table_mem_with_drugs_header_rsids),))
             conn.commit()
+
+            time_it()
 
             widgets = ['processing query -> ' + table1000g + ' :', Percentage(), ' ', Bar(marker=RotatingMarker()),
                        ' ', ETA(), ' ', FileTransferSpeed()]
@@ -1559,7 +1572,7 @@ try:
 
                     export_file.write("\n")
 
-
+    time_it()
 
     if args.add_gene_peptide_string:
 
