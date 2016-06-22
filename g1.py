@@ -1480,8 +1480,8 @@ try:
             check_overwrite_table(table_mem_with_drugs_header_rsids)
 
             # create dist header for ml with rsids here .....
-            print(cur.mogrify("CREATE TABLE %s AS select gene_name , string_agg(rsid,' ' order by rsid) as rsids from (select distinct gene_name,rsid from %s) as t1 group by t1.gene_name,t1.interactive_gene_name order by t1.gene_name,t1.interactive_gene_name; ",(AsIs(table_mem_with_drugs_header_rsids), AsIs(args.mind_export_ml_with_drugs_alt),)))
-            cur.execute("CREATE TABLE %s AS select gene_name, string_agg(rsid,' ' order by rsid) as rsids from (select distinct gene_name,rsid from %s) as t1 group by t1.gene_name,t1.interactive_gene_name order by t1.gene_name,t1.interactive_gene_name; ",(AsIs(table_mem_with_drugs_header_rsids), AsIs(args.mind_export_ml_with_drugs_alt),))
+            print(cur.mogrify("CREATE TABLE %s AS select gene_name , string_agg(rsid,' ' order by rsid) as rsids from (select distinct gene_name,rsid from %s) as t1 group by t1.gene_name order by t1.gene_name; ",(AsIs(table_mem_with_drugs_header_rsids), AsIs(args.mind_export_ml_with_drugs_alt),)))
+            cur.execute("CREATE TABLE %s AS select gene_name, string_agg(rsid,' ' order by rsid) as rsids from (select distinct gene_name,rsid from %s) as t1 group by t1.gene_name order by t1.gene_name; ",(AsIs(table_mem_with_drugs_header_rsids), AsIs(args.mind_export_ml_with_drugs_alt),))
             conn.commit()
 
             time_it()
