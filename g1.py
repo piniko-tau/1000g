@@ -1490,8 +1490,7 @@ try:
 
             # create dist header with drugs for ml here .....
             print(cur.mogrify("CREATE TABLE %s AS select gene_name as gene_name2,string_agg(drugs_info,' ' order by drugs_info) as gene_drugs,interactive_gene_name from (select distinct gene_name,interactive_gene_name,drugs_info from %s) as t1 group by t1.gene_name2,t1.interactive_gene_name order by t1.gene_name2,t1.interactive_gene_name; ",(AsIs(table_mem_with_drugs_alt_header_drugs), AsIs(args.mind_export_ml_with_drugs_alt),)))
-            cur.execute("CREATE TABLE %s AS select gene_name as gene_name2,string_agg(drugs_info,' ' order by drugs_info) as gene_drugs,interactive_gene_name from (select distinct gene_name,interactive_gene_name,drugs_info from %s) as t1 group by t1.gene_name2,t1.interactive_gene_name order by t1.gene_name2,t1.interactive_gene_name; ",
-                (AsIs(table_mem_with_drugs_alt_header_drugs), AsIs(args.mind_export_ml_with_drugs_alt),))
+            cur.execute("CREATE TABLE %s AS select gene_name as gene_name2,string_agg(drugs_info,' ' order by drugs_info) as gene_drugs,interactive_gene_name from (select distinct gene_name,interactive_gene_name,drugs_info from %s) as t1 group by t1.gene_name2,t1.interactive_gene_name order by t1.gene_name2,t1.interactive_gene_name; ",(AsIs(table_mem_with_drugs_alt_header_drugs), AsIs(args.mind_export_ml_with_drugs_alt),))
             conn.commit()
 
             time_it()
