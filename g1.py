@@ -185,7 +185,8 @@ dbpass = args.dbpass
 conn = psycopg2.connect("dbname="+dbname+" user="+dbuser+" password="+dbpass+" host=localhost")
 cur = conn.cursor()
 
-
+#variable to check table override
+skip_next_table_creation = False
 
 #setup ovwrwrite option
 if args.overwrite_tables:
@@ -194,9 +195,6 @@ if args.overwrite_tables:
 else:
     overwrite_tables_is_set = False
     # print("overwrite_tables_is_NOT_set")
-
-#next table ovewrite check
-skip_next_table_creation = False
 
 #counter col
 column_limit = 20
@@ -560,7 +558,6 @@ def check_1000g_table():
 
 def check_overwrite_table(table8):
 
-    global skip_next_table_creation
 
     time_it()
 
@@ -569,11 +566,10 @@ def check_overwrite_table(table8):
             ans = (raw_input("Are you sure you want to reset this table ? (yes/no)"))
             if ans == "yes":
                 delete_table(table8)
-                skip_next_table_creation = False
 
             elif ans == "no":
-                skip_next_table_creation = True
                 print "skipped..table create"
+
             else:
                 print "please answear yes or no ..."
                 check_overwrite_table()
@@ -1482,40 +1478,41 @@ try:
             rstable = args.mind_export_ml_with_drugs_alt.replace("_ensorted_by_gene_posann_by_drug_alt", "")
 
 
-            check_overwrite_table(table_mem_with_drugs_header_rsids)
-            if not skip_next_table_creation:
-            # create dist header for ml with rsids here .....
-                print(cur.mogrify("CREATE TABLE %s AS select gene_name , string_agg(rsid,' ' order by rsid) as rsids from (select distinct gene_name,interactive_gene_name,rsid from %s) as t1 group by t1.gene_name,t1.interactive_gene_name order by t1.gene_name,t1.interactive_gene_name; ",(AsIs(table_mem_with_drugs_header_rsids), AsIs(args.mind_export_ml_with_drugs_alt),)))
-                cur.execute("CREATE TABLE %s AS select gene_name, string_agg(rsid,' ' order by rsid) as rsids from (select distinct gene_name,interactive_gene_name,rsid from %s) as t1 group by t1.gene_name,t1.interactive_gene_name order by t1.gene_name,t1.interactive_gene_name; ",(AsIs(table_mem_with_drugs_header_rsids), AsIs(args.mind_export_ml_with_drugs_alt),))
-                conn.commit()
-
-            time_it()
-
-            check_overwrite_table(table_mem_with_drugs_alt_header_drugs)
-            if not skip_next_table_creation:
-            # create dist header with drugs for ml here .....
-                print(cur.mogrify("CREATE TABLE %s AS select gene_name as gene_name2,string_agg(drugs_info,' ' order by drugs_info) as gene_drugs,interactive_gene_name from (select distinct gene_name,interactive_gene_name,drugs_info from %s) as t1 group by gene_name2,interactive_gene_name order by gene_name2,interactive_gene_name; ",(AsIs(table_mem_with_drugs_alt_header_drugs), AsIs(args.mind_export_ml_with_drugs_alt),)))
-                cur.execute("CREATE TABLE %s AS select gene_name as gene_name2,string_agg(drugs_info,' ' order by drugs_info) as gene_drugs,interactive_gene_name from (select distinct gene_name,interactive_gene_name,drugs_info from %s) as t1 group by gene_name2,interactive_gene_name order by gene_name2,interactive_gene_name; ",(AsIs(table_mem_with_drugs_alt_header_drugs), AsIs(args.mind_export_ml_with_drugs_alt),))
-                conn.commit()
+            # check_overwrite_table(table_mem_with_drugs_header_rsids)
+            # # create dist header for ml with rsids here .....
+            # print(cur.mogrify("CREATE TABLE %s AS select gene_name , string_agg(rsid,' ' order by rsid) as rsids from (select distinct gene_name,interactive_gene_name,rsid from %s) as t1 group by t1.gene_name,t1.interactive_gene_name order by t1.gene_name,t1.interactive_gene_name; ",(AsIs(table_mem_with_drugs_header_rsids), AsIs(args.mind_export_ml_with_drugs_alt),)))
+            # cur.execute("CREATE TABLE %s AS select gene_name, string_agg(rsid,' ' order by rsid) as rsids from (select distinct gene_name,interactive_gene_name,rsid from %s) as t1 group by t1.gene_name,t1.interactive_gene_name order by t1.gene_name,t1.interactive_gene_name; ",(AsIs(table_mem_with_drugs_header_rsids), AsIs(args.mind_export_ml_with_drugs_alt),))
+            # conn.commit()
+            #
+            # time_it()
+            #
+            # check_overwrite_table(table_mem_with_drugs_alt_header_drugs)
+            #
+            # # create dist header with drugs for ml here .....
+            # print(cur.mogrify("CREATE TABLE %s AS select gene_name as gene_name2,string_agg(drugs_info,' ' order by drugs_info) as gene_drugs,interactive_gene_name from (select distinct gene_name,interactive_gene_name,drugs_info from %s) as t1 group by gene_name2,interactive_gene_name order by gene_name2,interactive_gene_name; ",(AsIs(table_mem_with_drugs_alt_header_drugs), AsIs(args.mind_export_ml_with_drugs_alt),)))
+            # cur.execute("CREATE TABLE %s AS select gene_name as gene_name2,string_agg(drugs_info,' ' order by drugs_info) as gene_drugs,interactive_gene_name from (select distinct gene_name,interactive_gene_name,drugs_info from %s) as t1 group by gene_name2,interactive_gene_name order by gene_name2,interactive_gene_name; ",(AsIs(table_mem_with_drugs_alt_header_drugs), AsIs(args.mind_export_ml_with_drugs_alt),))
+            # conn.commit()
+            #
 
             time_it()
 
             check_overwrite_table(table_mem_with_drugs_header_rsids_and_drugs)
-            if not skip_next_table_creation:
-                # join the previouse tables into one final header table
-                print(
-                cur.mogrify("CREATE TABLE %s AS SELECT * FROM  %s inner join %s on (%s.gene_name2 = %s.gene_name)  group by gene_name,interactive_gene_name order by gene_name,interactive_gene_name ", (
-                AsIs(table_mem_with_drugs_header_rsids_and_drugs),
-                AsIs(table_mem_with_drugs_header_rsids), AsIs(table_mem_with_drugs_alt_header_drugs),
-                AsIs(table_mem_with_drugs_alt_header_drugs),
-                AsIs(table_mem_with_drugs_header_rsids),)))
 
-                cur.execute("CREATE TABLE %s AS SELECT * FROM  %s inner join %s on (%s.gene_name2 = %s.gene_name)  group by gene_name,interactive_gene_name order by gene_name,interactive_gene_name", (
-                AsIs(table_mem_with_drugs_header_rsids_and_drugs),
-                AsIs(table_mem_with_drugs_header_rsids), AsIs(table_mem_with_drugs_alt_header_drugs),
-                AsIs(table_mem_with_drugs_alt_header_drugs),
-                AsIs(table_mem_with_drugs_header_rsids),))
-                conn.commit()
+            # join the previous tables into one final header table
+            print(
+            cur.mogrify("CREATE TABLE %s AS SELECT * FROM  %s inner join %s on (%s.gene_name2 = %s.gene_name)  group by gene_name,interactive_gene_name order by gene_name,interactive_gene_name ", (
+            AsIs(table_mem_with_drugs_header_rsids_and_drugs),
+            AsIs(table_mem_with_drugs_header_rsids), AsIs(table_mem_with_drugs_alt_header_drugs),
+            AsIs(table_mem_with_drugs_alt_header_drugs),
+            AsIs(table_mem_with_drugs_header_rsids),)))
+
+            cur.execute("CREATE TABLE %s AS SELECT * FROM  %s inner join %s on (%s.gene_name2 = %s.gene_name)  group by gene_name,interactive_gene_name order by gene_name,interactive_gene_name", (
+            AsIs(table_mem_with_drugs_header_rsids_and_drugs),
+            AsIs(table_mem_with_drugs_header_rsids), AsIs(table_mem_with_drugs_alt_header_drugs),
+            AsIs(table_mem_with_drugs_alt_header_drugs),
+            AsIs(table_mem_with_drugs_header_rsids),))
+            conn.commit()
+
 
             time_it()
 
