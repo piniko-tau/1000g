@@ -560,16 +560,18 @@ def check_1000g_table():
 
 def check_overwrite_table(table8):
 
+    global skip_next_table_creation
+
     time_it()
 
     if check_table_exists(table8):
             print "Table "+table8+" exists !"
             ans = (raw_input("Are you sure you want to reset this table ? (yes/no)"))
             if ans == "yes":
-
                 delete_table(table8)
-            elif ans == "no":
+                skip_next_table_creation = False
 
+            elif ans == "no":
                 skip_next_table_creation = True
                 print "skipped..table create"
             else:
