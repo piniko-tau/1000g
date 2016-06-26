@@ -1492,26 +1492,26 @@ try:
             # print(cur.mogrify("CREATE TABLE %s AS select gene_name as gene_name2,string_agg(drugs_info,' ' order by drugs_info) as gene_drugs,interactive_gene_name from (select distinct gene_name,interactive_gene_name,drugs_info from %s) as t1  ",(AsIs(table_mem_with_drugs_alt_header_drugs), AsIs(args.mind_export_ml_with_drugs_alt),)))
             # cur.execute("CREATE TABLE %s AS select gene_name as gene_name2,string_agg(drugs_info,' ' order by drugs_info) as gene_drugs,interactive_gene_name from (select distinct gene_name,interactive_gene_name,drugs_info from %s) as t1 ",(AsIs(table_mem_with_drugs_alt_header_drugs), AsIs(args.mind_export_ml_with_drugs_alt),))
             # conn.commit()
-
-
-            time_it()
-
-            check_overwrite_table(table_mem_with_drugs_header_rsids_and_drugs)
-
-            # join the previous tables into one final header table
-            print(
-            cur.mogrify("CREATE TABLE %s AS SELECT * FROM  %s inner join %s on (%s.gene_name2 = %s.gene_name)", (
-            AsIs(table_mem_with_drugs_header_rsids_and_drugs),
-            AsIs(table_mem_with_drugs_header_rsids), AsIs(table_mem_with_drugs_alt_header_drugs),
-            AsIs(table_mem_with_drugs_alt_header_drugs),
-            AsIs(table_mem_with_drugs_header_rsids),)))
-
-            cur.execute("CREATE TABLE %s AS SELECT * FROM  %s inner join %s on (%s.gene_name2 = %s.gene_name)", (
-            AsIs(table_mem_with_drugs_header_rsids_and_drugs),
-            AsIs(table_mem_with_drugs_header_rsids), AsIs(table_mem_with_drugs_alt_header_drugs),
-            AsIs(table_mem_with_drugs_alt_header_drugs),
-            AsIs(table_mem_with_drugs_header_rsids),))
-            conn.commit()
+            #
+            #
+            # time_it()
+            #
+            # check_overwrite_table(table_mem_with_drugs_header_rsids_and_drugs)
+            #
+            # # join the previous tables into one final header table
+            # print(
+            # cur.mogrify("CREATE TABLE %s AS SELECT * FROM  %s inner join %s on (%s.gene_name2 = %s.gene_name)", (
+            # AsIs(table_mem_with_drugs_header_rsids_and_drugs),
+            # AsIs(table_mem_with_drugs_header_rsids), AsIs(table_mem_with_drugs_alt_header_drugs),
+            # AsIs(table_mem_with_drugs_alt_header_drugs),
+            # AsIs(table_mem_with_drugs_header_rsids),)))
+            #
+            # cur.execute("CREATE TABLE %s AS SELECT * FROM  %s inner join %s on (%s.gene_name2 = %s.gene_name)", (
+            # AsIs(table_mem_with_drugs_header_rsids_and_drugs),
+            # AsIs(table_mem_with_drugs_header_rsids), AsIs(table_mem_with_drugs_alt_header_drugs),
+            # AsIs(table_mem_with_drugs_alt_header_drugs),
+            # AsIs(table_mem_with_drugs_header_rsids),))
+            # conn.commit()
 
 
             time_it()
@@ -1531,7 +1531,7 @@ try:
                 # add |drugs_info here after "||rsids"
                 export_file.write("'patient','diagnosis',")
 
-                cur.execute("select gene_name||' | '||rsids||' | '||gene_drugs|| ' | interacting_gene: '||interactive_gene_name from %s group by gene_name,interactive_gene_name order by gene_name,interactive_gene_name;",
+                cur.execute("select gene_name||' | '||rsids||' | '||gene_drugs|| ' | interacting_gene: '||interactive_gene_name from %s order by gene_name,interactive_gene_name;",
                             (AsIs(table_mem_with_drugs_header_rsids_and_drugs),))
 
                 for i2 in cur.fetchall():
