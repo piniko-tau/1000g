@@ -1554,9 +1554,9 @@ try:
 
                 export_file.write("\n")
 
-                
+
                 print(cur.mogrify(cur.execute(
-                    "select column_name from information_schema.columns where table_name = \'%s\' and ( column_name ~ \'^sz.*[1-9]\' or column_name ~ \'^cg.*[1-9]\' or column_name ~ \'^el.*[1-9]\' or column_name ~ \'^gc.*[1-9]\' );",(AsIs(args.mind_export_ml_with_drugs_alt),)))
+                    "select column_name from information_schema.columns where table_name = \'%s\' and ( column_name ~ \'^sz.*[1-9]\' or column_name ~ \'^cg.*[1-9]\' or column_name ~ \'^el.*[1-9]\' or column_name ~ \'^gc.*[1-9]\' );",(AsIs(args.mind_export_ml_with_drugs_alt),))))
 
                 cur.execute(
                     "select column_name from information_schema.columns where table_name = \'%s\' and ( column_name ~ \'^sz.*[1-9]\' or column_name ~ \'^cg.*[1-9]\' or column_name ~ \'^el.*[1-9]\' or column_name ~ \'^gc.*[1-9]\' );",
