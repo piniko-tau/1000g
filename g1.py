@@ -1483,7 +1483,7 @@ try:
             print(cur.mogrify("CREATE TABLE %s AS select gene_name , string_agg(rsid,' ' order by rsid) as rsids from (select distinct gene_name,interactive_gene_name,rsid from %s) as t1 ",(AsIs(table_mem_with_drugs_header_rsids), AsIs(args.mind_export_ml_with_drugs_alt),)))
             cur.execute("CREATE TABLE %s AS select gene_name, string_agg(rsid,' ' order by rsid) as rsids from (select distinct gene_name,interactive_gene_name,rsid from %s) as t1 ",(AsIs(table_mem_with_drugs_header_rsids), AsIs(args.mind_export_ml_with_drugs_alt),))
             conn.commit()
-            
+
             time_it()
 
             check_overwrite_table(table_mem_with_drugs_alt_header_drugs)
@@ -1534,6 +1534,9 @@ try:
                 # cur.execute("select gene_name||' | '||rsids||' | '||gene_drugs|| ' | interacting_gene: '||interactive_gene_name from %s order by gene_name,interactive_gene_name;",
                 #             (AsIs(table_mem_with_drugs_header_rsids_and_drugs),))
 
+                print(cur.mogrify(
+                    "select gene_name||' | '||rsids||' | '||gene_drugs|| ' | interacting_gene: '||interactive_gene_name from %s ;",
+                    (AsIs(table_mem_with_drugs_header_rsids_and_drugs),)))
                 cur.execute(
                     "select gene_name||' | '||rsids||' | '||gene_drugs|| ' | interacting_gene: '||interactive_gene_name from %s ;",
                     (AsIs(table_mem_with_drugs_header_rsids_and_drugs),))
@@ -1550,6 +1553,10 @@ try:
                     export_file.write(',')
 
                 export_file.write("\n")
+
+                
+                print(cur.mogrify(cur.execute(
+                    "select column_name from information_schema.columns where table_name = \'%s\' and ( column_name ~ \'^sz.*[1-9]\' or column_name ~ \'^cg.*[1-9]\' or column_name ~ \'^el.*[1-9]\' or column_name ~ \'^gc.*[1-9]\' );",(AsIs(args.mind_export_ml_with_drugs_alt),)))
 
                 cur.execute(
                     "select column_name from information_schema.columns where table_name = \'%s\' and ( column_name ~ \'^sz.*[1-9]\' or column_name ~ \'^cg.*[1-9]\' or column_name ~ \'^el.*[1-9]\' or column_name ~ \'^gc.*[1-9]\' );",
