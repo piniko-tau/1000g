@@ -1475,6 +1475,7 @@ try:
 
         table_mind_export_ml_with_drugs_alt_header_rsids_and_drugs = args.mind_export_ml_with_drugs_alt + "_h_rsids_drugs"
 
+        table_mind_export_ml_with_drugs_alt_header_rsids_and_drugs_and_altgene = args.mind_export_ml_with_drugs_alt + "_h_r_d_ag"
 
 
         rstable = args.mind_export_ml_with_drugs_alt.replace("_ensorted_by_gene_posann_by_drug","")
@@ -1509,6 +1510,12 @@ try:
         conn.commit()
 
 #join with alt
+        check_overwrite_table(table_mind_export_ml_with_drugs_alt_header_rsids_and_drugs_and_altgene)
+
+        #join the previouse tables into one final header table
+        print(cur.mogrify("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.gene_name2 = %s.gene_name3)",(AsIs(table_mind_export_ml_with_drugs_alt_header_rsids_and_drugs_and_altgene),AsIs(table_mind_export_ml_with_drugs_alt_header_rsids_and_drugs),AsIs(table_mind_export_ml_with_drugs_alt_header_altgene),AsIs(table_mind_export_ml_with_drugs_alt_header_rsids_and_drugs),AsIs(table_mind_export_ml_with_drugs_alt_header_altgene),)))
+        cur.execute("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.gene_name2 = %s.gene_name3)",(AsIs(table_mind_export_ml_with_drugs_alt_header_rsids_and_drugs_and_altgene),AsIs(table_mind_export_ml_with_drugs_alt_header_rsids_and_drugs),AsIs(table_mind_export_ml_with_drugs_alt_header_altgene),AsIs(table_mind_export_ml_with_drugs_alt_header_rsids_and_drugs),AsIs(table_mind_export_ml_with_drugs_alt_header_altgene),))
+        conn.commit()
 
         widgets = ['processing query -> '+table1000g+' :', Percentage(), ' ', Bar(marker=RotatingMarker()),' ', ETA(), ' ', FileTransferSpeed()]
 
