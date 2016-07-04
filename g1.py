@@ -1508,6 +1508,7 @@ try:
         cur.execute("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.gene_name2 = %s.gene_name)",(AsIs(table_mind_export_ml_with_drugs_alt_header_rsids_and_drugs),AsIs(table_mind_export_ml_with_drugs_alt_header_rsids),AsIs(table_mind_export_ml_with_drugs_alt_header_drugs),AsIs(table_mind_export_ml_with_drugs_alt_header_drugs),AsIs(table_mind_export_ml_with_drugs_alt_header_rsids),))
         conn.commit()
 
+#join with alt
 
         widgets = ['processing query -> '+table1000g+' :', Percentage(), ' ', Bar(marker=RotatingMarker()),' ', ETA(), ' ', FileTransferSpeed()]
 
