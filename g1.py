@@ -1532,7 +1532,7 @@ try:
             export_file.write("'patient','diagnosis',")
 
 #add alt gene here
-            cur.execute("select 'gene_name: '||gene_name||' | rsids: '||rsids||' |  '||gene_drugs||' | '||interacting_genes                     from %s order by gene_name;",(AsIs(table_mind_export_ml_with_drugs_alt_header_rsids_and_drugs),))
+            cur.execute("select 'gene_name: '||gene_name||' | rsids: '||rsids||' |  '||gene_drugs||' | interacting_genes: '||interacting_genes                     from %s order by gene_name;",(AsIs(table_mind_export_ml_with_drugs_alt_header_rsids_and_drugs_and_altgene),))
 
 
             for i2 in cur.fetchall():
