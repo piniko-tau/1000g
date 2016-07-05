@@ -1467,13 +1467,13 @@ try:
 # pydb=> select gene_name ,string_agg(drugs_info,' ' order by drugs_info) as gene_drugs from (select distinct gene_name,drugs_info from mind_data_1_rs_ensorted_by_gene_posann_by_drug) as t1 group by t1.gene_name order by t1.gene_name;
 
 
-        table_mind_export_ml_with_drugs_alt_header_rsids = args.mind_export_ml_with_drugs_alt + "_header_rsids"
+        table_mind_export_ml_with_drugs_alt_header_rsids = args.mind_export_ml_with_drugs_alt + "_h_r"
 
-        table_mind_export_ml_with_drugs_alt_header_drugs = args.mind_export_ml_with_drugs_alt + "_header_drugs"
+        table_mind_export_ml_with_drugs_alt_header_drugs = args.mind_export_ml_with_drugs_alt + "_h_d"
 
-        table_mind_export_ml_with_drugs_alt_header_altgene = args.mind_export_ml_with_drugs_alt + "_header_altgene"
+        table_mind_export_ml_with_drugs_alt_header_altgene = args.mind_export_ml_with_drugs_alt + "_h_ag"
 
-        table_mind_export_ml_with_drugs_alt_header_rsids_and_drugs = args.mind_export_ml_with_drugs_alt + "_h_rsids_drugs"
+        table_mind_export_ml_with_drugs_alt_header_rsids_and_drugs = args.mind_export_ml_with_drugs_alt + "_h_r_d"
 
         table_mind_export_ml_with_drugs_alt_header_rsids_and_drugs_and_altgene = args.mind_export_ml_with_drugs_alt + "_h_r_d_ag"
 
@@ -1531,8 +1531,8 @@ try:
              #add |drugs_info here after "||rsids"
             export_file.write("'patient','diagnosis',")
 
-            print(cur.mogrify("select 'gene_name: '||gene_name||' | rsids: '||rsids||' |  '||gene_drugs||' | interacting_genes: '||interacting_genes from %s order by gene_name;",(AsIs(table_mind_export_ml_with_drugs_alt_header_rsids_and_drugs_and_altgene),)))
-            cur.execute("select 'gene_name: '||gene_name||' | rsids: '||rsids||' |  '||gene_drugs||' | interacting_genes: '||interacting_genes                     from %s order by gene_name;",(AsIs(table_mind_export_ml_with_drugs_alt_header_rsids_and_drugs_and_altgene),))
+            print(cur.mogrify("select 'gene_name: '||gene_name||' | rsids: '||rsids||' | gene_drugs: '||gene_drugs||' | interacting_genes: '||interacting_genes from %s order by gene_name;",(AsIs(table_mind_export_ml_with_drugs_alt_header_rsids_and_drugs_and_altgene),)))
+            cur.execute("select 'gene_name: '||gene_name||' | rsids: '||rsids||' | gene_drugs: '||gene_drugs||' | interacting_genes: '||interacting_genes from %s order by gene_name;",(AsIs(table_mind_export_ml_with_drugs_alt_header_rsids_and_drugs_and_altgene),))
 
 
             for i2 in cur.fetchall():
