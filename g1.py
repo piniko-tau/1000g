@@ -1478,7 +1478,7 @@ try:
         table_mind_export_ml_with_drugs_alt_header_rsids_and_drugs_and_altgene = args.mind_export_ml_with_drugs_alt + "_h_r_d_ag"
 
 
-        rstable = args.mind_export_ml_with_drugs_alt.replace("_ensorted_by_gene_posann_by_drug","")
+        rstable = args.mind_export_ml_with_drugs_alt.replace("_ensorted_by_gene_posann_by_drug_alt","")
 
 
         check_overwrite_table(table_mind_export_ml_with_drugs_alt_header_rsids)
