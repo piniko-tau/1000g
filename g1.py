@@ -574,6 +574,17 @@ def check_overwrite_table(table8):
                 print "please answear yes or no ..."
                 check_overwrite_table()
 
+
+def force_check_overwrite_table(table8):
+
+
+    time_it()
+
+    if check_table_exists(table8):
+
+        delete_table(table8)
+
+
 def sort_annotated(anntable):
 
     sortedtable = args.sort+"sorted"
@@ -1480,42 +1491,41 @@ try:
 
         rstable = args.mind_export_ml_with_drugs_alt.replace("_ensorted_by_gene_posann_by_drug_alt","")
 
+        force_check_overwrite_table(table_mind_export_ml_with_drugs_alt_header_rsids)
 
-#         check_overwrite_table(table_mind_export_ml_with_drugs_alt_header_rsids)
-#
-#         # create dist header for ml with rsids here .....
-#         print(cur.mogrify("CREATE TABLE %s AS select gene_name , string_agg(rsid,' ' order by rsid) as rsids from (select distinct gene_name,rsid from %s) as t1 group by t1.gene_name order by t1.gene_name; ",(AsIs(table_mind_export_ml_with_drugs_alt_header_rsids),AsIs(args.mind_export_ml_with_drugs_alt),)))
-#         cur.execute("CREATE TABLE %s AS select gene_name , string_agg(rsid,' ' order by rsid) as rsids from (select distinct gene_name,rsid from %s) as t1 group by t1.gene_name order by t1.gene_name; ",(AsIs(table_mind_export_ml_with_drugs_alt_header_rsids),AsIs(args.mind_export_ml_with_drugs_alt),))
-#         conn.commit()
-#
-#         check_overwrite_table(table_mind_export_ml_with_drugs_alt_header_drugs)
-#
-#         # create dist header with drugs for ml here .....
-#         print(cur.mogrify("CREATE TABLE %s AS select gene_name as gene_name2 ,string_agg(drugs_info,' ' order by drugs_info) as gene_drugs from (select distinct gene_name,drugs_info from %s) as t1 group by t1.gene_name order by t1.gene_name; ",(AsIs(table_mind_export_ml_with_drugs_alt_header_drugs),AsIs(args.mind_export_ml_with_drugs_alt),)))
-#         cur.execute("CREATE TABLE %s AS select gene_name as gene_name2,string_agg(drugs_info,' ' order by drugs_info) as gene_drugs from (select distinct gene_name,drugs_info from %s) as t1 group by t1.gene_name order by t1.gene_name; ",(AsIs(table_mind_export_ml_with_drugs_alt_header_drugs),AsIs(args.mind_export_ml_with_drugs_alt),))
-#         conn.commit()
-#
-#         check_overwrite_table(table_mind_export_ml_with_drugs_alt_header_altgene)
-#
-#         # create dist header with alt genes for ml here .....
-#         print(cur.mogrify("CREATE TABLE %s AS select gene_name as gene_name3 ,string_agg(interactive_gene_name,' ' order by interactive_gene_name) as interacting_genes from (select distinct gene_name,interactive_gene_name from %s) as t1 group by t1.gene_name order by t1.gene_name; ",(AsIs(table_mind_export_ml_with_drugs_alt_header_altgene),AsIs(args.mind_export_ml_with_drugs_alt),)))
-#         cur.execute("CREATE TABLE %s AS select gene_name as gene_name3 ,string_agg(interactive_gene_name,' ' order by interactive_gene_name) as interacting_genes from (select distinct gene_name,interactive_gene_name from %s) as t1 group by t1.gene_name order by t1.gene_name; ",(AsIs(table_mind_export_ml_with_drugs_alt_header_altgene),AsIs(args.mind_export_ml_with_drugs_alt),))
-#         conn.commit()
-#
-#         check_overwrite_table(table_mind_export_ml_with_drugs_alt_header_rsids_and_drugs)
-#
-#         #join the previouse tables into one final header table
-#         print(cur.mogrify("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.gene_name2 = %s.gene_name)",(AsIs(table_mind_export_ml_with_drugs_alt_header_rsids_and_drugs),AsIs(table_mind_export_ml_with_drugs_alt_header_rsids),AsIs(table_mind_export_ml_with_drugs_alt_header_drugs),AsIs(table_mind_export_ml_with_drugs_alt_header_drugs),AsIs(table_mind_export_ml_with_drugs_alt_header_rsids),)))
-#         cur.execute("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.gene_name2 = %s.gene_name) ",(AsIs(table_mind_export_ml_with_drugs_alt_header_rsids_and_drugs),AsIs(table_mind_export_ml_with_drugs_alt_header_rsids),AsIs(table_mind_export_ml_with_drugs_alt_header_drugs),AsIs(table_mind_export_ml_with_drugs_alt_header_drugs),AsIs(table_mind_export_ml_with_drugs_alt_header_rsids),))
-#         conn.commit()
-#
-# #join with alt
-#         check_overwrite_table(table_mind_export_ml_with_drugs_alt_header_rsids_and_drugs_and_altgene)
-#
-#         #join the previouse tables into one final header table
-#         print(cur.mogrify("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.gene_name2 = %s.gene_name3)",(AsIs(table_mind_export_ml_with_drugs_alt_header_rsids_and_drugs_and_altgene),AsIs(table_mind_export_ml_with_drugs_alt_header_rsids_and_drugs),AsIs(table_mind_export_ml_with_drugs_alt_header_altgene),AsIs(table_mind_export_ml_with_drugs_alt_header_rsids_and_drugs),AsIs(table_mind_export_ml_with_drugs_alt_header_altgene),)))
-#         cur.execute("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.gene_name2 = %s.gene_name3)",(AsIs(table_mind_export_ml_with_drugs_alt_header_rsids_and_drugs_and_altgene),AsIs(table_mind_export_ml_with_drugs_alt_header_rsids_and_drugs),AsIs(table_mind_export_ml_with_drugs_alt_header_altgene),AsIs(table_mind_export_ml_with_drugs_alt_header_rsids_and_drugs),AsIs(table_mind_export_ml_with_drugs_alt_header_altgene),))
-#         conn.commit()
+        # create dist header for ml with rsids here .....
+        print(cur.mogrify("CREATE TABLE %s AS select gene_name , string_agg(rsid,' ' order by rsid) as rsids from (select distinct gene_name,rsid from %s) as t1 group by t1.gene_name order by t1.gene_name; ",(AsIs(table_mind_export_ml_with_drugs_alt_header_rsids),AsIs(args.mind_export_ml_with_drugs_alt),)))
+        cur.execute("CREATE TABLE %s AS select gene_name , string_agg(rsid,' ' order by rsid) as rsids from (select distinct gene_name,rsid from %s) as t1 group by t1.gene_name order by t1.gene_name; ",(AsIs(table_mind_export_ml_with_drugs_alt_header_rsids),AsIs(args.mind_export_ml_with_drugs_alt),))
+        conn.commit()
+
+        force_check_overwrite_table(table_mind_export_ml_with_drugs_alt_header_drugs)
+
+        # create dist header with drugs for ml here .....
+        print(cur.mogrify("CREATE TABLE %s AS select gene_name as gene_name2 ,string_agg(drugs_info,' ' order by drugs_info) as gene_drugs from (select distinct gene_name,drugs_info from %s) as t1 group by t1.gene_name order by t1.gene_name; ",(AsIs(table_mind_export_ml_with_drugs_alt_header_drugs),AsIs(args.mind_export_ml_with_drugs_alt),)))
+        cur.execute("CREATE TABLE %s AS select gene_name as gene_name2,string_agg(drugs_info,' ' order by drugs_info) as gene_drugs from (select distinct gene_name,drugs_info from %s) as t1 group by t1.gene_name order by t1.gene_name; ",(AsIs(table_mind_export_ml_with_drugs_alt_header_drugs),AsIs(args.mind_export_ml_with_drugs_alt),))
+        conn.commit()
+
+        force_check_overwrite_table(table_mind_export_ml_with_drugs_alt_header_altgene)
+
+        # create dist header with alt genes for ml here .....
+        print(cur.mogrify("CREATE TABLE %s AS select gene_name as gene_name3 ,string_agg(interactive_gene_name,' ' order by interactive_gene_name) as interacting_genes from (select distinct gene_name,interactive_gene_name from %s) as t1 group by t1.gene_name order by t1.gene_name; ",(AsIs(table_mind_export_ml_with_drugs_alt_header_altgene),AsIs(args.mind_export_ml_with_drugs_alt),)))
+        cur.execute("CREATE TABLE %s AS select gene_name as gene_name3 ,string_agg(interactive_gene_name,' ' order by interactive_gene_name) as interacting_genes from (select distinct gene_name,interactive_gene_name from %s) as t1 group by t1.gene_name order by t1.gene_name; ",(AsIs(table_mind_export_ml_with_drugs_alt_header_altgene),AsIs(args.mind_export_ml_with_drugs_alt),))
+        conn.commit()
+
+        force_check_overwrite_table(table_mind_export_ml_with_drugs_alt_header_rsids_and_drugs)
+
+        #join the previouse tables into one final header table
+        print(cur.mogrify("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.gene_name2 = %s.gene_name)",(AsIs(table_mind_export_ml_with_drugs_alt_header_rsids_and_drugs),AsIs(table_mind_export_ml_with_drugs_alt_header_rsids),AsIs(table_mind_export_ml_with_drugs_alt_header_drugs),AsIs(table_mind_export_ml_with_drugs_alt_header_drugs),AsIs(table_mind_export_ml_with_drugs_alt_header_rsids),)))
+        cur.execute("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.gene_name2 = %s.gene_name) ",(AsIs(table_mind_export_ml_with_drugs_alt_header_rsids_and_drugs),AsIs(table_mind_export_ml_with_drugs_alt_header_rsids),AsIs(table_mind_export_ml_with_drugs_alt_header_drugs),AsIs(table_mind_export_ml_with_drugs_alt_header_drugs),AsIs(table_mind_export_ml_with_drugs_alt_header_rsids),))
+        conn.commit()
+
+#join with alt
+        force_check_overwrite_table(table_mind_export_ml_with_drugs_alt_header_rsids_and_drugs_and_altgene)
+
+        #join the previouse tables into one final header table
+        print(cur.mogrify("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.gene_name2 = %s.gene_name3)",(AsIs(table_mind_export_ml_with_drugs_alt_header_rsids_and_drugs_and_altgene),AsIs(table_mind_export_ml_with_drugs_alt_header_rsids_and_drugs),AsIs(table_mind_export_ml_with_drugs_alt_header_altgene),AsIs(table_mind_export_ml_with_drugs_alt_header_rsids_and_drugs),AsIs(table_mind_export_ml_with_drugs_alt_header_altgene),)))
+        cur.execute("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.gene_name2 = %s.gene_name3)",(AsIs(table_mind_export_ml_with_drugs_alt_header_rsids_and_drugs_and_altgene),AsIs(table_mind_export_ml_with_drugs_alt_header_rsids_and_drugs),AsIs(table_mind_export_ml_with_drugs_alt_header_altgene),AsIs(table_mind_export_ml_with_drugs_alt_header_rsids_and_drugs),AsIs(table_mind_export_ml_with_drugs_alt_header_altgene),))
+        conn.commit()
 
         widgets = ['processing query -> '+table1000g+' :', Percentage(), ' ', Bar(marker=RotatingMarker()),' ', ETA(), ' ', FileTransferSpeed()]
 
@@ -1549,33 +1559,33 @@ try:
 
             export_file.write("\n")
 
-            # cur.execute("select column_name from information_schema.columns where table_name = \'%s\' and ( column_name ~ \'^sz.*[1-9]\' or column_name ~ \'^cg.*[1-9]\' or column_name ~ \'^el.*[1-9]\' or column_name ~ \'^gc.*[1-9]\' );",(AsIs(args.mind_export_ml_with_drugs_alt),))
-            #
-            # for hg2 in pbar(query2list()):
-            #
-            #
-            #     export_file.write('\''+hg2+'\'')
-            #     export_file.write(',')
-            #
-            #     #add correct diagnosis for each patient , idnum=1 is the row with diagnosis for each patient column
-            #     cur.execute("select %s from %s where idnum='1' limit 1;",(AsIs(hg2),AsIs(rstable),))
-            #
-            #     for i2 in cur.fetchall():
-            #         export_file.write(re.sub('(\()|(\[)|(\])|(\))','',str(i2)))
-            #
-            #     print(cur.mogrify("select peptid_group from (select gene_name , string_agg(rsid,',' order by rsid) as rsids, string_agg(peptid_group,'') as peptid_group from (select distinct gene_name,rsid,mytable.t1||mytable.t2||mytable.t3  as peptid_group from (select gene_name,rsid,%s, case when substr(%s,1,1) = allele1 then '+'||peptide1 when substr(%s,1,1) = allele2 then '+'||peptide2 when substr(%s,1,1) = allele3 then '+'||peptide3 when substr(%s,1,1) = opallele1 then '-'||peptide1 when substr(%s,1,1) = opallele2 then '-'||peptide2 when substr(%s,1,1) = opallele3 then '-'||peptide3 end as t1 , case when substr(%s,3,1) = allele1 then '+'||peptide1 when substr(%s,3,1) = allele2 then '+'||peptide2 when substr(%s,3,1) = allele3 then '+'||peptide3 when substr(%s,3,1) = opallele1 then '-'||peptide1 when substr(%s,3,1) = opallele2 then '-'||peptide2 when substr(%s,3,1) = opallele3 then '-'||peptide3 end as t2 ,case when substr(%s,5,1) = '' then '' when substr(%s,5,1) = allele1 then '+'||peptide1 when substr(%s,5,1) = allele2 then '+'||peptide2 when substr(%s,5,1) = allele3 then '+'||peptide3 when substr(%s,5,1) = opallele1 then '-'||peptide1 when substr(%s,5,1) = opallele2 then '-'||peptide2 when substr(%s,5,1) = opallele3 then '-'||peptide3 end as t3 from  %s) as mytable )as t1 group by t1.gene_name order by t1.gene_name) as t5;",(AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(args.mind_export_ml_with_drugs_alt),)))
-            #
-            #     cur.execute("select peptid_group from (select gene_name , string_agg(rsid,',' order by rsid) as rsids, string_agg(peptid_group,'') as peptid_group from (select distinct gene_name,rsid,mytable.t1||mytable.t2||mytable.t3  as peptid_group from (select gene_name,rsid,%s, case when substr(%s,1,1) = allele1 then '+'||peptide1 when substr(%s,1,1) = allele2 then '+'||peptide2 when substr(%s,1,1) = allele3 then '+'||peptide3 when substr(%s,1,1) = opallele1 then '-'||peptide1 when substr(%s,1,1) = opallele2 then '-'||peptide2 when substr(%s,1,1) = opallele3 then '-'||peptide3 end as t1 , case when substr(%s,3,1) = allele1 then '+'||peptide1 when substr(%s,3,1) = allele2 then '+'||peptide2 when substr(%s,3,1) = allele3 then '+'||peptide3 when substr(%s,3,1) = opallele1 then '-'||peptide1 when substr(%s,3,1) = opallele2 then '-'||peptide2 when substr(%s,3,1) = opallele3 then '-'||peptide3 end as t2 ,case when substr(%s,5,1) = '' then '' when substr(%s,5,1) = allele1 then '+'||peptide1 when substr(%s,5,1) = allele2 then '+'||peptide2 when substr(%s,5,1) = allele3 then '+'||peptide3 when substr(%s,5,1) = opallele1 then '-'||peptide1 when substr(%s,5,1) = opallele2 then '-'||peptide2 when substr(%s,5,1) = opallele3 then '-'||peptide3 end as t3 from  %s) as mytable )as t1 group by t1.gene_name order by t1.gene_name) as t5;",(AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(args.mind_export_ml_with_drugs_alt),))
-            #
-            #
-            #
-            #
-            #     for i2 in cur.fetchall():
-            #        export_file.write(re.sub('(\()|(\[)|(\])|(\))','',str(i2)))
-            #
-            #     export_file.write("\n")
-            #
-            #
+            cur.execute("select column_name from information_schema.columns where table_name = \'%s\' and ( column_name ~ \'^sz.*[1-9]\' or column_name ~ \'^cg.*[1-9]\' or column_name ~ \'^el.*[1-9]\' or column_name ~ \'^gc.*[1-9]\' );",(AsIs(args.mind_export_ml_with_drugs_alt),))
+
+            for hg2 in pbar(query2list()):
+
+
+                export_file.write('\''+hg2+'\'')
+                export_file.write(',')
+
+                #add correct diagnosis for each patient , idnum=1 is the row with diagnosis for each patient column
+                cur.execute("select %s from %s where idnum='1' limit 1;",(AsIs(hg2),AsIs(rstable),))
+
+                for i2 in cur.fetchall():
+                    export_file.write(re.sub('(\()|(\[)|(\])|(\))','',str(i2)))
+
+                # print(cur.mogrify("select peptid_group from (select gene_name , string_agg(rsid,',' order by rsid) as rsids, string_agg(peptid_group,'') as peptid_group from (select distinct gene_name,rsid,mytable.t1||mytable.t2||mytable.t3  as peptid_group from (select gene_name,rsid,%s, case when substr(%s,1,1) = allele1 then '+'||peptide1 when substr(%s,1,1) = allele2 then '+'||peptide2 when substr(%s,1,1) = allele3 then '+'||peptide3 when substr(%s,1,1) = opallele1 then '-'||peptide1 when substr(%s,1,1) = opallele2 then '-'||peptide2 when substr(%s,1,1) = opallele3 then '-'||peptide3 end as t1 , case when substr(%s,3,1) = allele1 then '+'||peptide1 when substr(%s,3,1) = allele2 then '+'||peptide2 when substr(%s,3,1) = allele3 then '+'||peptide3 when substr(%s,3,1) = opallele1 then '-'||peptide1 when substr(%s,3,1) = opallele2 then '-'||peptide2 when substr(%s,3,1) = opallele3 then '-'||peptide3 end as t2 ,case when substr(%s,5,1) = '' then '' when substr(%s,5,1) = allele1 then '+'||peptide1 when substr(%s,5,1) = allele2 then '+'||peptide2 when substr(%s,5,1) = allele3 then '+'||peptide3 when substr(%s,5,1) = opallele1 then '-'||peptide1 when substr(%s,5,1) = opallele2 then '-'||peptide2 when substr(%s,5,1) = opallele3 then '-'||peptide3 end as t3 from  %s) as mytable )as t1 group by t1.gene_name order by t1.gene_name) as t5;",(AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(args.mind_export_ml_with_drugs_alt),)))
+
+                cur.execute("select peptid_group from (select gene_name , string_agg(rsid,',' order by rsid) as rsids, string_agg(peptid_group,'') as peptid_group from (select distinct gene_name,rsid,mytable.t1||mytable.t2||mytable.t3  as peptid_group from (select gene_name,rsid,%s, case when substr(%s,1,1) = allele1 then '+'||peptide1 when substr(%s,1,1) = allele2 then '+'||peptide2 when substr(%s,1,1) = allele3 then '+'||peptide3 when substr(%s,1,1) = opallele1 then '-'||peptide1 when substr(%s,1,1) = opallele2 then '-'||peptide2 when substr(%s,1,1) = opallele3 then '-'||peptide3 end as t1 , case when substr(%s,3,1) = allele1 then '+'||peptide1 when substr(%s,3,1) = allele2 then '+'||peptide2 when substr(%s,3,1) = allele3 then '+'||peptide3 when substr(%s,3,1) = opallele1 then '-'||peptide1 when substr(%s,3,1) = opallele2 then '-'||peptide2 when substr(%s,3,1) = opallele3 then '-'||peptide3 end as t2 ,case when substr(%s,5,1) = '' then '' when substr(%s,5,1) = allele1 then '+'||peptide1 when substr(%s,5,1) = allele2 then '+'||peptide2 when substr(%s,5,1) = allele3 then '+'||peptide3 when substr(%s,5,1) = opallele1 then '-'||peptide1 when substr(%s,5,1) = opallele2 then '-'||peptide2 when substr(%s,5,1) = opallele3 then '-'||peptide3 end as t3 from  %s) as mytable )as t1 group by t1.gene_name order by t1.gene_name) as t5;",(AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(args.mind_export_ml_with_drugs_alt),))
+
+
+
+
+                for i2 in cur.fetchall():
+                   export_file.write(re.sub('(\()|(\[)|(\])|(\))','',str(i2)))
+
+                export_file.write("\n")
+
+
 
     if args.add_gene_peptide_string:
 
@@ -2114,12 +2124,14 @@ try:
         conn.commit()
 
 
+
     if args.filter_mind_table_by_drugs_extended_gene_interactions:
 #filter mind_data_1-4_rs_ensorted_by_gene_posann tables by : join with table gene_name_and_drug_name on gene_name
 
         filter_mind_table_by_drugs_extended_gene_interactions_alt = args.filter_mind_table_by_drugs_extended_gene_interactions
         filter_mind_table_by_drugs_extended_gene_interactions_alt_by_drug = args.filter_mind_table_by_drugs_extended_gene_interactions+"_by_drug_alt"
         table_gene_drug_name_and_category_aggcat_aggdrug2_alt = "gene_and_drug_name_category_agg_cat_drug_int_alt2"
+        table_gene_drug_name_and_category_aggcat_aggdrug2_a_u="gene_and_drug_name_category_agg_cat_drug_int_a_u"
 
 
         check_overwrite_table(table_gene_drug_name_and_category_aggcat_aggdrug2_alt)
@@ -2134,12 +2146,22 @@ try:
         cur.execute("alter table  %s rename column gene_name to gene_name2",(AsIs(table_gene_drug_name_and_category_aggcat_aggdrug2_alt),))
         conn.commit()
 
+#method fix :
+#create uniq alt table without interacting genes since it is creating too big of a table
+
+        check_overwrite_table(table_gene_drug_name_and_category_aggcat_aggdrug2_alt)
+
+        print(cur.mogrify("create table %s as select distinct gene_name2,drugs_info from gene_and_drug_name_category_agg_cat_drug_int_alt2",(AsIs(table_gene_drug_name_and_category_aggcat_aggdrug2_a_u),)))
+        cur.execute("create table %s as select distinct gene_name2,drugs_info from gene_and_drug_name_category_agg_cat_drug_int_alt2",(AsIs(table_gene_drug_name_and_category_aggcat_aggdrug2_a_u),))
+        conn.commit()
+
         check_overwrite_table(filter_mind_table_by_drugs_extended_gene_interactions_alt_by_drug)
+#method fix : changed to join from the a_u table
 
         # join mind table with table gene_name_and_drug_name on gene_name
-        print(cur.mogrify("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.gene_name2 = %s.gene_name)",(AsIs(filter_mind_table_by_drugs_extended_gene_interactions_alt_by_drug),AsIs(table_gene_drug_name_and_category_aggcat_aggdrug2_alt),AsIs(filter_mind_table_by_drugs_extended_gene_interactions_alt),AsIs(table_gene_drug_name_and_category_aggcat_aggdrug2_alt),AsIs(filter_mind_table_by_drugs_extended_gene_interactions_alt),)))
+        print(cur.mogrify("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.gene_name2 = %s.gene_name)",(AsIs(filter_mind_table_by_drugs_extended_gene_interactions_alt_by_drug),AsIs(table_gene_drug_name_and_category_aggcat_aggdrug2_a_u),AsIs(filter_mind_table_by_drugs_extended_gene_interactions_alt),AsIs(table_gene_drug_name_and_category_aggcat_aggdrug2_a_u),AsIs(filter_mind_table_by_drugs_extended_gene_interactions_alt),)))
 
-        cur.execute("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.gene_name2 = %s.gene_name)",(AsIs(filter_mind_table_by_drugs_extended_gene_interactions_alt_by_drug),AsIs(table_gene_drug_name_and_category_aggcat_aggdrug2_alt),AsIs(filter_mind_table_by_drugs_extended_gene_interactions_alt),AsIs(table_gene_drug_name_and_category_aggcat_aggdrug2_alt),AsIs(filter_mind_table_by_drugs_extended_gene_interactions_alt),))
+        cur.execute("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.gene_name2 = %s.gene_name)",(AsIs(filter_mind_table_by_drugs_extended_gene_interactions_alt_by_drug),AsIs(table_gene_drug_name_and_category_aggcat_aggdrug2_a_u),AsIs(filter_mind_table_by_drugs_extended_gene_interactions_alt),AsIs(table_gene_drug_name_and_category_aggcat_aggdrug2_a_u),AsIs(filter_mind_table_by_drugs_extended_gene_interactions_alt),))
         conn.commit()
 
 
