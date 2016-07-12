@@ -57,6 +57,7 @@ parser = argparse.ArgumentParser(prog='psql_1000g_loader',usage='psql_1000g_load
  [-filter_mind_table_by_drugs_extended_gene_interactions]\
  [-mind_export_ml export a ml dataset of mind data]\
  [-mind_export_ml_with_drugs export a ml dataset of mind data with drug fields]\
+ [-mind_export_ml_with_drugs_u export a ml dataset of mind data with drug fields and unique alt genes]\
  [-mind_export_ml_with_drugs_alt export a ml dataset of mind data with alt_drug fields]\
  [-add_meta add tables metadata]',\
 
@@ -161,6 +162,7 @@ parser.add_argument("-mind_export_ml",help='export a ml dataset of mind data',me
 
 parser.add_argument("-mind_export_ml_with_drugs",help='export a ml dataset of mind data with drug fields',metavar='mind_export_ml_with_drugs')
 
+parser.add_argument("-mind_export_ml_with_drugs_u",help='export a ml dataset of mind data with drug fields',metavar='mind_export_ml_with_drugs_u')
 
 parser.add_argument("-mind_export_ml_with_drugs_alt",help='export a ml dataset of mind data with alt_drug fields',metavar='mind_export_ml_with_drugs_alt')
 
@@ -1377,30 +1379,31 @@ try:
 
         table_mind_export_ml_with_drugs_header_rsids = args.mind_export_ml_with_drugs + "_header_rsids"
 
-        table_mind_export_ml_with_drugs_header_drugs = args.mind_export_ml_with_drugs + "_header_drugs"
+        table_mind_export_ml_with_drugs_header_drugs = args.mind_export_ml_with_drugs + "_h_d"
 
-        table_mind_export_ml_with_drugs_header_rsids_and_drugs = args.mind_export_ml_with_drugs + "_h_rsids_drugs"
-
-
-
-        rstable = args.mind_export_ml_with_drugs.replace("_ensorted_by_gene_posann_by_drug","")
+        table_mind_export_ml_with_drugs_header_rsids_and_drugs = args.mind_export_ml_with_drugs + "_h_r_d"
 
 
-        check_overwrite_table(table_mind_export_ml_with_drugs_header_rsids)
+
+        rstable = args.mind_export_ml_with_drugs.replace("_ensorted_by_gene_posann_by_drug_altyesyesyes"
+                                                         "","")
+
+
+        force_check_overwrite_table(table_mind_export_ml_with_drugs_header_rsids)
 
         # create dist header for ml with rsids here .....
         print(cur.mogrify("CREATE TABLE %s AS select gene_name , string_agg(rsid,' ' order by rsid) as rsids from (select distinct gene_name,rsid from %s) as t1 group by t1.gene_name order by t1.gene_name; ",(AsIs(table_mind_export_ml_with_drugs_header_rsids),AsIs(args.mind_export_ml_with_drugs),)))
         cur.execute("CREATE TABLE %s AS select gene_name , string_agg(rsid,' ' order by rsid) as rsids from (select distinct gene_name,rsid from %s) as t1 group by t1.gene_name order by t1.gene_name; ",(AsIs(table_mind_export_ml_with_drugs_header_rsids),AsIs(args.mind_export_ml_with_drugs),))
         conn.commit()
 
-        check_overwrite_table(table_mind_export_ml_with_drugs_header_drugs)
+        force_check_overwrite_table(table_mind_export_ml_with_drugs_header_drugs)
 
         # create dist header with drugs for ml here .....
         print(cur.mogrify("CREATE TABLE %s AS select gene_name as gene_name2 ,string_agg(drugs_info,' ' order by drugs_info) as gene_drugs from (select distinct gene_name,drugs_info from %s) as t1 group by t1.gene_name order by t1.gene_name; ",(AsIs(table_mind_export_ml_with_drugs_header_drugs),AsIs(args.mind_export_ml_with_drugs),)))
         cur.execute("CREATE TABLE %s AS select gene_name as gene_name2,string_agg(drugs_info,' ' order by drugs_info) as gene_drugs from (select distinct gene_name,drugs_info from %s) as t1 group by t1.gene_name order by t1.gene_name; ",(AsIs(table_mind_export_ml_with_drugs_header_drugs),AsIs(args.mind_export_ml_with_drugs),))
         conn.commit()
 
-        check_overwrite_table(table_mind_export_ml_with_drugs_header_rsids_and_drugs)
+        force_check_overwrite_table(table_mind_export_ml_with_drugs_header_rsids_and_drugs)
 
         #join the previouse tables into one final header table
         print(cur.mogrify("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.gene_name2 = %s.gene_name)",(AsIs(table_mind_export_ml_with_drugs_header_rsids_and_drugs),AsIs(table_mind_export_ml_with_drugs_header_rsids),AsIs(table_mind_export_ml_with_drugs_header_drugs),AsIs(table_mind_export_ml_with_drugs_header_drugs),AsIs(table_mind_export_ml_with_drugs_header_rsids),)))
@@ -1422,7 +1425,7 @@ try:
              #add |drugs_info here after "||rsids"
             export_file.write("'patient','diagnosis',")
 
-            cur.execute("select gene_name||' | '||rsids||' | '||gene_drugs from %s ;",(AsIs(table_mind_export_ml_with_drugs_header_rsids_and_drugs),))
+            cur.execute("select gene_name||' | '||rsids||' | '||gene_drugs from %s order by gene_name;;",(AsIs(table_mind_export_ml_with_drugs_header_rsids_and_drugs),))
 
 
             for i2 in cur.fetchall():
@@ -1466,6 +1469,7 @@ try:
 
     def time_it():
         print "time: " + datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d %H:%M:%S')
+
 
 
     def mind_export_ml_with_drugs_alt():
@@ -1930,6 +1934,10 @@ try:
     if args.mind_export_ml_with_drugs:
         mind_export_ml_with_drugs()
 
+    if args.mind_export_ml_with_drugs_u:
+        mind_export_ml_with_drugs_u()
+
+
     if args.mind_export_ml_with_drugs_alt:
         mind_export_ml_with_drugs_alt()
 
@@ -2149,14 +2157,14 @@ try:
 #method fix :
 #create uniq alt table without interacting genes since it is creating too big of a table
 
-        check_overwrite_table(table_gene_drug_name_and_category_aggcat_aggdrug2_alt)
+        check_overwrite_table(table_gene_drug_name_and_category_aggcat_aggdrug2_a_u)
 
         print(cur.mogrify("create table %s as select distinct gene_name2,drugs_info from gene_and_drug_name_category_agg_cat_drug_int_alt2",(AsIs(table_gene_drug_name_and_category_aggcat_aggdrug2_a_u),)))
         cur.execute("create table %s as select distinct gene_name2,drugs_info from gene_and_drug_name_category_agg_cat_drug_int_alt2",(AsIs(table_gene_drug_name_and_category_aggcat_aggdrug2_a_u),))
         conn.commit()
 
         check_overwrite_table(filter_mind_table_by_drugs_extended_gene_interactions_alt_by_drug)
-#method fix : changed to join from the a_u table
+        #method fix : changed to join from the a_u table
 
         # join mind table with table gene_name_and_drug_name on gene_name
         print(cur.mogrify("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.gene_name2 = %s.gene_name)",(AsIs(filter_mind_table_by_drugs_extended_gene_interactions_alt_by_drug),AsIs(table_gene_drug_name_and_category_aggcat_aggdrug2_a_u),AsIs(filter_mind_table_by_drugs_extended_gene_interactions_alt),AsIs(table_gene_drug_name_and_category_aggcat_aggdrug2_a_u),AsIs(filter_mind_table_by_drugs_extended_gene_interactions_alt),)))
