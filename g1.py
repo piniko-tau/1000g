@@ -57,7 +57,7 @@ parser = argparse.ArgumentParser(prog='psql_1000g_loader',usage='psql_1000g_load
  [-filter_mind_table_by_drugs_extended_gene_interactions]\
  [-mind_export_ml export a ml dataset of mind data]\
  [-mind_export_ml_with_drugs export a ml dataset of mind data with drug fields]\
- [-mind_export_ml_with_drugs_u export a ml dataset of mind data with drug fields and unique alt genes]\
+ [-mind_export_ml_with_drugs_u NOT FINISHED export a ml dataset of mind data with drug fields and unique alt genes]\
  [-mind_export_ml_with_drugs_alt export a ml dataset of mind data with alt_drug fields]\
  [-add_meta add tables metadata]',\
 
@@ -162,7 +162,7 @@ parser.add_argument("-mind_export_ml",help='export a ml dataset of mind data',me
 
 parser.add_argument("-mind_export_ml_with_drugs",help='export a ml dataset of mind data with drug fields',metavar='mind_export_ml_with_drugs')
 
-parser.add_argument("-mind_export_ml_with_drugs_u",help='export a ml dataset of mind data with drug fields',metavar='mind_export_ml_with_drugs_u')
+parser.add_argument("-mind_export_ml_with_drugs_u",help='NOT FINISHED export a ml dataset of mind data with drug fields',metavar='mind_export_ml_with_drugs_u')
 
 parser.add_argument("-mind_export_ml_with_drugs_alt",help='export a ml dataset of mind data with alt_drug fields',metavar='mind_export_ml_with_drugs_alt')
 
