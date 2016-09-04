@@ -2124,10 +2124,8 @@ try:
         cur.execute("CREATE TABLE %s AS select gene_name,string_agg(dg1.drug_name2,' ') as drugs_info from (select distinct gene_name,drug_name||'{'||drug_categories||'}' as drug_name2 from gene_name_and_drug_name_and_category_aggcat) as dg1 group by gene_name;  ",(AsIs(table_gene_name_and_drug_name_and_category_aggcat_aggdrug),))
         conn.commit()
 
-    # noinspection PyUnboundLocalVariable
     if args.create_drugs_genes_table_extended_gene_interactions:
         #create extended genes tables
-        #this isa copy of the prefiouse function change it :
 
         ##we want the gene_name to be derived from interactive_gene_id and the grnr_claim_id from gene_name_id
 
