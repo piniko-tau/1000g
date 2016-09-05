@@ -1,0 +1,1307 @@
+Sql snp schizo documentation 
+
+Manual overview: 
+First index is for data process steps with explanation and source code.
+Next comes the index for actual commands to recreate each step.
+
+Table naming overview :
+1st end dataset is a table named : 
+
+“Mind_data_1_rs_ensorted_by_gene_posann”
+*This table is exported at step 11 
+
+Each name part corresponds to several data process steps:
+
+“Mind_data_1” - steps 1,2
+“_rs” - steps 3,4
+“en” - 5,6
+“sorted_by_gene_pos” - step 7
+“ann” - steps 8,9,10
+
+2nd dataset with drugs: 
+    “Mind_data_1_rs_ensorted_by_gene_posann”+“_by_drug”
+    This is done is steps 12,13,14.
+
+3rd dataset with alternative genes and drugs:
+“Mind_data_1_rs_ensorted_by_gene_posann”+“_by_drug”+”_alt”    This is done is steps 16,17,18.
+
+Mind data database processing steps index : 
+
+Preprocess of the mind_data for sql upload
+Creation of mind_data tables(mind data upload)
+Creation of mind_rsids table
+Join mind data with mind data rsids
+Creation of ensemble “rsid to gene_name” table
+Creation of ensemble annotated mind tables
+Sort mind tables by gene and position
+Creation of UCSC “amino acid changing rsids” table
+Spliting the above table into individual and opposite alleles
+Join mind data tables with annotated “amino changing rsids table”
+Export & transform the processed table to a machine learning ready dataset
+
+*following steps are for exporting ml dataset with gene-drug data.
+12) Load_DBIdb_tables_preproces
+13) Create drugs to genes table
+14) Filter mind table genes by genes with drug interaction
+15) Export & transform the processed table to a machine learning ready dataset with gene-drug info
+
+*following steps are for exporting ml dataset with alternative gene-drug data
+16) Create drugs to alternative genes table
+17) Filter mind table genes by alternative genes with drug interaction
+18) Export & transform the processed table to a machine learning ready dataset with alternative gene-drug info * this method uses the same export code as the method before.
+
+
+
+
+Actual commands and steps to recreate all of the project : 
+
+Prerequisites: 
+Optional: Win Os, can work on any Os.
+0.5 tera hdd
+Recommended : I7 processor , 16G ram
+
+Setting up the working environment :  
+
+Install python 2.7 
+Install pip , packages and dependencies: psycopg2,argparse,progressbar,transposer
+Install Postgresql-9.4, can be a higher version
+Install Cygwin 
+
+Getting the main python program execution file :
+The project git repo :
+https://github.com/piniko-tau/1000g
+
+The execution file:
+https://github.com/piniko-tau/1000g/blob/master/g1.py  
+
+Commands to execute the Mind data database processing steps : 
+
+*syntax: step_number) -> commands for that step
+
+Create new project_dir, copy file Individual_Phenotype_AllGenotypes.w_header (previously created by eitan) to the project_dir.
+On cygwin run the following commands on the file : 
+            split -l 100 --verbose -d Individual_Phenotype_AllGenotypes.w_header
+        for i in `ls |grep x`;do cat -A $i|sed \'s/\^I/ /g\'|sed \'s/\$//g\'>$i.s;done
+        for i in `ls |grep x.*s`;do transposer -i $i -o $i.t -d \" \";done
+        paste `ls|grep \'\.t\'|sort`>>fint
+        awk \'{if(NR>1)print}\' fint >fint2; cat -n fint2 > fint22
+        head -n 1 fint >fint3; cat -n fint3 |sed \'s/ 1 /numid/g\'> fint33
+        cat fint22 >>fint33
+        cat -A fint33|sed \'s/^ *//g\'|sed \'s/\^M/ /g\'|sed \'s/\^I/ /g\'>fint333
+        cut -d " " -f1-900 fint333>fint_1;cut -d " " -f1,901-1800 fint333>fint_2;cut -d " " -f1,1801-2700 fint333>fint_3;cut -d " " -f1,2701- fint333>fint_4
+1½)        Create a postgresql database and user with all rights to that db.
+    For this tutorial I assume: -dbname pydb -dbpass pyuser -dbuser pyuser
+
+Download the g1.py program to the current dir : in the project_dir : wget https://github.com/piniko-tau/1000g/blob/master/g1.py
+
+
+2)     Run the g1 script to load the mind data files into the database: 
+
+Open a CMD terminal in win , cd to the project_dir , run : 
+
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -load_mind_data_f fint_1 -load_mind_data_t mind_data_1
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -load_mind_data_f fint_2 -load_mind_data_t mind_data_2
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -load_mind_data_f fint_3 -load_mind_data_t mind_data_3
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -load_mind_data_f fint_4 -load_mind_data_t mind_data_4
+
+3)     Run the g1 script to load the rs mind data file  into the database: 
+    
+Open a CMD terminal in win , cd to the project_dir , run : 
+
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -load_mind_rsids chr_rsID_Coordinate.w_lnum
+    
+4)    Run the g1 script to join mind_data and mind rsids: 
+    
+Open a CMD terminal in win , cd to the project_dir , run : 
+
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -join_mind_rsids mind_data_1
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -join_mind_rsids mind_data_2
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -join_mind_rsids mind_data_3
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -join_mind_rsids mind_data_4
+
+5)    Upload and create ensemble rsid to gene_name table
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -ensembl_variation_snpf variation.txt -ensembl_variation_genename_snpf variation_genename.txt
+
+6)    Run the g1 script to annotate mind_data_rs tables with gene_name and other metadata: 
+    
+Open a CMD terminal in win , cd to the project_dir , run : 
+
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -mind_a_ensembl mind_data_1_rs
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -mind_a_ensembl mind_data_2_rs
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -mind_a_ensembl mind_data_3_rs
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -mind_a_ensembl mind_data_4_rs
+
+7)    Run the g1 script to sort mind_data_rs tables by gene name and position:
+
+Open a CMD terminal in win , cd to the project_dir , run : 
+
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -mind_sort_by_gene_and_pos mind_data_1_rs_en
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -mind_sort_by_gene_and_pos mind_data_2_rs_en
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -mind_sort_by_gene_and_pos mind_data_3_rs_en
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -mind_sort_by_gene_and_pos mind_data_4_rs_en
+
+8)    Run the g1 script to create the “amino acid changing rsids” asnp_s_ch_filtered_final table.    
+
+Open a CMD terminal in win , cd to the project_dir , run : 
+
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -ucsc_snpf snp141CodingDbSnp.txt -ucsc_snpt ansp
+
+9)    Run the g1 script to add a table that splits the above table into individual and opposite alleles.
+
+Open a CMD terminal in win , cd to the project_dir , run : 
+
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -mind_prepare_ucsc_4_mind_annotations asnp_s_ch_filtered_final
+
+10)    Run the g1 script to Join mind data tables with a tables containing alleles and codons and peptides for those alleles by rsid.
+
+Open a CMD terminal in win , cd to the project_dir , run : 
+
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -join_mind_with_with_anno_ucsc_snp mind_data_1_rs_ensorted_by_gene_pos
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -join_mind_with_with_anno_ucsc_snp mind_data_2_rs_ensorted_by_gene_pos
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -join_mind_with_with_anno_ucsc_snp mind_data_3_rs_ensorted_by_gene_pos
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -join_mind_with_with_anno_ucsc_snp mind_data_4_rs_ensorted_by_gene_pos
+
+11)    Run the g1 script to transform the mind datasets tables into a machine learning ready dataset and export it as a csv file.
+
+Open a CMD terminal in win , cd to the project_dir , run : 
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -mind_export_ml mind_data_1_rs_ensorted_by_gene_posann
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -mind_export_ml mind_data_2_rs_ensorted_by_gene_posann
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -mind_export_ml mind_data_3_rs_ensorted_by_gene_posann
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -mind_export_ml mind_data_4_rs_ensorted_by_gene_posann
+
+This step will produce a file named : 'exported_mind.csv’
+!!! for debug purposes the first row containing column names will be inserted 4 times, each time a mind table is added to the final csv file. Remove all but the first with : 
+Open cygwin ,cd to project dir, vim exported_mind.csv, then press /patient (enter),n,dd,n,dd,n,dd. This should jump to next header line each time and delete it . !!! 
+12)    Download whole schema from : http://dgidb.genome.wustl.edu/downloads
+Run this to upload the DGidb schema and tables to our database.
+
+Open a CMD terminal in win , cd to the project_dir , run : 
+D:\DGIdb>D:\postgresql9.4\bin\psql.exe -U pyuser -d pydb -f DGIdb_schema.sql
+D:\DGIdb>D:\postgresql9.4\bin\psql.exe -U pyuser -d pydb -f DGIdb_dump.sql
+
+13)    Run the g1 script to create a single table containing  gene and drug names from the whole DGidb schema.    
+
+Open a CMD terminal in win , cd to the project_dir , run :
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -create_drugs_genes_table
+
+14)    Run the g1 script to Produce a table which has only genes with direct drug interaction listed in the DGidb database.
+
+Open a CMD terminal in win , cd to the project_dir , run :
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -filter_mind_table_by_drugs mind_data_1_rs_ensorted_by_gene_posann
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -filter_mind_table_by_drugs mind_data_2_rs_ensorted_by_gene_posann
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -filter_mind_table_by_drugs mind_data_3_rs_ensorted_by_gene_posann
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -filter_mind_table_by_drugs mind_data_4_rs_ensorted_by_gene_posann
+
+15)    Run the g1 script to transform the mind datasets tables ,with drug data, into a machine learning ready dataset and export it as a csv file. 
+
+Open a CMD terminal in win , cd to the project_dir , run :
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -mind_export_ml_with_drugs mind_data_1_rs_ensorted_by_gene_posann_by_drug
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -mind_export_ml_with_drugs mind_data_2_rs_ensorted_by_gene_posann_by_drug
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -mind_export_ml_with_drugs mind_data_3_rs_ensorted_by_gene_posann_by_drug
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -mind_export_ml_with_drugs mind_data_4_rs_ensorted_by_gene_posann_by_drug
+
+This step will produce a file named : 'exported_mind.csv’
+!!! for debug purposes the first row containing column names will be inserted 4 times, each time a mind table is added to the final csv file. Remove all but the first with : 
+Open cygwin ,cd to project dir, vim exported_mind.csv, then press /patient (enter),n,dd,n,dd,n,dd. This should jump to next header line each time and delete it . !!! 
+    
+16)    Run the g1 script to create a single table containing  alternative gene and drug names from the whole DGidb schema. 
+
+Open a CMD terminal in win , cd to the project_dir , run :
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -create_drugs_genes_table_extended_gene_interactions 
+
+17)    Run the g1 script to Produce a table which has only the alternative genes with direct drug interaction listed in the DGidb database.
+
+Open a CMD terminal in win , cd to the project_dir , run :
+
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -filter_mind_table_by_drugs_extended_gene_interactions mind_data_1_rs_ensorted_by_gene_posann
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -filter_mind_table_by_drugs_extended_gene_interactions mind_data_2_rs_ensorted_by_gene_posann
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -filter_mind_table_by_drugs_extended_gene_interactions mind_data_3_rs_ensorted_by_gene_posann
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -filter_mind_table_by_drugs_extended_gene_interactions mind_data_4_rs_ensorted_by_gene_posann
+
+18)    Run the g1 script to transform the mind datasets tables ,with drug data and alternative genes, into a machine learning ready dataset and export it as a csv file. 
+
+Open a CMD terminal in win , cd to the project_dir , run :
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -mind_export_ml_with_drugs mind_data_1_rs_ensorted_by_gene_posann_by_drug_alt
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -mind_export_ml_with_drugs mind_data_2_rs_ensorted_by_gene_posann_by_drug_alt
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -mind_export_ml_with_drugs mind_data_3_rs_ensorted_by_gene_posann_by_drug_alt
+C:\Python27\python.exe path_to_project_dir\g1.py -dbname pydb -dbpass pyuser -dbuser pyuser -mind_export_ml_with_drugs mind_data_4_rs_ensorted_by_gene_posann_by_drug_alt
+
+This step will produce a file named : 'exported_mind.csv’
+!!! for debug purposes the first row containing column names will be inserted 4 times, each time a mind table is added to the final csv file. Remove all but the first with : 
+Open cygwin ,cd to project dir, vim exported_mind.csv, then press /patient (enter),n,dd,n,dd,n,dd. This should jump to next header line each time and delete it . !!! 
+
+
+
+
+
+Preprocess of the mind_data for sql upload:
+
+This will result in 4 files that can be uploaded to the sql database.
+The preprocess was necessary because of the 1000 column per table limit on postgresql.
+
+From file : Individual_Phenotype_AllGenotypes.w_header
+
+Preprocess explanation : 
+
+- split the file to 100 rows files
+- transpose all the files
+- then add together row wise 
+- add header 
+- split big file into 900 columns file
+- result is 4 files transposed .
+
+
+Code snippet :
+
+        #! /bin/bash
+        split -l 100 --verbose -d t1
+        for i in `ls |grep x`;do  echo "cat -A $i|sed \'s/\^I/ /g\'|sed \'s/\$//g\'>$i.s";done
+        for i in `ls |grep x.*s`;do  echo "transposer -i $i -o $i.t -d \" \"";done
+        paste `ls|grep \'\.t\'|sort`>>fint
+        awk \'{if(NR>1)print}\' fint >fint2; cat -n fint2 > fint22
+        head -n 1 fint >fint3; cat -n fint3 |sed \'s/ 1 /numid/g\'> fint33
+        cat fint22 >>fint33
+        cat -A fint33|sed \'s/^ *//g\'|sed \'s/\^M/ /g\'|sed \'s/\^I/ /g\'>fint333
+        cut -d " " -f1-900 fint333>fint_1;cut -d " " -f1,901-1800 fint333>fint_2;cut -d " " -f1,1801-2700 fint333>fint_3;cut -d " " -f1,2701- fint333>fint_4
+
+
+
+
+
+
+2) Creation of mind_data tables :
+
+This will create 1-4 mind_data tables containing info of the patients diagnosis , their and allele - amino acids. 
+
+Method:
+The first line that starts with idnum, becomes tables columns
+The other lines are checked to be the same (columns) length and are inserted as row values.
+
+Table description : 
+
+pydb=> \d mind_data_4
+   Table "public.mind_data_4"
+   Column    | Type | Modifiers
+-------------+------+-----------
+ idnum       | text |
+ gcobbn3803  | text |
+ gcobbn3804  | text |
+ gcobbn3805  | text | …...all patients , each patient in a seperate column.
+
+
+
+Code snippet : 
+
+parser.add_argument("-load_mind_data_f", help="load mind dataset file" , metavar='load_mind_data_f')
+
+parser.add_argument("-load_mind_data_t",help=" load mind dataset table prefix",metavar='load_mind_data_t')
+
+def load_md2sql():
+
+    mind_firstline = True
+
+    global column_variable_counter
+    global column_limit_counter
+    #define progress bar object
+    widgets = ['database upload -> '+table_mind+' :', Percentage(), ' ', Bar(marker=RotatingMarker()),' ', ETA(), ' ', FileTransferSpeed()]
+
+    pbar = ProgressBar(widgets=widgets, maxval=10000000).start()
+
+    with open(args.load_mind_data_f) as f:
+
+
+       for line in pbar(f):
+            logging.debug("whole line :"+line)
+            # find columns row and set it as column names
+
+            # if first line with column names create table with column lines:
+            if mind_firstline:
+                logging.debug("mind data first line!")
+                col_words = line.split()
+                col_counter = len(col_words)
+                logging.debug("column list length")
+                logging.debug(col_counter)
+
+                create_table(table_mind)
+
+                for word in line.split():
+
+                    logging.debug(word+" word"+str(col_counter))
+
+                    addcol_2table(word,table_mind)
+
+def addcol_2table (column_name,table_name):
+   logging.debug(cur.mogrify("alter table %s add column %s text;", (AsIs(table_name),AsIs(column_name),)))
+   cur.execute("alter table %s add column %s text;", (AsIs(table_name),AsIs(column_name),))
+
+            mind_firstline = False
+
+            # first check the line length and compare to columns number
+            #find and load variable lines
+            if not line.startswith('idnum'):
+                col_words2 = line.split()
+                word_counter = len(col_words2)
+                if word_counter == col_counter:
+                    logging.debug("variables list length :")
+                    logging.debug(word_counter)
+                    logging.debug("column list length :")
+                    logging.debug(col_counter)
+                    linequoted = ""
+
+                    for word in line.split():
+
+                        #skip after 20 column
+                        # if column_variable_counter >= column_limit:
+                        #     column_variable_counter=0
+                        #     break
+                        #
+                        # column_variable_counter+=1
+
+
+                        wordquoted='\''+word+'\''','
+                        logging.debug(wordquoted)
+                        linequoted += wordquoted
+
+                    logging.debug(linequoted)
+                    insertline=linequoted[:-1]
+
+                    insert_values_2table(insertline,table_mind)
+
+def insert_values_2table(line,table_name):
+    logging.debug(cur.mogrify("insert into %s values (%s);", (AsIs(table_name),AsIs(line),)))
+    cur.execute("insert into %s values (%s);", (AsIs(table_name),AsIs(line),))
+    conn.commit()
+
+
+3) Creation of mind_rsids table:
+
+This table will be used to add rsids to the schizo patients file , the join will be on the numid field.
+
+from chr_rsID_Coordinate.w_lnum source file
+created from Human Genome Build NCBI36 (hg18).
+
+Table contents :
+
+   Table "public.mind_rsids"
+   Column   | Type | Modifie
+------------+------+--------
+ numid      | text |
+ chr        | text |
+ rsid       | text |
+ coordinate | text |
+
+code snippet :
+
+parser.add_argument("-load_mind_rsids",help=" load the mind rsids file to mind_rsids table",metavar='load_mind_rsids')
+
+varmindrsids_table="mind_rsids"
+
+
+def load_mind_rsids2sql():
+
+    mind_firstline = True
+
+    global column_variable_counter
+    global column_limit_counter
+    #define progress bar object
+    widgets = ['database upload -> mind_rsids  :', Percentage(), ' ', Bar(marker=RotatingMarker()),' ', ETA(), ' ', FileTransferSpeed()]
+
+    pbar = ProgressBar(widgets=widgets, maxval=10000000).start()
+
+    with open(args.load_mind_rsids) as f:
+
+
+       for line in pbar(f):
+            logging.debug("whole line :"+line)
+            # find columns row and set it as column names
+
+            # if first line with column names create table with column lines:
+            if mind_firstline:
+                logging.debug("mind rs first line!")
+                col_words = line.split()
+                col_counter = len(col_words)
+                logging.debug("column list length")
+                logging.debug(col_counter)
+
+                create_table(varmindrsids_table)
+
+                for word in line.split():
+
+                    logging.debug(word+" word"+str(col_counter))
+
+                    addcol_2table(word,varmindrsids_table)
+
+            mind_firstline = False
+
+            # first check the line length and compare to columns number
+            #find and load variable lines
+            if "numid" not in line:
+                col_words2 = line.split()
+                word_counter = len(col_words2)
+                if word_counter == col_counter:
+                    logging.debug("variables list length :")
+                    logging.debug(word_counter)
+                    logging.debug("column list length :")
+                    logging.debug(col_counter)
+                    linequoted = ""
+
+                    for word in line.split():
+
+                        #skip after 20 column
+                        # if column_variable_counter >= column_limit:
+                        #     column_variable_counter=0
+                        #     break
+                        #
+                        # column_variable_counter+=1
+
+
+                        wordquoted='\''+word+'\''','
+                        logging.debug(wordquoted)
+                        linequoted += wordquoted
+
+                    logging.debug(linequoted)
+                    insertline=linequoted[:-1]
+
+                    insert_values_2table(insertline,varmindrsids_table)
+
+def insert_values_2table(line,table_name):
+    logging.debug(cur.mogrify("insert into %s values (%s);", (AsIs(table_name),AsIs(line),)))
+    cur.execute("insert into %s values (%s);", (AsIs(table_name),AsIs(line),))
+    conn.commit()
+
+
+
+4) Join mind data with mind data rsids :
+
+ Annotate / join mind data with rsids. 
+
+Method:
+Full outer join  between mind_data and mind rsids .The join will be on the idnum field of the uploaded mind table and the numid of the mind_rsids table.
+
+Output table: mind_table_name+_rs
+
+Code snippet : 
+
+parser.add_argument("-join_mind_rsids",help=" table to annotate join mind data with rsids",metavar='join_mind_rsids')
+
+def join_mind_data_with_rsids(mind_table):
+    if not check_table_exists("mind_rsids"):
+        print "no mind_rsids table present"
+        sys.exit()
+
+    # new annotation table to be created
+    varmind_table_rs = mind_table+"_rs"
+
+    check_overwrite_table(varmind_table_rs)
+
+    #  inner join the ensembl table with the chranntable
+    cur.execute("CREATE TABLE %s AS SELECT * FROM %s full outer join mind_rsids on (%s.idnum = mind_rsids.numid)",(AsIs(varmind_table_rs),AsIs(mind_table),AsIs(mind_table),))
+    conn.commit()
+
+5) Create ensemble “rsid to gene_name” table 
+
+This results in a table containing rsids - to gene name translation , and other fields.
+
+From files : variation.txt, variation_genename.txt
+From : ftp://ftp.ensembl.org/pub/release-75/mysql/homo_sapiens_variation_75_37/variation.txt.gz,  ftp://ftp.ensembl.org/pub/release-75/mysql/homo_sapiens_variation_75_37/variation_genename.txt.gz
+
+
+table contents :
+
+pydb=> \d ensembl_variation
+      Table "public.ensembl_variation"
+        Column         |  Type   | Modifiers
+-----------------------+---------+----------
+ variation_id          | integer |
+ source_id             | integer |
+ rs_name               | text    |
+ validation_status     | text    |
+ ancestral_allele      | text    |
+ flipped               | boolean |
+ class_attrib_id       | integer |
+ somatic               | boolean |
+ minor_allele          | text    |
+ minor_allele_freq     | real    |
+ minor_allele_count    | integer |
+ clinical_significance | text    |
+ evidence              | text    |
+  
+pydb=> \d ensembl_variation_genename
+Table "public.ensembl_variation_genename"
+    Column     |  Type   | Modifiers
+---------------+---------+-----------
+ variation_id2 | integer |
+ gene_name     | text    |
+
+Code snippet : 
+
+ [-ensembl_variation_snpf file name -ensembl_variation_genename_snpf file name] (optional add a annotated ensembl tables from files) 
+
+def add_ann_ensembl():
+
+    e1 = "ensembl_variation"
+    e2 = "ensembl_variation_genename"
+
+    if not check_table_exists(e1):
+        cur.execute("CREATE TABLE ensembl_variation (\"variation_id\" int ,\"source_id\" int ,\"rs_name\" text ,\"validation_status\" text ,\"ancestral_allele\" text ,\"flipped\" boolean ,\"class_attrib_id\" int ,\"somatic\" boolean ,\"minor_allele\" text ,\"minor_allele_freq\" real ,\"minor_allele_count\" int ,\"clinical_significance\" text , \"evidence\" text)")
+        conn.commit()
+
+
+    if not check_table_exists(e2):
+        cur.execute("CREATE TABLE ensembl_variation_genename (\"variation_id2\" int ,  \"gene_name\" text)")
+        conn.commit()
+
+    #copy data to the tables
+
+    print ("COPY ensembl_variation FROM "+args.ensembl_variation_snpf)
+    cur.copy_from(ensembl_variation_file, "ensembl_variation")
+    conn.commit()
+    print ("COPY ensembl_variation FROM "+args.ensembl_variation_genename_snpf)
+    cur.copy_from(ensembl_variation_genename_file, "ensembl_variation_genename")
+    conn.commit()
+
+    #join them to a new table : variation_genename_4ann
+
+    cur.execute("CREATE TABLE variation_genename_4ann AS SELECT * FROM ensembl_variation inner join ensembl_variation_genename on (ensembl_variation.variation_id = ensembl_variation_genename.variation_id2)")
+    conn.commit()
+
+    print cur.execute("alter table variation_genename_4ann drop column variation_id2")
+    conn.commit()
+
+
+
+6) Creation of ensemble annotated mind tables:
+
+This results in a tables with added annotated fields per patient : 
+Gene name , clinical significance and other fields.
+
+
+
+table contents :
+
+(Patients columns above…)
+ gcobbn4655            | text    |
+ gcobbn4656           | text    |
+ numid                 | text    |
+ chr                   | text    |
+ rsid                  | text    |
+ coordinate            | text    |
+ variation_id          | integer |
+ source_id             | integer |
+ rs_name               | text    |
+ validation_status     | text    |
+ ancestral_allele      | text    |
+ flipped               | boolean |
+ class_attrib_id       | integer |
+ somatic               | boolean |
+ minor_allele          | text    |
+ minor_allele_freq     | real    |
+ minor_allele_count    | integer |
+ clinical_significance | text    |
+ evidence              | text    |
+ gene_name             | text    |
+
+Code snippet : 
+
+parser.add_argument("-mind_a_ensembl",help=" annotate mind table with ensemble ",metavar='mind_a_ensembl')
+
+def join_mind_table_with_anno_ensembl_snp():
+    if not check_table_exists("variation_genename_4ann"):
+        print "no snp annotated table present"
+        sys.exit()
+
+    #new annotation table to be created
+    mind2bann_ensembl = args.mind_a_ensembl+"_en"
+
+    check_overwrite_table(mind2bann_ensembl)
+
+    #  inner join the ensembl table with the chranntable
+    print(cur.mogrify("CREATE TABLE %s AS SELECT * FROM %s inner join variation_genename_4ann on (%s.rsid = variation_genename_4ann.rs_name)",(AsIs(mind2bann_ensembl),AsIs(args.mind_a_ensembl),AsIs(args.mind_a_ensembl),)))
+
+    cur.execute("CREATE TABLE %s AS SELECT * FROM %s inner join variation_genename_4ann on (%s.rsid = variation_genename_4ann.rs_name)",(AsIs(mind2bann_ensembl),AsIs(args.mind_a_ensembl),AsIs(args.mind_a_ensembl),))
+    conn.commit()
+
+7) Sort mind tables by gene and position: 
+
+Annotated tables are sorted by gene name and position.
+
+Code snippet:
+
+parser.add_argument("-mind_sort_by_gene_and_pos",help='annotated table to be sorted by gene name and position',metavar='SORT_TABLES')
+
+def mind_sort_by_gene_and_pos(anntable2):
+
+    sortedtable2 = args.mind_sort_by_gene_and_pos+"sorted_by_gene_pos"
+    check_overwrite_table(sortedtable2)
+    cur.mogrify("create table %s as select * from %s order by \"coordinate\" , \"gene_name\" ;",(AsIs(sortedtable2),AsIs(anntable2),))
+    cur.execute("create table %s as select * from %s order by \"coordinate\" , \"gene_name\" ;",(AsIs(sortedtable2),AsIs(anntable2),))
+    conn.commit()
+
+
+8) Creation of UCSC “amino acid changing rsids” asnp_s_ch_filtered_final table
+
+This results in a table containing rsids , allels and codons and peptides for those allels by rsid . the table was filtered to retain only non duplicate , amino-acid coding snps.
+
+
+from snp141CodingDbSnp.txt source file
+from http://hgdownload.cse.ucsc.edu/goldenpath/hg19/database/snp141CodingDbSnp.txt.gz
+
+table contents :
+
+CREATE TABLE asnp_s_ch_filtered_final (
+    bin smallint,
+    chrom character varying(255),
+    "chromStart" integer,
+    "chromEnd" integer,
+    name text,
+    transcript character varying(255),
+    frame character varying(255),
+    "alleleCount" integer,
+    "funcCodes" text,
+    alleles text,
+    codons text,
+    peptides text,
+    peptide1 character(1),
+    peptide2 character(2),
+    peptide3 character(3)
+);
+
+code snippet :
+
+parser.add_argument("-ucsc_snpf",help='a ucsc file to load into snp annotated table',metavar='UCSC_FILE')
+parser.add_argument("-ucsc_snpt",help='destination table name for the snp annotated table',metavar='UCSC_PSQL_TABLE')
+
+
+    if args.ucsc_snpt and args.ucsc_snpf:
+        #snp anno. vars
+        snptable = args.ucsc_snpt
+        snptablena = args.ucsc_snpt+"na"
+        snptablenasma = args.ucsc_snpt+"sma"
+        snptable_s_c = args.ucsc_snpt+"_s_c"
+        snptable_s_ch_filtered_final = args.ucsc_snpt+"_s_ch_filtered_final"
+        snpfile = args.ucsc_snpf
+        fsnpfile = open(snpfile)
+
+def insert_snp_table():
+
+
+    cur.execute("CREATE TABLE \"%s\" (\"bin\" smallint NOT NULL,\"chrom\" varchar(255) NOT NULL,\"chromStart\" int  NOT NULL,\"chromEnd\" int  NOT NULL, \"name\" text NOT NULL,\"transcript\" varchar(255) NOT NULL,\"frame\" varchar(255) NOT NULL,\"alleleCount\" int NOT NULL,\"funcCodes\" text NOT NULL,\"alleles\" text NOT NULL,\"codons\" text NOT NULL,\"peptides\" text NOT NULL)",(AsIs(snptable),))
+
+    cur.copy_from(fsnpfile, snptable)
+
+    cur.execute("CREATE TABLE %s AS SELECT * FROM \"%s\" WHERE frame NOT LIKE \'n/a\'",(AsIs(snptablena),AsIs(snptable),))
+
+    cur.execute("CREATE TABLE %s AS SELECT * FROM %s WITH NO DATA",(AsIs(snptablenasma),AsIs(snptablena),))
+
+    cur.execute("ALTER TABLE %s ADD COLUMN peptide1 char(1), add column peptide2 char(2), add column peptide3 char(3)",(AsIs(snptablenasma),))
+
+    cur.execute("INSERT INTO %s SELECT * FROM ( SELECT * , SUBSTR(peptides,1 , 1) AS peptide1 , SUBSTR(peptides,3 , 1) AS peptide2 , SUBSTR(peptides,5 , 1) AS peptide3 FROM %s ) AS ptt WHERE (peptide1!=peptide2) OR (peptide1!=peptide3) OR (peptide2!=peptide3)",(AsIs(snptablenasma),AsIs(snptablena),))
+
+    cur.execute("CREATE TABLE %s AS SELECT * FROM %s ORDER BY codons",(AsIs(snptable_s_c),AsIs(snptablenasma),))
+
+    cur.execute("CREATE TABLE %s AS SELECT * FROM %s ORDER BY \"chromStart\"",(AsIs(snptable_s_ch_filtered_final),AsIs(snptable_s_c),))
+    conn.commit()
+
+
+9) Splitting the above table into individual and opposite alleles
+
+- Add a copy of  annotated “amino changing rsids table with 6 additional fields :
+Splitting alleles field into allele1,2,3 fields.
+
+-Add opposite alleles fields - allele 1,2,3, this is done by simple conversion table in the code.
+
+Table description: 
+
+pydb=> \d asnp_s_ch_filtered_final_spltal
+  Table "public.asnp_s_ch_filtered_final_sp
+   Column    |          Type          | Mod
+-------------+------------------------+----
+ bin         | smallint               |
+ chrom       | character varying(255) |
+ chromStart  | integer                |
+ chromEnd    | integer                |
+ name        | text                   |
+ transcript  | character varying(255) |
+ frame       | character varying(255) |
+ alleleCount | integer                |
+ funcCodes   | text                   |
+ alleles     | text                   |
+ codons      | text                   |
+ peptides    | text                   |
+ peptide1    | character(1)           |
+ peptide2    | character(2)           |
+ peptide3    | character(3)           |
+ allele1     | text                   |
+ allele2     | text                   |
+ allele3     | text                   |
+ opallele1   | text                   |
+ opallele2   | text                   |
+ opallele3   | text                   |
+
+Code snippet:
+
+parser.add_argument("-mind_prepare_ucsc_4_mind_annotations",help='preprocess ucsc table for mind ann',metavar='mind_prepare_ucsc_4_mind_annotations')
+
+def uscs_split_allels(ucsc_table):
+
+    global ucsc_table_split_alleles
+    ucsc_table_split_alleles=ucsc_table+"_spltal"
+    check_overwrite_table(ucsc_table_split_alleles)
+
+    print (cur.mogrify("create table %s as SELECT *  FROM ( SELECT * , SUBSTR(alleles,1 , 1) AS allele1 , SUBSTR(alleles,3 , 1) AS allele2 , SUBSTR(alleles,5 , 1) AS allele3 FROM %s) as t;",(AsIs(ucsc_table_split_alleles),AsIs(ucsc_table),)))
+    cur.execute("create table %s as SELECT *  FROM ( SELECT * , SUBSTR(alleles,1 , 1) AS allele1 , SUBSTR(alleles,3 , 1) AS allele2 , SUBSTR(alleles,5 , 1) AS allele3 FROM %s) as t;",(AsIs(ucsc_table_split_alleles),AsIs(ucsc_table),))
+    conn.commit()
+
+
+def ucsc_add_op_allele_strand(ucsc_table2):
+
+    print (cur.mogrify("ALTER TABLE %s ADD COLUMN opallele1 text, add column opallele2 text, add column opallele3 text",(AsIs(ucsc_table2),)))
+    cur.execute("ALTER TABLE %s ADD COLUMN opallele1 text, add column opallele2 text, add column opallele3 text",(AsIs(ucsc_table2),))
+    conn.commit()
+
+    print (cur.mogrify("update %s set opallele1 = (case when (allele1='G') then  'C' when (allele1='C') then  'G' when (allele1='A') then  'T' when (allele1='T') then  'A' end),opallele2 = (case when (allele2='G') then  'C' when (allele2='C') then  'G' when (allele2='A') then  'T' when (allele2='T') then  'A' end),opallele3 = (case when (allele3='G') then  'C' when (allele3='C') then  'G' when (allele3='A') then  'T' when (allele3='T') then  'A'  end)",(AsIs(ucsc_table2),)))
+    cur.execute("update %s set opallele1 = (case when (allele1='G') then  'C' when (allele1='C') then  'G' when (allele1='A') then  'T' when (allele1='T') then  'A' end),opallele2 = (case when (allele2='G') then  'C' when (allele2='C') then  'G' when (allele2='A') then  'T' when (allele2='T') then  'A' end),opallele3 = (case when (allele3='G') then  'C' when (allele3='C') then  'G' when (allele3='A') then  'T' when (allele3='T') then  'A'  end)",(AsIs(ucsc_table2),))
+    conn.commit()
+
+
+
+
+10) Join mind data tables with annotated “amino changing rsids table” :
+
+ Join mind data tables with a tables containing alleles and codons and peptides for those alleles by rsid
+
+Method:
+Inner join between the mind data and annotated rsid table on rsid field.
+
+Code snippet : 
+
+parser.add_argument("-join_mind_with_with_anno_ucsc_snp",help=" annotate mind table with peptide data",metavar='join_mind_with_with_anno_ucsc_snp')
+
+def join_mind_with_with_anno_ucsc_snp():
+
+    cur.execute("SELECT tablename FROM pg_catalog.pg_tables where tableowner='pyuser' and tablename like '%filtered_final_spltal'")
+    snpname=str(cur.fetchall())
+    if not snpname:
+        print "no snp annotated table present"
+        sys.exit()
+    else:
+        annsnp = snpname[3:-4]
+        annsnptemp = annsnp+"temp"
+
+    mind2bann = args.join_mind_with_with_anno_ucsc_snp+"ann"
+    #check overwrite or stop
+    check_overwrite_table(mind2bann)
+    # check_overwrite_table(annsnptemp)
+    if not check_table_exists(annsnptemp):
+        #first copy the snp table without the chrom column
+        cur.execute("create table %s as select * from %s ",(AsIs(annsnptemp),AsIs(annsnp)))
+        conn.commit()
+            cur.execute("alter table %s drop column chrom", (AsIs(annsnptemp),))
+        conn.commit()
+    # then inner join the annsnp table with the chrtable
+    cur.execute("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.name =%s.rsid)",(AsIs(mind2bann),AsIs(annsnptemp),AsIs(args.join_mind_with_with_anno_ucsc_snp),AsIs(annsnptemp),AsIs(args.join_mind_with_with_anno_ucsc_snp),))
+    conn.commit()
+
+11) Export & transform the processed table to a machine learning ready dataset.
+
+This will transform the mind datasets tables into a machine learning ready dataset and export it as a csv file.
+
+Exported file name :  'exported_mind.csv’
+
+Transformation process explanation: 
+
+1) First create a dataset header row: alphabetically ordered gene and rsids list , extracted from the mind table.
+
+Then for each patient : 
+
+2) Write the first patients name.
+3) Write patients diagnosis.
+4) Write a line matching a patient’s rsids alleles with peptides on -+ strand.
+ 
+How Dataset consistency is maintained : (genes to peptide values and patients to diagnosis value)
+Steps 2),3) are referencing the same “hg2” patient name value.
+Steps 1),4) are using the same order by and group by gene_name method.
+
+Code snippet : 
+
+parser.add_argument("-mind_export_ml",help='export a ml dataset of mind data',metavar='mind_export_ml')
+
+def mind_export_ml():
+
+   #get diagnosis, patient name,peptides string,gene in single line and string_agg it , output to file , for each of the four tables, for each patient
+
+   rstable = args.mind_export_ml.replace("_ensorted_by_gene_posann","")
+
+
+table_mind_export_ml_header_rsids = args.mind_export_ml + "_header_rsids"
+
+force_check_overwrite_table(table_mind_export_ml_header_rsids)
+
+# create dist header for ml with rsids here .....
+1)
+cur.execute("CREATE TABLE %s AS select gene_name , string_agg(rsid,' ' order by rsid) as rsids from (select distinct gene_name,rsid from %s) as t1 group by gene_name order by gene_name; ",(AsIs(table_mind_export_ml_header_rsids),AsIs(args.mind_export_ml_with_drugs),))
+conn.commit()
+
+
+   widgets = ['processing query -> '+table1000g+' :', Percentage(), ' ', Bar(marker=RotatingMarker()),' ', ETA(), ' ', FileTransferSpeed()]
+
+   pbar = ProgressBar(widgets=widgets, maxval=10000000).start()
+
+   with open('exported_mind.txt',"a") as export_file:
+
+       export_file.write("'patient','diagnosis',")
+       cur.execute("select gene_name||' | '||rsids from %s_dist_header ;",(AsIs(args.mind_export_ml),))
+       for i2 in cur.fetchall():
+               # export_file.write(str(i2))
+               export_file.write(re.sub('(\()|(\[)|(\])|(\))','',str(i2)))
+       export_file.write("\n")
+2)
+       cur.execute("select column_name from information_schema.columns where table_name = \'%s\' and ( column_name ~ \'^sz.*[1-9]\' or column_name ~ \'^cg.*[1-9]\' or column_name ~ \'^el.*[1-9]\' or column_name ~ \'^gc.*[1-9]\' );",(AsIs(args.mind_export_ml),))
+
+       for hg2 in pbar(query2list()):
+
+
+           export_file.write('\''+hg2+'\'')
+           export_file.write(',')
+
+           # # mind_data_4_rs_ensorted_by_gene_posann
+3)
+           cur.execute("select %s from %s where idnum='1' limit 1;",(AsIs(hg2),AsIs(rstable),))
+
+           for i2 in cur.fetchall():
+               # export_file.write(str(i2))
+               export_file.write(re.sub('(\()|(\[)|(\])|(\))','',str(i2)))
+4)
+           cur.execute("select peptid_group from (select gene_name , string_agg(rsid,',' order by rsid) as rsids, string_agg(peptid_group,'') as peptid_group from (select distinct gene_name,rsid,mytable.t1||mytable.t2||mytable.t3  as peptid_group from (select gene_name,rsid,%s, case when substr(%s,1,1) = allele1 then '+'||peptide1 when substr(%s,1,1) = allele2 then '+'||peptide2 when substr(%s,1,1) = allele3 then '+'||peptide3 when substr(%s,1,1) = opallele1 then '-'||peptide1 when substr(%s,1,1) = opallele2 then '-'||peptide2 when substr(%s,1,1) = opallele3 then '-'||peptide3 end as t1 , case when substr(%s,3,1) = allele1 then '+'||peptide1 when substr(%s,3,1) = allele2 then '+'||peptide2 when substr(%s,3,1) = allele3 then '+'||peptide3 when substr(%s,3,1) = opallele1 then '-'||peptide1 when substr(%s,3,1) = opallele2 then '-'||peptide2 when substr(%s,3,1) = opallele3 then '-'||peptide3 end as t2 ,case when substr(%s,5,1) = '' then '' when substr(%s,5,1) = allele1 then '+'||peptide1 when substr(%s,5,1) = allele2 then '+'||peptide2 when substr(%s,5,1) = allele3 then '+'||peptide3 when substr(%s,5,1) = opallele1 then '-'||peptide1 when substr(%s,5,1) = opallele2 then '-'||peptide2 when substr(%s,5,1) = opallele3 then '-'||peptide3 end as t3 from  %s) as mytable )as t1 group by t1.gene_name order by t1.gene_name) as t5;",(AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(args.mind_export_ml),))
+
+           for i2 in cur.fetchall():
+           
+              export_file.write(re.sub('(\()|(\[)|(\])|(\))','',str(i2)))
+
+           export_file.write("\n")
+
+
+
+
+
+
+
+
+12) Load_DBIdb_tables_preprocess 
+
+This uploads the DGidb schema and tables to our database, DGidb has tables connecting specific genes with drug treatments.
+
+From : 
+http://dgidb.genome.wustl.edu/downloads
+
+Schema contents :
+Drug to gene and gene to gene many to many interactions.
+
+Code snippet: 
+
+parser.add_argument("-load_DBIdb_tables_preprocess",help='list how to load_DBIdb_tables_preprocess',metavar='load_DBIdb_tables_preprocess')
+
+        print "DBidb load whole database preprocess how to: "
+        print "D:\DGIdb>D:\postgresql9.4\bin\psql.exe -U pyuser -d pydb -f DGIdb_schema.sql"
+        print  "D:\DGIdb>D:\postgresql9.4\bin\psql.exe -U pyuser -d pydb -f DGIdb_dump.sql"
+
+
+13) Create drugs to genes table:
+
+This will create a single table containing  gene and drug names from the whole DGidb schema.
+
+Method: 
+Create drug name , drug id table
+Create gene_name , gene id table
+Join them on interaction_id field
+Add drug categories field for additional drug meta data
+Finally creating “gene_name_and_drug_name_and_category_aggcat_aggdrug” table.
+
+Code snippet : 
+
+parser.add_argument("-create_drugs_genes_table",help='create_drugs_genes_table',action="store_true")
+
+#add genes to drugs names here to a new table named drugs_genes_names;
+    if args.create_drugs_genes_table:
+
+        table_drug_name_and_claim_id = "drug_name_and_claim_id"
+        table_gene_name_and_claim_id = "gene_name_and_claim_id"
+        table_drug_claim_and_gene_name_1_intermediate = "drug_claim_and_gene_name_1_intermediate"
+        table_gene_name_and_drug_name = "gene_name_and_drug_name"
+        table_gene_name_and_drug_name_and_category = "gene_name_and_drug_name_and_category"
+        table_gene_name_and_drug_name_and_category_filtered = "gene_name_and_drug_name_and_category_filtered"
+        table_gene_name_and_drug_name_and_category_aggcat = "gene_name_and_drug_name_and_category_aggcat"
+        table_gene_name_and_drug_name_and_category_aggcat_aggdrug = "gene_name_and_drug_name_and_category_aggcat_aggdrug"
+
+        # join tables drugs and drug claim aliases - > creating name and drug claim id = drug_name_and_claim_id
+
+        check_overwrite_table(table_drug_name_and_claim_id)
+
+        cur.execute("CREATE TABLE %s AS SELECT name as drug_name,drug_claim_id FROM drugs inner join drug_claims_drugs on (drugs.id = drug_claims_drugs.drug_id)",(AsIs(table_drug_name_and_claim_id),))
+        conn.commit()
+
+        #join tables genes and gene_claims_genes -> creating name and gene_claim_id = gene_name_and_claim_id
+
+        check_overwrite_table(table_gene_name_and_claim_id)
+
+        cur.execute("CREATE TABLE %s AS SELECT name as gene_name,gene_claim_id FROM genes inner join gene_claims_genes on (genes.id = gene_claims_genes.gene_id)",(AsIs(table_gene_name_and_claim_id),))
+        conn.commit()
+
+        #join tables gene_name_and_claim_id and interaction_claims creating -> gene_name , gene_claim_id and drug_claim_id = drug_claim_and_gene_name_1_intermediate
+
+        check_overwrite_table(table_drug_claim_and_gene_name_1_intermediate)
+
+        cur.execute("CREATE TABLE %s AS SELECT gene_name,gene_name_and_claim_id.gene_claim_id,drug_claim_id FROM gene_name_and_claim_id inner join interaction_claims on (gene_name_and_claim_id.gene_claim_id = interaction_claims.gene_claim_id)",(AsIs(table_drug_claim_and_gene_name_1_intermediate),))
+        conn.commit()
+
+        #join tables  gene_name_and_claim_id and interaction_claims creating -> gene_name and drug_name = drug_name_gene_name
+
+        check_overwrite_table(table_gene_name_and_drug_name)
+
+        cur.execute("CREATE TABLE %s AS SELECT gene_name,drug_claim_and_gene_name_1_intermediate.gene_claim_id,drug_claim_and_gene_name_1_intermediate.drug_claim_id,drug_name FROM drug_claim_and_gene_name_1_intermediate inner join drug_name_and_claim_id on (drug_name_and_claim_id.drug_claim_id = drug_claim_and_gene_name_1_intermediate.drug_claim_id)",(AsIs(table_gene_name_and_drug_name),))
+        conn.commit()
+
+          #create gene_name_and_drug_name_and_category table join table_gene_name_and_drug_name with drug_claim_attributes = gene_name,drug_name,drug_claim_id, value,name
+
+        check_overwrite_table(table_gene_name_and_drug_name_and_category)
+
+        cur.execute("CREATE TABLE %s AS SELECT gene_name,gene_claim_id,gene_name_and_drug_name.drug_claim_id,drug_name,drug_claim_attributes.value ,drug_claim_attributes.name FROM drug_claim_attributes inner join gene_name_and_drug_name on (drug_claim_attributes.drug_claim_id = gene_name_and_drug_name.drug_claim_id)",(AsIs(table_gene_name_and_drug_name_and_category),))
+        conn.commit()
+
+#add column "drug_function_categories" string_agg of gene | drug categories...
+
+        check_overwrite_table(table_gene_name_and_drug_name_and_category_aggcat)
+
+        cur.execute("CREATE TABLE %s AS select gene_name,gene_claim_id,drug_name,drug_claim_id,string_agg(value,'/') as drug_categories from (select distinct gene_name,gene_claim_id,drug_name,drug_claim_id,name,value from gene_name_and_drug_name_and_category) as gdc where name='Drug Categories' group by drug_claim_id,gene_name,gene_claim_id,drug_name; ",(AsIs(table_gene_name_and_drug_name_and_category_aggcat),))
+        conn.commit()
+
+
+        check_overwrite_table(table_gene_name_and_drug_name_and_category_aggcat_aggdrug)
+
+        cur.execute("CREATE TABLE %s AS select gene_name,string_agg(dg1.drug_name2,' ') as drugs_info from (select distinct gene_name,drug_name||'{'||drug_categories||'}' as drug_name2 from gene_name_and_drug_name_and_category_aggcat) as dg1 group by gene_name;  ",(AsIs(table_gene_name_and_drug_name_and_category_aggcat_aggdrug),))
+        conn.commit()
+
+
+
+14) Filter mind table genes by genes with drug interaction
+
+Produces a table which has only genes with direct drug interaction listed in the DGidb database.
+
+Method: 
+ Inner join between the mind table and the table produced in the previous stage on the gene_name field.
+
+Added field: drugs_info
+The field contains Drug name, drug category, drug groups affiliation. 
+Example: 
+IBUPROFEN{anti-inflammatory agents/analgesics/non-narcotic/non-steroidal/cyclooxygenase inhibitors}
+
+Output table : “Mind_data_1_rs_ensorted_by_gene_posann_by_drug”
+
+Code snippet : 
+
+parser.add_argument("-filter_mind_table_by_drugs",help='filter_mind_table_by_drugs',metavar='filter_mind_table_by_drugs')
+
+    if args.filter_mind_table_by_drugs:
+#filter mind_data_1-4_rs_ensorted_by_gene_posann tables by : join with table gene_name_and_drug_name on gene_name
+        table_mind_data_n_rs_ensorted_by_gene_posann = args.filter_mind_table_by_drugs
+        table_mind_data_n_rs_ensorted_by_gene_posann_by_drug = args.filter_mind_table_by_drugs+"_by_drug"
+        table_gene_name_and_drug_name_and_category_aggcat_aggdrug2 = "gene_name_and_drug_name_and_category_aggcat_aggdrug2"
+
+
+        check_overwrite_table(table_gene_name_and_drug_name_and_category_aggcat_aggdrug2)
+
+        #copy and alter drugs table gene_name column to gene_name2 for easy joining
+
+        cur.execute("CREATE TABLE %s AS SELECT * FROM gene_name_and_drug_name_and_category_aggcat_aggdrug",(AsIs(table_gene_name_and_drug_name_and_category_aggcat_aggdrug2),))
+        conn.commit()
+
+        #copy and alter drugs table gene_name column to gene_name2 for easy joining
+
+        cur.execute("alter table  %s rename column gene_name to gene_name2",(AsIs(table_gene_name_and_drug_name_and_category_aggcat_aggdrug2),))
+        conn.commit()
+
+        check_overwrite_table(table_mind_data_n_rs_ensorted_by_gene_posann_by_drug)
+
+        # join mind table with table gene_name_and_drug_name on gene_name
+
+        cur.execute("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.gene_name2 = %s.gene_name)",(AsIs(table_mind_data_n_rs_ensorted_by_gene_posann_by_drug),AsIs(table_gene_name_and_drug_name_and_category_aggcat_aggdrug2),AsIs(table_mind_data_n_rs_ensorted_by_gene_posann),AsIs(table_gene_name_and_drug_name_and_category_aggcat_aggdrug2),AsIs(table_mind_data_n_rs_ensorted_by_gene_posann),))
+        conn.commit()
+
+
+
+
+15) Export & transform the processed table to a machine learning ready dataset with gene-drug info
+
+This will transform the table into a machine learning ready dataset and export it as a csv file. * This method also has drugs_info additional field.
+
+Exported file name : ‘exported_mind_by_drugs.csv’
+
+
+Transformation process explanation: 
+
+1) First create a dataset header row: alphabetically ordered gene and rsids list , extracted from the mind table. * This version also has drugs_info field.
+
+Then for each patient : 
+
+2) Write the first patients name.
+3) Write patients diagnosis.
+4) Write a line matching a patient’s rsids alleles with peptides on -+ strand.
+ 
+How Dataset consistency is maintained : (genes to peptide values and patients to diagnosis value)
+Steps 2),3) are referencing the same “hg2” patient name value.
+Steps 1),4) are using the same order by and group by gene_name method.
+
+Code snippet : 
+
+parser.add_argument("-mind_export_ml_with_drugs",help='export a ml dataset of mind data with drug fields',metavar='mind_export_ml_with_drugs')
+
+mind_export_ml_with_drugs():
+
+        table_mind_export_ml_with_drugs_header_rsids = args.mind_export_ml_with_drugs + "_header_rsids"
+
+        table_mind_export_ml_with_drugs_header_drugs = args.mind_export_ml_with_drugs + "_h_d"
+
+        table_mind_export_ml_with_drugs_header_rsids_and_drugs = args.mind_export_ml_with_drugs + "_h_r_d"
+
+        rstable = args.mind_export_ml_with_drugs.replace("_ensorted_by_gene_posann_by_drug_alt","")
+        rstable = args.mind_export_ml_with_drugs.replace("_ensorted_by_gene_posann_by_drug","")
+
+        force_check_overwrite_table(table_mind_export_ml_with_drugs_header_rsids)
+
+        # create dist header for ml with rsids here .....
+
+ 
+   1)
+    
+cur.execute("CREATE TABLE %s AS select gene_name , string_agg(rsid,' ' order by rsid) as rsids from (select distinct gene_name,rsid from %s) as t1 group by t1.gene_name order by t1.gene_name; ",(AsIs(table_mind_export_ml_with_drugs_header_rsids),AsIs(args.mind_export_ml_with_drugs),))
+        conn.commit()
+
+        force_check_overwrite_table(table_mind_export_ml_with_drugs_header_drugs)
+
+        # create dist header with drugs for ml here .....
+
+        cur.execute("CREATE TABLE %s AS select gene_name as gene_name2,string_agg(drugs_info,' ' order by drugs_info) as gene_drugs from (select distinct gene_name,drugs_info from %s) as t1 group by t1.gene_name order by t1.gene_name; ",(AsIs(table_mind_export_ml_with_drugs_header_drugs),AsIs(args.mind_export_ml_with_drugs),))
+        conn.commit()
+        force_check_overwrite_table(table_mind_export_ml_with_drugs_header_rsids_and_drugs)
+
+        #join the previouse tables into one final header table
+
+        cur.execute("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.gene_name2 = %s.gene_name)",(AsIs(table_mind_export_ml_with_drugs_header_rsids_and_drugs),AsIs(table_mind_export_ml_with_drugs_header_rsids),AsIs(table_mind_export_ml_with_drugs_header_drugs),AsIs(table_mind_export_ml_with_drugs_header_drugs),AsIs(table_mind_export_ml_with_drugs_header_rsids),))
+        conn.commit()
+
+        widgets = ['processing query -> '+table1000g+' :', Percentage(), ' ', Bar(marker=RotatingMarker()),' ', ETA(), ' ', FileTransferSpeed()]
+
+        pbar = ProgressBar(widgets=widgets, maxval=10000000).start()
+
+        with open('exported_mind_by_drugs.csv',"a") as export_file:
+
+            #all 4 files are appended
+            #I delete the header line manually for the 3 last files
+            # this is useful for quality control
+
+
+             #add |drugs_info here after "||rsids"
+            export_file.write("'patient','diagnosis',")
+2)
+            cur.execute("select gene_name||' | '||rsids||' | '||gene_drugs from %s order by gene_name;;",(AsIs(table_mind_export_ml_with_drugs_header_rsids_and_drugs),))
+
+            for i2 in cur.fetchall():
+
+            #output this line with only commas between columns !
+
+                    i2_filter1 = re.sub('(\()|(\[)|(\])|(\))','',str(i2))
+
+                    i2_filter2 = re.sub(',','',i2_filter1)
+
+                    export_file.write(i2_filter2)
+
+                    export_file.write(',')
+
+            export_file.write("\n")
+
+            cur.execute("select column_name from information_schema.columns where table_name = \'%s\' and ( column_name ~ \'^sz.*[1-9]\' or column_name ~ \'^cg.*[1-9]\' or column_name ~ \'^el.*[1-9]\' or column_name ~ \'^gc.*[1-9]\' );",(AsIs(args.mind_export_ml_with_drugs),))
+
+            for hg2 in pbar(query2list()):
+
+                export_file.write('\''+hg2+'\'')
+                export_file.write(',')
+3)
+                #add correct diagnosis for each patient , idnum=1 is the row with diagnosis for each patient column
+                cur.execute("select %s from %s where idnum='1' limit 1;",(AsIs(hg2),AsIs(rstable),))
+
+                for i2 in cur.fetchall():
+                    export_file.write(re.sub('(\()|(\[)|(\])|(\))','',str(i2)))
+4)
+                cur.execute("select peptid_group from (select gene_name , string_agg(rsid,',' order by rsid) as rsids, string_agg(peptid_group,'') as peptid_group from (select distinct gene_name,rsid,mytable.t1||mytable.t2||mytable.t3  as peptid_group from (select gene_name,rsid,%s, case when substr(%s,1,1) = allele1 then '+'||peptide1 when substr(%s,1,1) = allele2 then '+'||peptide2 when substr(%s,1,1) = allele3 then '+'||peptide3 when substr(%s,1,1) = opallele1 then '-'||peptide1 when substr(%s,1,1) = opallele2 then '-'||peptide2 when substr(%s,1,1) = opallele3 then '-'||peptide3 end as t1 , case when substr(%s,3,1) = allele1 then '+'||peptide1 when substr(%s,3,1) = allele2 then '+'||peptide2 when substr(%s,3,1) = allele3 then '+'||peptide3 when substr(%s,3,1) = opallele1 then '-'||peptide1 when substr(%s,3,1) = opallele2 then '-'||peptide2 when substr(%s,3,1) = opallele3 then '-'||peptide3 end as t2 ,case when substr(%s,5,1) = '' then '' when substr(%s,5,1) = allele1 then '+'||peptide1 when substr(%s,5,1) = allele2 then '+'||peptide2 when substr(%s,5,1) = allele3 then '+'||peptide3 when substr(%s,5,1) = opallele1 then '-'||peptide1 when substr(%s,5,1) = opallele2 then '-'||peptide2 when substr(%s,5,1) = opallele3 then '-'||peptide3 end as t3 from  %s) as mytable )as t1 group by t1.gene_name order by t1.gene_name) as t5;",(AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(hg2),AsIs(args.mind_export_ml_with_drugs),))
+
+                for i2 in cur.fetchall():
+                   export_file.write(re.sub('(\()|(\[)|(\])|(\))','',str(i2)))
+
+                export_file.write("\n")
+
+
+
+
+16) Create drugs to alternative genes table
+
+This will create a single table containing  alternative gene and drug names from the whole DGidb schema. Alternative genes were extracted from gene_gene_interactions table, and are genes with documented interaction with the original gene.
+
+Method: 
+Create drug name , drug id table
+Create gene_name , gene id table
+* The difference here was that we inserted the alternative (interacting) gene name field with the original gene id field, this gene_name field will be used in the subsequent filter method to select those genes from the mind data.
+Join them on interaction_id field
+Add drug categories field for additional drug meta data
+Finally creating “gene_name_and_drug_name_and_category_aggcat_aggdrug” table.
+
+Code snippet : 
+
+parser.add_argument("-create_drugs_genes_table_extended_gene_interactions",help='create_drugs_genes_table_extended_gene_interactions',action="store_true")
+
+    if args.create_drugs_genes_table_extended_gene_interactions:
+        #create extended genes tables
+        ##we want the gene_name to be derived from interactive_gene_id and the grnr_claim_id from gene_name_id
+
+        table_drug_name_and_claim_id_alt = "drug_name_and_claim_id_alt"
+        table_gene_name_alt = "gene_name_alt"
+        table_gene_name_and_interactive_gene_name_alt = "gene_name_and_interactive_gene_name_alt"
+        table_gene_name_and_claim_id_alt = "gene_name_and_claim_id_alt"
+        table_drug_claim_and_gene_name_1_intermediate_alt = "drug_claim_and_gene_name_1_intermediate_alt"
+        table_gene_name_and_drug_name_alt = "gene_name_and_drug_name_alt"
+        table_gene_name_and_drug_name_and_category_alt = "gene_name_and_drug_name_and_category_alt"
+        table_gene_name_and_drug_name_and_category_filtered_alt = "gene_name_and_drug_name_and_category_filtered_alt"
+        table_gene_name_and_drug_name_and_category_aggcat_alt= "gene_name_and_drug_name_and_category_aggcat_alt"
+        table_gene_and_drug_name_category_agg_cat_drug_alt = "gene_and_drug_name_category_agg_cat_drug_alt"
+        table_gene_and_drug_name_category_agg_cat_drug_int_alt = "gene_and_drug_name_category_agg_cat_drug_int_alt"
+
+        # join tables drugs and drug claim aliases - > creating name and drug claim id = drug_name_and_claim_id_alt
+
+        check_overwrite_table(table_drug_name_and_claim_id_alt)
+        print(cur.mogrify("CREATE TABLE %s AS SELECT name as drug_name,drug_claim_id FROM drugs inner join drug_claims_drugs on (drugs.id = drug_claims_drugs.drug_id)",(AsIs(table_drug_name_and_claim_id_alt),)))
+        cur.execute("CREATE TABLE %s AS SELECT name as drug_name,drug_claim_id FROM drugs inner join drug_claims_drugs on (drugs.id = drug_claims_drugs.drug_id)",(AsIs(table_drug_name_and_claim_id_alt),))
+        conn.commit()
+
+        #create join table of alt genes and their names gene_id,gene_id_alt,name.
+
+        check_overwrite_table(table_gene_name_alt)
+        print(cur.mogrify("CREATE TABLE %s AS SELECT name as gene_name,gene_id,interacting_gene_id as gene_id_alt FROM genes inner join gene_gene_interaction_claims on (genes.id = gene_gene_interaction_claims.interacting_gene_id)",(AsIs(table_gene_name_alt),)))
+        cur.execute("CREATE TABLE %s AS SELECT name as gene_name,gene_id,interacting_gene_id as gene_id_alt FROM genes inner join gene_gene_interaction_claims on (genes.id = gene_gene_interaction_claims.interacting_gene_id)",(AsIs(table_gene_name_alt),))
+        conn.commit()
+
+        #create join table of alt genes and their names gene_id,gene_id_alt,name.
+
+        check_overwrite_table(table_gene_name_and_interactive_gene_name_alt)
+        print(cur.mogrify("CREATE TABLE %s AS SELECT name as interactive_gene_name,gene_name,gene_id,gene_id_alt as gene_id_alt FROM genes inner join gene_name_alt on (genes.id = gene_name_alt.gene_id)",(AsIs(table_gene_name_and_interactive_gene_name_alt),)))
+        cur.execute("CREATE TABLE %s AS SELECT name as interactive_gene_name,gene_name,gene_id,gene_id_alt as gene_id_alt FROM genes inner join gene_name_alt on (genes.id = gene_name_alt.gene_id)",(AsIs(table_gene_name_and_interactive_gene_name_alt),))
+        conn.commit()
+
+        #join tables genes and gene_claims_genes -> creating name and gene_claim_id = gene_name_and_claim_id_alt
+
+        check_overwrite_table(table_gene_name_and_claim_id_alt)
+        print(cur.mogrify("CREATE TABLE %s AS SELECT gene_id_alt,gene_name,gene_claim_id FROM gene_name_alt inner join gene_claims_genes on (gene_name_alt.gene_id = gene_claims_genes.gene_id)",(AsIs(table_gene_name_and_claim_id_alt),)))
+        cur.execute("CREATE TABLE %s AS SELECT gene_id_alt,gene_name,gene_claim_id FROM gene_name_alt inner join gene_claims_genes on (gene_name_alt.gene_id = gene_claims_genes.gene_id)",(AsIs(table_gene_name_and_claim_id_alt),))
+        conn.commit()
+
+        #join tables gene_name_and_claim_id_alt and interaction_claims creating -> gene_name , gene_claim_id and drug_claim_id = drug_claim_and_gene_name_1_intermediate_alt
+
+        check_overwrite_table(table_drug_claim_and_gene_name_1_intermediate_alt)
+        print(cur.mogrify("CREATE TABLE %s AS SELECT gene_id_alt,gene_name,gene_name_and_claim_id_alt.gene_claim_id,drug_claim_id FROM gene_name_and_claim_id_alt inner join interaction_claims on (gene_name_and_claim_id_alt.gene_claim_id = interaction_claims.gene_claim_id)",(AsIs(table_drug_claim_and_gene_name_1_intermediate_alt),)))
+        cur.execute("CREATE TABLE %s AS SELECT gene_id_alt,gene_name,gene_name_and_claim_id_alt.gene_claim_id,drug_claim_id FROM gene_name_and_claim_id_alt inner join interaction_claims on (gene_name_and_claim_id_alt.gene_claim_id = interaction_claims.gene_claim_id)",(AsIs(table_drug_claim_and_gene_name_1_intermediate_alt),))
+        conn.commit()
+
+        #join tables  gene_name_and_claim_id_alt and interaction_claims creating -> gene_name and drug_name = drug_name_gene_name
+
+        check_overwrite_table(table_gene_name_and_drug_name_alt)
+        print(cur.mogrify("CREATE TABLE %s AS SELECT gene_id_alt,gene_name,drug_claim_and_gene_name_1_intermediate_alt.gene_claim_id,drug_claim_and_gene_name_1_intermediate_alt.drug_claim_id,drug_name FROM drug_claim_and_gene_name_1_intermediate_alt inner join drug_name_and_claim_id_alt on (drug_name_and_claim_id_alt.drug_claim_id = drug_claim_and_gene_name_1_intermediate_alt.drug_claim_id)",(AsIs(table_gene_name_and_drug_name_alt),)))
+        cur.execute("CREATE TABLE %s AS SELECT gene_id_alt,gene_name,drug_claim_and_gene_name_1_intermediate_alt.gene_claim_id,drug_claim_and_gene_name_1_intermediate_alt.drug_claim_id,drug_name FROM drug_claim_and_gene_name_1_intermediate_alt inner join drug_name_and_claim_id_alt on (drug_name_and_claim_id_alt.drug_claim_id = drug_claim_and_gene_name_1_intermediate_alt.drug_claim_id)",(AsIs(table_gene_name_and_drug_name_alt),))
+        conn.commit()
+
+          #create gene_name_and_drug_name_and_category_alt table join table_gene_name_and_drug_name_alt with drug_claim_attributes = gene_name,drug_name,drug_claim_id, value,name
+
+        check_overwrite_table(table_gene_name_and_drug_name_and_category_alt)
+
+        print(cur.mogrify("CREATE TABLE %s AS SELECT gene_id_alt,gene_name,gene_claim_id,gene_name_and_drug_name_alt.drug_claim_id,drug_name,drug_claim_attributes.value ,drug_claim_attributes.name FROM drug_claim_attributes inner join gene_name_and_drug_name_alt on (drug_claim_attributes.drug_claim_id = gene_name_and_drug_name_alt.drug_claim_id)",(AsIs(table_gene_name_and_drug_name_and_category_alt),)))
+        cur.execute("CREATE TABLE %s AS SELECT gene_id_alt,gene_name,gene_claim_id,gene_name_and_drug_name_alt.drug_claim_id,drug_name,drug_claim_attributes.value ,drug_claim_attributes.name FROM drug_claim_attributes inner join gene_name_and_drug_name_alt on (drug_claim_attributes.drug_claim_id = gene_name_and_drug_name_alt.drug_claim_id)",(AsIs(table_gene_name_and_drug_name_and_category_alt),))
+        conn.commit()
+
+#add column "drug_function_categories" string_agg of gene | drug categories...
+
+        check_overwrite_table(table_gene_name_and_drug_name_and_category_aggcat_alt)
+
+        print(cur.mogrify("CREATE TABLE %s AS select gene_name,gene_claim_id,drug_name,drug_claim_id,string_agg(value,'/') as drug_categories from (select distinct gene_name,gene_claim_id,drug_name,drug_claim_id,name,value from gene_name_and_drug_name_and_category_alt) as gdc where name='Drug Categories' group by drug_claim_id,gene_name,gene_claim_id,drug_name; ",(AsIs(table_gene_name_and_drug_name_and_category_aggcat_alt),)))
+        cur.execute("CREATE TABLE %s AS select gene_name,gene_claim_id,drug_name,drug_claim_id,string_agg(value,'/') as drug_categories from (select distinct gene_name,gene_claim_id,drug_name,drug_claim_id,name,value from gene_name_and_drug_name_and_category_alt) as gdc where name='Drug Categories' group by drug_claim_id,gene_name,gene_claim_id,drug_name; ",(AsIs(table_gene_name_and_drug_name_and_category_aggcat_alt),))
+        conn.commit()
+
+
+        check_overwrite_table(table_gene_and_drug_name_category_agg_cat_drug_alt)
+
+        print(cur.mogrify("CREATE TABLE %s AS select gene_name,string_agg(dg1.drug_name2,' ') as drugs_info from (select distinct gene_name,drug_name||'{'||drug_categories||'}' as drug_name2 from gene_name_and_drug_name_and_category_aggcat_alt) as dg1 group by gene_name;  ", (AsIs(table_gene_and_drug_name_category_agg_cat_drug_alt),)))
+        cur.execute("CREATE TABLE %s AS select gene_name,string_agg(dg1.drug_name2,' ') as drugs_info from (select distinct gene_name,drug_name||'{'||drug_categories||'}' as drug_name2 from gene_name_and_drug_name_and_category_aggcat_alt) as dg1 group by gene_name;  ", (AsIs(table_gene_and_drug_name_category_agg_cat_drug_alt),))
+        conn.commit()
+
+        # add gene_name_and_interactive_gene_name_alt annotation with :  | interactive_gene_name
+
+        check_overwrite_table(table_gene_and_drug_name_category_agg_cat_drug_int_alt)
+        print(cur.mogrify(
+            "CREATE TABLE %s AS SELECT gene_and_drug_name_category_agg_cat_drug_alt.gene_name ,drugs_info, interactive_gene_name FROM gene_and_drug_name_category_agg_cat_drug_alt inner join gene_name_and_interactive_gene_name_alt on (gene_and_drug_name_category_agg_cat_drug_alt.gene_name = gene_name_and_interactive_gene_name_alt.gene_name)",
+            (AsIs(table_gene_and_drug_name_category_agg_cat_drug_int_alt),)))
+        cur.execute(
+            "CREATE TABLE %s AS SELECT gene_and_drug_name_category_agg_cat_drug_alt.gene_name ,drugs_info, interactive_gene_name FROM gene_and_drug_name_category_agg_cat_drug_alt inner join gene_name_and_interactive_gene_name_alt on (gene_and_drug_name_category_agg_cat_drug_alt.gene_name = gene_name_and_interactive_gene_name_alt.gene_name)",
+            (AsIs(table_gene_and_drug_name_category_agg_cat_drug_int_alt),))
+        conn.commit()
+
+
+
+17) Filter mind table genes by alternantive genes with drug interaction
+
+Produces a table which has only the alternative genes with direct drug interaction listed in the DGidb database.
+
+Method: 
+* This method is the same as before but it selects the alternative genes. 
+ Inner join between the mind table and the table produced in the previous stage on the gene_name field.
+
+Added field: drugs_info
+The field contains Drug name, drug category, drug groups affiliation. 
+Example: 
+IBUPROFEN{anti-inflammatory agents/analgesics/non-narcotic/non-steroidal/cyclooxygenase inhibitors}
+
+Output table : “Mind_data_1_rs_ensorted_by_gene_posann_by_drug_alt”
+
+Code snippet : 
+
+parser.add_argument("-filter_mind_table_by_drugs_extended_gene_interactions",help='filter_mind_table_by_drugs_extended_gene_interactions',metavar='filter_mind_table_by_drugs_extended_gene_interactions')
+
+
+    if args.filter_mind_table_by_drugs_extended_gene_interactions:
+#filter mind_data_1-4_rs_ensorted_by_gene_posann tables by : join with table gene_name_and_drug_name on gene_name
+
+        filter_mind_table_by_drugs_extended_gene_interactions_alt = args.filter_mind_table_by_drugs_extended_gene_interactions
+        filter_mind_table_by_drugs_extended_gene_interactions_alt_by_drug = args.filter_mind_table_by_drugs_extended_gene_interactions+"_by_drug_alt"
+        table_gene_drug_name_and_category_aggcat_aggdrug2_alt = "gene_and_drug_name_category_agg_cat_drug_int_alt2"
+        table_gene_drug_name_and_category_aggcat_aggdrug2_a_u="gene_and_drug_name_category_agg_cat_drug_int_a_u"
+
+
+        check_overwrite_table(table_gene_drug_name_and_category_aggcat_aggdrug2_alt)
+
+        #copy and alter drugs table gene_name column to gene_name2 for easy joining
+        cur.execute("CREATE TABLE %s AS SELECT * FROM gene_and_drug_name_category_agg_cat_drug_int_alt",(AsIs(table_gene_drug_name_and_category_aggcat_aggdrug2_alt),))
+        conn.commit()
+
+        #copy and alter drugs table gene_name column to gene_name2 for easy joining
+        cur.execute("alter table  %s rename column gene_name to gene_name2",(AsIs(table_gene_drug_name_and_category_aggcat_aggdrug2_alt),))
+        conn.commit()
+
+#method fix :
+#create uniq alt table without interacting genes since it is creating too big of a table
+
+        check_overwrite_table(table_gene_drug_name_and_category_aggcat_aggdrug2_a_u)
+        cur.execute("create table %s as select distinct gene_name2,drugs_info from gene_and_drug_name_category_agg_cat_drug_int_alt2",(AsIs(table_gene_drug_name_and_category_aggcat_aggdrug2_a_u),))
+        conn.commit()
+
+        check_overwrite_table(filter_mind_table_by_drugs_extended_gene_interactions_alt_by_drug)
+        #method fix : changed to join from the a_u table
+
+        # join mind table with table gene_name_and_drug_name on gene_name
+        cur.execute("CREATE TABLE %s AS SELECT * FROM %s inner join %s on (%s.gene_name2 = %s.gene_name)",(AsIs(filter_mind_table_by_drugs_extended_gene_interactions_alt_by_drug),AsIs(table_gene_drug_name_and_category_aggcat_aggdrug2_a_u),AsIs(filter_mind_table_by_drugs_extended_gene_interactions_alt),AsIs(table_gene_drug_name_and_category_aggcat_aggdrug2_a_u),AsIs(filter_mind_table_by_drugs_extended_gene_interactions_alt),))
+        conn.commit()
+
