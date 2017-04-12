@@ -69,7 +69,7 @@ parser = argparse.ArgumentParser(prog='psql_1000g_loader',usage='psql_1000g_load
 
 # dbname=pydb user=pyuser password=pyuser
 # postgresql credentials
-parser.add_argument("-dbname",required=True,help='name of psql database',metavar='DBNAME')
+credentialsparser.add_argument("-dbname",required=True,help='name of psql database',metavar='DBNAME')
 parser.add_argument("-dbuser",required=True,help='name of psql database user',metavar='DBUSER')
 parser.add_argument("-dbpass",required=True,help='psql database user pass',metavar='DBPASS')
 
