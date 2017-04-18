@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 
 
 import sys
@@ -6,7 +6,6 @@ import re
 import multiprocessing as mp
 import argparse
 import logging
-from progressbar import AnimatedMarker, Bar, BouncingBar, Counter, ETA, FileTransferSpeed, FormatLabel, Percentage, ProgressBar, ReverseBar, RotatingMarker, SimpleProgress, Timer
 import datetime
 import pandas as pd
 
@@ -36,12 +35,15 @@ if args.verbose:
 
 if args.analyse_col_file:
 
-    pd1=pd.read_csv(args.analyse_col_file,sep=' ')
+    pd1=pd.read_csv(args.analyse_col_file, sep='\t')
 
     for col in pd1:
         print (pd1[col].value_counts())
 
-
 if args.nih3_file:
 
-    '''   -retain only amino change, order by codons by abc, order by chrom pos asc'''
+    pd1=pd.read_csv(args.nih3_file, sep='\t')
+    for index, row in pd1.iterrows():
+       print row['ID'],row['REF'],row['ALT']
+
+
