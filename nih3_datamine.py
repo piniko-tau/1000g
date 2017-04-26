@@ -44,6 +44,11 @@ if args.nih3_file:
 
     pd1=pd.read_csv(args.nih3_file, sep='\t')
     for index, row in pd1.iterrows():
-       print row['ID'],row['REF'],row['ALT']
+       # print row['ID'],row['REF'],row['ALT']
+       if not row['REF'] == row['ALT']:
+           print "equals"+row['ALT']+row['REF']
+       if  not '.'== row['ALT']:
+           print "ok"+row['ALT']
 
-
+#next join pd.merge between rsid_nih3 and the rsid_gene
+#pd.merge(df_a, df_b, on='rsid', how='inner')
