@@ -41,14 +41,14 @@ if args.analyse_col_file:
         print (pd1[col].value_counts())
 
 if args.nih3_file:
-
+    pd2=pd.DataFrame()
     pd1=pd.read_csv(args.nih3_file, sep='\t')
     for index, row in pd1.iterrows():
        # print row['ID'],row['REF'],row['ALT']
-       if not row['REF'] == row['ALT']:
-           print "equals"+row['ALT']+row['REF']
-       if  not '.'== row['ALT']:
-           print "ok"+row['ALT']
+        if (not row['REF'] == row['ALT']) and (not '.'== row['ALT'] or row['REF'] =='.'):
+            pd2.append(row)
+    #add ok rows to empty dataframe
+    print pd2
 
 #next join pd.merge between rsid_nih3 and the rsid_gene
 #pd.merge(df_a, df_b, on='rsid', how='inner')
