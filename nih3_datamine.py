@@ -8,6 +8,7 @@ import argparse
 import logging
 import datetime
 import pandas as pd
+from random import randint
 
 #__author__ = 'piniko'
 
@@ -41,14 +42,19 @@ if args.analyse_col_file:
         print (pd1[col].value_counts())
 
 if args.nih3_file:
-    pd2=pd.DataFrame()
     pd1=pd.read_csv(args.nih3_file, sep='\t')
-    for index, row in pd1.iterrows():
-       # print row['ID'],row['REF'],row['ALT']
-        if (not row['REF'] == row['ALT']) and (not '.'== row['ALT'] or row['REF'] =='.'):
-            pd2.append(row)
-    #add ok rows to empty dataframe
-    print pd2
+    for nrow in range(pd1.shape[0]):
+        if pd1.loc[nrow,'REF'] == pd1.loc[nrow,'ALT']:
+            print(pd1.loc[nrow,'REF']+pd1.loc[nrow,'ALT']+"drop row "+nrow)
+            pd2=pd1.drop(pd1.index[nrow])
+    # with open('vcf_nih3_file.out','w') as f:
 
+        # for index, row in pd1.iterrows():
+        #    # print row['ID'],row['REF'],row['ALT']
+        #     if (not row['REF'] == row['ALT']) and (not '.'== row['ALT'] or row['REF'] =='.'):
+        #         print row
+        #         f.write(str(row))
+
+    #add ok rows to empty dataframe
 #next join pd.merge between rsid_nih3 and the rsid_gene
 #pd.merge(df_a, df_b, on='rsid', how='inner')
