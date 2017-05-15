@@ -9,7 +9,8 @@ import logging
 import datetime
 import pandas as pd
 from random import randint
-
+import urllib
+import os.path
 #__author__ = 'piniko'
 
 
@@ -27,6 +28,8 @@ parser = argparse.ArgumentParser(prog='nih3_datamine',usage='python nih3_datamin
 description='Load annotated snp database & Create a 1000G sql table from all Chromosomes - using a connection to a postgresql DB.')
 parser.add_argument("-analyse_col_file",help='analyse_col_file print col var table',metavar='analyse_col_file')
 parser.add_argument("-nih3_file",help='nih3_file file to process',metavar='nih3_file')
+parser.add_argument("-rsid_2_gene_table",help='get rsid to gene table from ensemble',action="store_true")
+parser.add_argument("-nih3_merge_genemnames",help='inner join nih3 and variation_genenames',action="store_true")
 parser.add_argument("-v", "--verbose", help="increase output verbosity",action="store_true")
 args = parser.parse_args()
 
@@ -41,20 +44,44 @@ if args.analyse_col_file:
     for col in pd1:
         print (pd1[col].value_counts())
 
+if args.rsid_2_gene_table:
+    if not os.path.exists("./variation.txt.gz"):
+        print "getting variation.txt.gz from ensemble..."
+        urllib.urlretrieve("ftp://ftp.ensembl.org/pub/release-75/mysql/homo_sapiens_variation_75_37/variation.txt.gz", "variation.txt.gz")
+        print "done."
+    if not os.path.exists("./variation_genename.txt.gz"):
+        print "getting variation_genename.txt.gz from ensemble..."
+        urllib.urlretrieve("ftp://ftp.ensembl.org/pub/release-75/mysql/homo_sapiens_variation_75_37/variation_genename.txt.gz", "variation_genename.txt.gz")
+        print "done."
+    #join the two tables compression='gzip'
+        #get dataframes from the two files
+    print "loading variation.txt.gz into DF"
+    pd3=pd.read_csv('./variation.txt.gz',names=['variation_id','source_id','rs_name','validation_status','ancestral_allele','flipped','class_attrib_id','somatic','minor_allele','minor_allele_freq','minor_allele_count','clinical_significance','evidence'],compression='gzip', sep='\t')
+    print "done"
+    print "loading variation_genename.txt.gz into DF"
+    pd4=pd.read_csv('./variation_genename.txt.gz',names=['variation_id','gene_name'],compression='gzip', sep='\t')
+    print "done"
+    # #merge on id
+    print "merging variation_genename and variation on variation id , to get gene names with rsids"
+    pd34=pd.merge(pd3, pd4, on='variation_id', how='inner')
+    print "done."
+
+
 if args.nih3_file:
     pd1=pd.read_csv(args.nih3_file, sep='\t')
+    drop_row_list=[]
+    # print(pd1.to_string())
     for nrow in range(pd1.shape[0]):
         if pd1.loc[nrow,'REF'] == pd1.loc[nrow,'ALT']:
-            print(pd1.loc[nrow,'REF']+pd1.loc[nrow,'ALT']+"drop row "+nrow)
-            pd2=pd1.drop(pd1.index[nrow])
-    # with open('vcf_nih3_file.out','w') as f:
+            print(pd1.loc[nrow,'REF']+pd1.loc[nrow,'ALT']+"drop row "+str(nrow))
+            drop_row_list.append(pd1.index[nrow])
+            print(pd1.index[nrow])
+    pd2=pd1.drop(pd1.index[drop_row_list])
+    # print(pd2.to_string())
 
-        # for index, row in pd1.iterrows():
-        #    # print row['ID'],row['REF'],row['ALT']
-        #     if (not row['REF'] == row['ALT']) and (not '.'== row['ALT'] or row['REF'] =='.'):
-        #         print row
-        #         f.write(str(row))
+if args.nih3_merge_genemnames:
+    pass
 
-    #add ok rows to empty dataframe
+#add ok rows to empty dataframe
 #next join pd.merge between rsid_nih3 and the rsid_gene
 #pd.merge(df_a, df_b, on='rsid', how='inner')

@@ -1,0 +1,10 @@
+14000	1	rs14153	cluster,freq,submitter,doublehit,hapmap,1000Genome	C	1	2	0	T	0.499541	1088	\N	Multiple_observations,Frequency,HapMap,1000Genomes
+14001	1	rs14154	cluster,freq,doublehit,hapmap,1000Genome	G	0	2	0	G	0.440771	960	\N	Multiple_observations,Frequency,1000Genomes
+14002	1	rs14155	cluster,freq,hapmap,1000Genome	C	1	2	0	G	0.444444	968	\N	Multiple_observations,Frequency,1000Genomes,ESP
+14003	1	rs14156	cluster,doublehit,hapmap	T	0	2	0	\N	\N	\N	\N	Multiple_observations
+14004	1	rs14157	cluster,freq,hapmap,1000Genome	T	0	2	0	G	0.436639	951	\N	Multiple_observations,Frequency,1000Genomes
+14005	1	rs14158	cluster,freq,submitter,doublehit,hapmap,1000Genome	G	0	2	0	A	0.248852	542	\N	Multiple_observations,Frequency,HapMap,1000Genomes,Cited,ESP
+14006	1	rs14159	\N	A	1	2	0	\N	\N	\N	\N	Multiple_observations
+14007	1	rs14160	cluster,freq,doublehit,hapmap,1000Genome	C	1	2	0	C	0.378329	824	\N	Multiple_observations,Frequency,HapMap,1000Genomes
+14008	1	rs14161	cluster,freq,hapmap,1000Genome	T	0	2	0	C	0.210744	459	\N	Multiple_observations,Frequency,HapMap,1000Genomes
+14009	1	rs14162	\N	G	0	2	0	\N	\N	\N	\N	Multiple_observations
