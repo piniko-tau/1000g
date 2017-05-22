@@ -1,0 +1,1 @@
+./nih3_datamine.py -nih3_file nih3_100_data_12col_10row -rsid_2_gene_table_test -nih3_merge_genemnames

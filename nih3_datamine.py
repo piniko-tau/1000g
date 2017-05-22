@@ -29,7 +29,9 @@ description='Load annotated snp database & Create a 1000G sql table from all Chr
 parser.add_argument("-analyse_col_file",help='analyse_col_file print col var table',metavar='analyse_col_file')
 parser.add_argument("-nih3_file",help='nih3_file file to process',metavar='nih3_file')
 parser.add_argument("-rsid_2_gene_table",help='get rsid to gene table from ensemble',action="store_true")
+parser.add_argument("-rsid_2_gene_table_test",help='get rsid to gene table from ensemble',action="store_true")
 parser.add_argument("-nih3_merge_genemnames",help='inner join nih3 and variation_genenames',action="store_true")
+parser.add_argument("-to_csv",help='write merge to file',action="store_true")
 parser.add_argument("-v", "--verbose", help="increase output verbosity",action="store_true")
 args = parser.parse_args()
 
@@ -43,6 +45,18 @@ if args.analyse_col_file:
 
     for col in pd1:
         print (pd1[col].value_counts())
+if args.nih3_file:
+    pd1=pd.read_csv(args.nih3_file, sep='\t')
+    drop_row_list=[]
+    # print(pd1.to_string())
+    for nrow in range(pd1.shape[0]):
+        if pd1.loc[nrow,'REF'] == pd1.loc[nrow,'ALT']:
+            print(pd1.loc[nrow,'REF']+pd1.loc[nrow,'ALT']+"drop row "+str(nrow))
+            drop_row_list.append(pd1.index[nrow])
+            print(pd1.index[nrow])
+    pd2=pd1.drop(pd1.index[drop_row_list])
+    print '\nnih3_file :\n'
+    print(pd2.to_string())
 
 if args.rsid_2_gene_table:
     if not os.path.exists("./variation.txt.gz"):
@@ -66,21 +80,34 @@ if args.rsid_2_gene_table:
     pd34=pd.merge(pd3, pd4, on='variation_id', how='inner')
     print "done."
 
+if args.rsid_2_gene_table_test:
+    #join the two tables compression='gzip'
+        #get dataframes from the two files
+    print "loading variation_10n into DF"
+    pd3=pd.read_csv('./variation_10n',names=['variation_id','source_id','rs_name','validation_status','ancestral_allele','flipped','class_attrib_id','somatic','minor_allele','minor_allele_freq','minor_allele_count','clinical_significance','evidence'], sep='\t')
+    print "done"
+    print "loading variation_genename_10n into DF"
+    pd4=pd.read_csv('./variation_genename_10n',names=['variation_id','gene_name'], sep='\t')
+    print "done"
+    # #merge on id
+    print "merging variation_genename and variation on variation id , to get gene names with rsids"
+    pd34=pd.merge(pd3, pd4, on='variation_id', how='inner')
+    print "done."
+    print '\nrsid_2_gene_table_test :\n'
+    print(pd34.to_string())
 
-if args.nih3_file:
-    pd1=pd.read_csv(args.nih3_file, sep='\t')
-    drop_row_list=[]
-    # print(pd1.to_string())
-    for nrow in range(pd1.shape[0]):
-        if pd1.loc[nrow,'REF'] == pd1.loc[nrow,'ALT']:
-            print(pd1.loc[nrow,'REF']+pd1.loc[nrow,'ALT']+"drop row "+str(nrow))
-            drop_row_list.append(pd1.index[nrow])
-            print(pd1.index[nrow])
-    pd2=pd1.drop(pd1.index[drop_row_list])
-    # print(pd2.to_string())
+
+
 
 if args.nih3_merge_genemnames:
-    pass
+    #merge on rs_name of pd34 and ID of pd2
+    pd234=pd.merge(pd2, pd34, left_on='ID',right_on='rs_name', how='inner')
+    print '\nnih3_merge_genemnames :\n'
+    print(pd234.to_string())
+
+if args.to_csv:
+    pd234.to_csv('out.csv',index=False)
+
 
 #add ok rows to empty dataframe
 #next join pd.merge between rsid_nih3 and the rsid_gene
