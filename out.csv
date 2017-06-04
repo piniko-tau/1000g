@@ -1,3 +1,3 @@
 #CHROM,POS,ID,REF,ALT,QUAL,FILTER,INFO,FORMAT,SZPABR0002_SZPABR0002,SZPABR0003_SZPABR0003,SZPABR0004_SZPABR0004,variation_id,source_id,rs_name,validation_status,ancestral_allele,flipped,class_attrib_id,somatic,minor_allele,minor_allele_freq,minor_allele_count,clinical_significance,evidence,gene_name
-1,72017,rs14160,A,.,.,.,PR,GT,0/0,0/0,0/0,14007,1,rs14160,"cluster,freq,doublehit,hapmap,1000Genome",C,1,2,0,C,0.378329,824,\N,"Multiple_observations,Frequency,HapMap,1000Genomes",LRRD1
-1,558151,rs14160,N,A,.,.,PR,GT,0/0,0/0,0/0,14007,1,rs14160,"cluster,freq,doublehit,hapmap,1000Genome",C,1,2,0,C,0.378329,824,\N,"Multiple_observations,Frequency,HapMap,1000Genomes",LRRD1
+1,72017,rs14160,A,.,.,.,PR,GT,0/0,0/0,0/0,14007,1,rs14160,"clusterfreqdoublehithapmap1000Genome",C,1,2,0,C,0.378329,824,\N,"Multiple_observationsFrequencyHapMap1000Genomes",LRRD1
+1,558151,rs14160,N,A,.,.,PR,GT,0/0,0/0,0/0,14007,1,rs14160,"clusterfreqdoublehithapmap1000Genome",C,1,2,0,C,0.378329,824,\N,"Multiple_observationsFrequencyHapMap1000Genomes",LRRD1

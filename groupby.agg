@@ -1,0 +1,19 @@
+In [48]: pd3
+Out[48]: 
+   #CHROM       ID SZPABR0002 SZPABR0003 ZPABR0004 gene_name
+0       1  rs14160        0/0        0/0       0/0     LRRD1
+1       1  rs14161        0/0        0/0       0/0     LRRD1
+2       1  rs14162        0/0        0/0       0/0     LRRD3
+3       1  rs14164        0/0        0/0       0/0     LRRD2
+4       1  rs14161        0/0        0/0       0/0     LRRD2
+5       1  rs14160        0/0        0/0       0/0     LRRD4
+
+In [49]: pd3.groupby('gene_name').agg(lambda x: ''.join(set(x)))
+Out[49]: 
+                       ID SZPABR0002 SZPABR0003 ZPABR0004
+gene_name                                                
+LRRD1      rs14160rs14161        0/0        0/0       0/0
+LRRD2      rs14161rs14164        0/0        0/0       0/0
+LRRD3             rs14162        0/0        0/0       0/0
+LRRD4             rs14160        0/0        0/0       0/0
+
