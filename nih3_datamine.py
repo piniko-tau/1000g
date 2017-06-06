@@ -131,15 +131,18 @@ if args.nih3_make_ml_table:
     print(pd234['gene_name'])
     print(pd234.groupby('gene_name')['ID'].apply(list))
     pd6=pd234.groupby('gene_name')['ID'].apply(list)
-    pd7=pd234.add(pd6)
-    print(pd7.to_string())
+    pd6.to_csv('pd6.csv',index=True)
+    pd7=pd.read_csv('./pd6.csv',names=['gene_name','rsids_list'])
+    pd8=pd.merge(pd234,pd7,on='gene_name',how='inner')
+    print(pd8.to_string())
+    #
 
 if args.nih3_merge_peptides:
     pass
 
 
 if args.to_csv:
-    pd234.to_csv('out.csv',index=False)
+    pd7.to_csv('out.csv',index=False)
 
 
 #add ok rows to empty dataframe
